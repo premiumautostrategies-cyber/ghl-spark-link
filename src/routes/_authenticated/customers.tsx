@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,9 @@ function CustomersPage() {
   const [open, setOpen] = useState(false);
   const [vehicleFor, setVehicleFor] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const { organization, location } = useRouteContext({ from: "/_authenticated" });
+  const orgId = organization?.id;
+  const locId = location?.id ?? null;
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers"],
@@ -51,12 +54,15 @@ function CustomersPage() {
 
   const addCustomer = useMutation({
     mutationFn: async (form: FormData) => {
+      if (!orgId) throw new Error("No workspace selected");
       const { error } = await supabase.from("customers").insert({
         name: String(form.get("name")),
         email: String(form.get("email") || "") || null,
         phone: String(form.get("phone") || "") || null,
         company: String(form.get("company") || "") || null,
         notes: String(form.get("notes") || "") || null,
+        organization_id: orgId,
+        location_id: locId,
       });
       if (error) throw error;
     },
