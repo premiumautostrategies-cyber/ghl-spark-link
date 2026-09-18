@@ -164,7 +164,7 @@ function SalesPage() {
   }, [deals, filter]);
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageHeader
         title="Sales Pipeline"
         subtitle="Leads, quotes and negotiations — the money before it hits a bay."
@@ -291,7 +291,7 @@ function SalesPage() {
             if (over && deal && deal.stage !== over) moveStage.mutate({ id, stage: over });
           }}
         >
-          <div className="no-scrollbar -mx-1 flex gap-4 overflow-x-auto px-1 pb-4">
+          <div className="no-scrollbar -mx-1 flex w-full max-w-full gap-4 overflow-x-auto px-1 pb-4">
             {DEAL_STAGES.map((stage) => {
               const list = visible.filter((d) => d.stage === stage);
               const total = list.reduce((t, d) => t + Number(d.value), 0);
