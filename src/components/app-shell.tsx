@@ -138,7 +138,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Top command bar */}
         <header className="glass sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-elevated px-4">
           <Link to="/command-center" className="display-title text-xl font-bold lg:hidden">
