@@ -41,6 +41,9 @@ export const Route = createFileRoute("/_authenticated/schedule")({
 function SchedulePage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const { organization, location } = useRouteContext({ from: "/_authenticated" });
+  const orgId = organization?.id;
+  const locId = location?.id;
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["jobs"],
