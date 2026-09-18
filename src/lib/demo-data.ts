@@ -184,5 +184,54 @@ export async function seedDemoData(orgId: string, locId: string | null) {
   const docRes = await supabase.from("documents").insert(docs);
   if (docRes.error) throw docRes.error;
 
+  // --- Inspections --------------------------------------------------------
+  const inspectionRows = [
+    {
+      ...org,
+      vehicle_id: vid("ELN-914"),
+      customer_id: cid("Elena Marsh"),
+      job_id: jid("Full front PPF — Macan GTS"),
+      stage: "check_in",
+      status: "signed",
+      mileage: 8420,
+      inspector: "Marcus Webb",
+      notes: "Rock chips across the nose, customer approved film over existing chips.",
+      acknowledged_by: "Elena Marsh",
+      acknowledged_at: daysFromNow(-4, 9),
+    },
+    {
+      ...org,
+      vehicle_id: vid("BRN-778"),
+      customer_id: cid("Jordan Pike"),
+      job_id: jid("Satin black color change — Bronco"),
+      stage: "check_in",
+      status: "open",
+      mileage: 21750,
+      inspector: "Corey Lang",
+      notes: "Aftermarket bumper, extra prep time expected.",
+    },
+  ];
+  const inspRes = await supabase.from("inspections").insert(inspectionRows).select("id,vehicle_id");
+  if (inspRes.error) throw inspRes.error;
+  const insp = inspRes.data ?? [];
+  const iid = (plate: string) => insp.find((i) => i.vehicle_id === vid(plate))?.id ?? null;
+
+  const defectRows = [
+    { panel: "front_bumper", defect_type: "chip", severity: "critical", note: "Dense chip cluster, lower valance", inspection_id: iid("ELN-914") },
+    { panel: "hood", defect_type: "chip", severity: "minor", note: "Six chips along leading edge", inspection_id: iid("ELN-914") },
+    { panel: "driver_side", defect_type: "scratch", severity: "minor", note: "Door edge scuff", inspection_id: iid("ELN-914") },
+    { panel: "rear_bumper", defect_type: "scratch", severity: "critical", note: "Deep scratch through clear, needs correction before wrap", inspection_id: iid("JPK-BRC") },
+    { panel: "roof", defect_type: "swirl", severity: "minor", note: "Wash swirls across roof panel", inspection_id: iid("JPK-BRC") },
+  ]
+    .flatMap((d) =>
+      d.inspection_id
+        ? [{ ...d, inspection_id: d.inspection_id, organization_id: orgId, pos_x: 0, pos_y: 0 }]
+        : [],
+    );
+  if (defectRows.length) {
+    const defRes = await supabase.from("inspection_defects").insert(defectRows);
+    if (defRes.error) throw defRes.error;
+  }
+
   return { customers: customerRows.length, jobs: jobRows.length, deals: deals.length };
 }

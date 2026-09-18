@@ -1,9 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import {
+  closestCorners,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
-import { EmptyState, PageHeader, StatCard } from "@/components/page-header";
+import { EmptyState, PageHeader } from "@/components/page-header";
+import { FilterPills, Kpi, Tag } from "@/components/os-ui";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +38,28 @@ import {
 import { DEAL_STAGES, dayDate, label, money } from "@/lib/format";
 import { toast } from "sonner";
 
+type Deal = {
+  id: string;
+  title: string;
+  stage: string;
+  value: number | string;
+  probability: number;
+  source: string | null;
+  owner_name: string | null;
+  expected_close: string | null;
+  last_activity_at: string | null;
+  customers: { name: string } | null;
+};
+
+type FilterKey = "all" | "untouched" | "high" | "closing";
+
+const FILTERS = [
+  { value: "all" as const, label: "All" },
+  { value: "untouched" as const, label: "Untouched 3d+" },
+  { value: "high" as const, label: "High value" },
+  { value: "closing" as const, label: "Closing" },
+];
+
 export const Route = createFileRoute("/_authenticated/sales")({
   head: () => ({
     meta: [
@@ -44,6 +79,9 @@ function SalesPage() {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [dragging, setDragging] = useState<string | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const { data: deals = [] } = useQuery({
     queryKey: ["deals"],
@@ -113,8 +151,20 @@ function SalesPage() {
     ? Math.round((won.length / deals.filter((d) => ["won", "lost"].includes(d.stage)).length || 1) * 100)
     : 0;
 
+  const visible = useMemo(() => {
+    if (filter === "untouched")
+      return deals.filter(
+        (d) =>
+          !d.last_activity_at ||
+          Date.now() - new Date(d.last_activity_at).getTime() > 3 * 86400000,
+      );
+    if (filter === "high") return deals.filter((d) => Number(d.value) >= 2500);
+    if (filter === "closing") return deals.filter((d) => d.probability >= 60);
+    return deals;
+  }, [deals, filter]);
+
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageHeader
         title="Sales Pipeline"
         subtitle="Leads, quotes and negotiations — the money before it hits a bay."
@@ -204,10 +254,23 @@ function SalesPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Open pipeline" value={money(openValue)} />
-        <StatCard label="Weighted forecast" value={money(weighted)} />
-        <StatCard label="Won this period" value={money(won.reduce((t, d) => t + Number(d.value), 0))} />
-        <StatCard label="Close rate" value={`${closeRate}%`} />
+        <Kpi label="Open pipeline" value={money(openValue)} hint={`${openDeals.length} live opportunities`} />
+        <Kpi label="Weighted forecast" value={money(weighted)} tone="rig" hint="Value × probability" />
+        <Kpi
+          label="Won"
+          value={money(won.reduce((t, d) => t + Number(d.value), 0))}
+          tone="revenue"
+        />
+        <Kpi label="Close rate" value={`${closeRate}%`} tone="urgent" />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FilterPills
+          options={FILTERS}
+          value={filter}
+          onChange={(v) => setFilter(v as FilterKey)}
+        />
+        <p className="text-xs text-muted-foreground">Drag a card between stages to move the deal.</p>
       </div>
 
       {deals.length === 0 ? (
@@ -216,57 +279,122 @@ function SalesPage() {
           body="Every call, DM and walk-in becomes an opportunity you can forecast."
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {DEAL_STAGES.map((stage) => {
-            const list = deals.filter((d) => d.stage === stage);
-            const total = list.reduce((t, d) => t + Number(d.value), 0);
-            return (
-              <div key={stage} className="rounded-xl border border-border bg-card">
-                <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                  <h2 className="text-sm uppercase tracking-widest text-muted-foreground">
-                    {label(stage)}
-                  </h2>
-                  <span className="text-xs text-muted-foreground">
-                    {list.length} · {money(total)}
-                  </span>
-                </div>
-                <div className="divide-y divide-border">
-                  {list.length === 0 && (
-                    <p className="px-4 py-6 text-center text-xs text-muted-foreground">Empty</p>
-                  )}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={(e) => setDragging(String(e.active.id))}
+          onDragEnd={(e) => {
+            setDragging(null);
+            const over = e.over?.id ? String(e.over.id) : null;
+            const id = String(e.active.id);
+            const deal = deals.find((d) => d.id === id);
+            if (over && deal && deal.stage !== over) moveStage.mutate({ id, stage: over });
+          }}
+        >
+          <div className="no-scrollbar -mx-1 flex w-full max-w-full gap-4 overflow-x-auto px-1 pb-4">
+            {DEAL_STAGES.map((stage) => {
+              const list = visible.filter((d) => d.stage === stage);
+              const total = list.reduce((t, d) => t + Number(d.value), 0);
+              return (
+                <StageColumn key={stage} stage={stage} count={list.length} total={total}>
                   {list.map((d) => (
-                    <div key={d.id} className="space-y-2 px-4 py-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-medium leading-tight">{d.title}</p>
-                        <span className="whitespace-nowrap font-semibold">{money(d.value)}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {d.customers?.name ?? "No customer"} · {d.source || "Direct"} ·{" "}
-                        {d.probability}% · close {dayDate(d.expected_close)}
-                      </p>
-                      <Select
-                        value={d.stage}
-                        onValueChange={(v) => moveStage.mutate({ id: d.id, stage: v })}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DEAL_STAGES.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {label(s)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <DealCard key={d.id} deal={d} dragging={dragging === d.id} />
                   ))}
-                </div>
+                </StageColumn>
+              );
+            })}
+          </div>
+          <DragOverlay>
+            {dragging ? (
+              <div className="w-[248px] rotate-2 rounded-xl border border-bronze/50 bg-surface-2 p-3 shadow-lux">
+                <p className="text-sm font-semibold">
+                  {deals.find((d) => d.id === dragging)?.title}
+                </p>
               </div>
-            );
-          })}
-        </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
+    </div>
+  );
+}
+
+const STAGE_TONE: Record<string, "bronze" | "comms" | "urgent" | "revenue" | "critical" | "muted"> = {
+  new_lead: "comms",
+  contacted: "rig" as never,
+  quoted: "bronze",
+  negotiating: "urgent",
+  won: "revenue",
+  lost: "critical",
+};
+
+function StageColumn({
+  stage,
+  count,
+  total,
+  children,
+}: {
+  stage: string;
+  count: number;
+  total: number;
+  children: ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "flex w-[280px] shrink-0 flex-col rounded-2xl border bg-surface transition-colors",
+        isOver ? "border-bronze/60 bg-surface-2" : "border-elevated",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-elevated px-4 py-3">
+        <Tag tone={STAGE_TONE[stage] ?? "muted"}>{label(stage)}</Tag>
+        <span className="text-xs tabular-nums text-muted-foreground">
+          {count} · {money(total)}
+        </span>
+      </div>
+      <div className="flex min-h-[140px] flex-col gap-2 p-3">
+        {count === 0 ? (
+          <p className="py-8 text-center text-xs text-muted-foreground">Drop a deal here</p>
+        ) : (
+          children
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DealCard({ deal, dragging }: { deal: Deal; dragging: boolean }) {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: deal.id });
+  const age = deal.last_activity_at
+    ? Math.round((Date.now() - new Date(deal.last_activity_at).getTime()) / 86400000)
+    : null;
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        "cursor-grab touch-none rounded-xl border border-elevated bg-surface-2 p-3 transition-colors hover:border-hairline active:cursor-grabbing",
+        dragging && "opacity-40",
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-semibold leading-tight">{deal.title}</p>
+        <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-bronze">
+          {money(deal.value)}
+        </span>
+      </div>
+      <p className="mt-1.5 text-xs text-muted-foreground">
+        {deal.customers?.name ?? "No customer"} · {deal.source || "Direct"}
+      </p>
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+        <Tag tone="muted">{deal.probability}%</Tag>
+        {deal.expected_close && <Tag tone="muted">Close {dayDate(deal.expected_close)}</Tag>}
+        {age !== null && age > 3 && <Tag tone="critical">{age}d untouched</Tag>}
+        {deal.owner_name && <Tag tone="bronze">{deal.owner_name}</Tag>}
+      </div>
     </div>
   );
 }

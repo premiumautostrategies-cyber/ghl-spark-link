@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bot,
@@ -22,26 +23,52 @@ import {
   Search,
   Settings,
   Users,
+  ScanLine,
   Wrench,
 } from "lucide-react";
 
-const NAV = [
-  { to: "/command-center", label: "Command Center", icon: Command },
-  { to: "/sales", label: "Sales", icon: Briefcase },
-  { to: "/schedule", label: "Schedule", icon: CalendarRange },
-  { to: "/jobs", label: "Jobs", icon: Wrench },
-  { to: "/customers", label: "Customers", icon: Users },
-  { to: "/vehicles", label: "Vehicles", icon: Car },
-  { to: "/services", label: "Services", icon: Layers },
-  { to: "/inventory", label: "Inventory", icon: Package },
-  { to: "/documents", label: "Documents", icon: FileText },
-  { to: "/payments", label: "Payments", icon: CreditCard },
-  { to: "/team", label: "Team", icon: Users },
-  { to: "/automations", label: "Automations", icon: Bot },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/integrations", label: "Integrations", icon: Plug },
-  { to: "/settings", label: "Settings", icon: Settings },
-] as const;
+type NavItem = { to: string; label: string; icon: LucideIcon };
+
+const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
+  {
+    group: "Sales",
+    items: [
+      { to: "/command-center", label: "Command Center", icon: Command },
+      { to: "/sales", label: "Pipeline", icon: Briefcase },
+      { to: "/customers", label: "Customers", icon: Users },
+      { to: "/vehicles", label: "Vehicles", icon: Car },
+      { to: "/services", label: "Service Menu", icon: Layers },
+    ],
+  },
+  {
+    group: "Operations",
+    items: [
+      { to: "/schedule", label: "Bays", icon: CalendarRange },
+      { to: "/jobs", label: "Production", icon: Wrench },
+      { to: "/inspections", label: "Inspections", icon: ScanLine },
+      { to: "/documents", label: "Documents", icon: FileText },
+    ],
+  },
+  {
+    group: "Shop",
+    items: [
+      { to: "/inventory", label: "Stock", icon: Package },
+      { to: "/payments", label: "Payments", icon: CreditCard },
+      { to: "/team", label: "Team", icon: Gauge },
+      { to: "/analytics", label: "Reports", icon: BarChart3 },
+    ],
+  },
+  {
+    group: "Setup",
+    items: [
+      { to: "/automations", label: "Automations", icon: Bot },
+      { to: "/integrations", label: "Integrations", icon: Plug },
+      { to: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
+];
+
+const NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -60,34 +87,42 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-border bg-sidebar lg:flex">
-        <div className="flex h-16 items-center px-5">
+      <aside className="hidden w-[248px] flex-col border-r border-elevated bg-sidebar lg:flex">
+        <div className="flex h-16 items-center px-5 hairline-b">
           <Link to="/command-center" className="display-title text-xl font-bold text-sidebar-foreground">
             System<span className="text-sidebar-primary">ize</span>
           </Link>
         </div>
 
-        <div className="px-3 py-4">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/50">
-            Shop OS
-          </p>
-          <nav className="mt-2 space-y-0.5">
-            {NAV.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  isActive(item.to)
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-                )}
-              >
-                <item.icon className="size-4" />
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+        <div className="no-scrollbar flex-1 overflow-y-auto px-3 py-4">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.group} className="mb-5">
+              <p className="px-3 micro-label">{group.group}</p>
+              <nav className="mt-2 space-y-0.5">
+                {group.items.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to as never}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
+                      isActive(item.to)
+                        ? "bg-surface-2 font-semibold text-foreground"
+                        : "text-muted-foreground hover:bg-surface/70 hover:text-foreground",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "h-4 w-px rounded-full transition-colors",
+                        isActive(item.to) ? "bg-bronze" : "bg-transparent",
+                      )}
+                    />
+                    <item.icon className={cn("size-4", isActive(item.to) && "text-bronze")} />
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          ))}
         </div>
 
         <div className="mt-auto border-t border-sidebar-border p-4">
@@ -103,9 +138,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Top command bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/90 px-4 backdrop-blur">
+        <header className="glass sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-elevated px-4">
           <Link to="/command-center" className="display-title text-xl font-bold lg:hidden">
             System<span className="text-primary">ize</span>
           </Link>
@@ -135,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {NAV.map((item) => (
             <Link
               key={item.to}
-              to={item.to}
+              to={item.to as never}
               className={cn(
                 "flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium",
                 isActive(item.to)
@@ -149,7 +184,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <main className="flex-1 overflow-auto p-4 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 overflow-auto p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );

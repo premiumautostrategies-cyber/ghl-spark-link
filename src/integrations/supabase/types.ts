@@ -620,6 +620,162 @@ export type Database = {
           },
         ]
       }
+      inspection_defects: {
+        Row: {
+          created_at: string
+          defect_type: string
+          id: string
+          inspection_id: string
+          note: string | null
+          organization_id: string
+          panel: string
+          photo_url: string | null
+          pos_x: number
+          pos_y: number
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          defect_type?: string
+          id?: string
+          inspection_id: string
+          note?: string | null
+          organization_id: string
+          panel: string
+          photo_url?: string | null
+          pos_x?: number
+          pos_y?: number
+          severity?: string
+        }
+        Update: {
+          created_at?: string
+          defect_type?: string
+          id?: string
+          inspection_id?: string
+          note?: string | null
+          organization_id?: string
+          panel?: string
+          photo_url?: string | null
+          pos_x?: number
+          pos_y?: number
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_defects_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspection_defects_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspections: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          deleted_at: string | null
+          id: string
+          inspector: string | null
+          job_id: string | null
+          location_id: string | null
+          mileage: number | null
+          notes: string | null
+          organization_id: string
+          stage: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          deleted_at?: string | null
+          id?: string
+          inspector?: string | null
+          job_id?: string | null
+          location_id?: string | null
+          mileage?: number | null
+          notes?: string | null
+          organization_id: string
+          stage?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          deleted_at?: string | null
+          id?: string
+          inspector?: string | null
+          job_id?: string | null
+          location_id?: string | null
+          mileage?: number | null
+          notes?: string | null
+          organization_id?: string
+          stage?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspections_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspections_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           brand: string | null
