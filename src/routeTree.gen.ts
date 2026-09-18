@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEstimatesRouteImport } from './routes/_authenticated/estimates'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 
@@ -47,6 +48,12 @@ const AuthenticatedEstimatesRoute = AuthenticatedEstimatesRouteImport.update({
   path: '/estimates',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedIntegrationsRoute =
+  AuthenticatedIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
@@ -73,6 +81,7 @@ export interface FileRoutesByTo {
   '/customers': typeof AuthenticatedCustomersRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
@@ -84,6 +93,7 @@ export interface FileRoutesById {
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estimates': typeof AuthenticatedEstimatesRoute
+  '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/estimates'
+    | '/integrations'
     | '/schedule'
     | '/oauth/hubspot/return'
   fileRoutesByTo: FileRoutesByTo
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/estimates'
+    | '/integrations'
     | '/schedule'
     | '/oauth/hubspot/return'
   id:
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
     | '/_authenticated/customers'
     | '/_authenticated/dashboard'
     | '/_authenticated/estimates'
+    | '/_authenticated/integrations'
     | '/_authenticated/schedule'
     | '/oauth/hubspot/return'
   fileRoutesById: FileRoutesById
@@ -169,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEstimatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/schedule': {
       id: '/_authenticated/schedule'
       path: '/schedule'
@@ -190,6 +210,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEstimatesRoute: typeof AuthenticatedEstimatesRoute
+  AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
 }
 
@@ -197,6 +218,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEstimatesRoute: AuthenticatedEstimatesRoute,
+  AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
 }
 
