@@ -16,6 +16,7 @@ import { Route as AuthenticatedCustomersRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEstimatesRouteImport } from './routes/_authenticated/estimates'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
+import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +52,11 @@ const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   path: '/schedule',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const OauthHubspotReturnRoute = OauthHubspotReturnRouteImport.update({
+  id: '/oauth/hubspot/return',
+  path: '/oauth/hubspot/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
   '/schedule': typeof AuthenticatedScheduleRoute
+  '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,13 +85,27 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/estimates': typeof AuthenticatedEstimatesRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
+  '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/customers' | '/dashboard' | '/estimates' | '/schedule'
+    | '/'
+    | '/auth'
+    | '/customers'
+    | '/dashboard'
+    | '/estimates'
+    | '/schedule'
+    | '/oauth/hubspot/return'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/customers' | '/dashboard' | '/estimates' | '/schedule'
+  to:
+    | '/'
+    | '/auth'
+    | '/customers'
+    | '/dashboard'
+    | '/estimates'
+    | '/schedule'
+    | '/oauth/hubspot/return'
   id:
     | '__root__'
     | '/'
@@ -93,12 +115,14 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/estimates'
     | '/_authenticated/schedule'
+    | '/oauth/hubspot/return'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  OauthHubspotReturnRoute: typeof OauthHubspotReturnRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/oauth/hubspot/return': {
+      id: '/oauth/hubspot/return'
+      path: '/oauth/hubspot/return'
+      fullPath: '/oauth/hubspot/return'
+      preLoaderRoute: typeof OauthHubspotReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -176,6 +207,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  OauthHubspotReturnRoute: OauthHubspotReturnRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
