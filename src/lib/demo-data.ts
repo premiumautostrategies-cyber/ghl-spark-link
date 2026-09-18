@@ -201,7 +201,7 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     },
     {
       ...org,
-      vehicle_id: vid("JPK-BRC"),
+      vehicle_id: vid("BRN-778"),
       customer_id: cid("Jordan Pike"),
       job_id: jid("Satin black color change — Bronco"),
       stage: "check_in",
