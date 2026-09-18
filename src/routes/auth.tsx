@@ -38,26 +38,28 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
+      const signUpIfNeeded = async () => {
+        const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { shop_name: shopName },
-          },
+          options: { data: { shop_name: shopName || "My shop" } },
         });
         if (error) throw error;
-        if (!data.session) {
-          toast.success("Check your email to confirm your account.");
-          return;
-        }
-        navigate({ to: "/dashboard", replace: true });
+      };
+
+      if (mode === "signup") {
+        await signUpIfNeeded();
+        await supabase.auth.signInWithPassword({ email, password });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/dashboard", replace: true });
+        if (error) {
+          // No account yet — create one on the spot instead of blocking.
+          await signUpIfNeeded();
+          const retry = await supabase.auth.signInWithPassword({ email, password });
+          if (retry.error) throw retry.error;
+        }
       }
+      navigate({ to: "/dashboard", replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
