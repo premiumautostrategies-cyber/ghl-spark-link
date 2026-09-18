@@ -8,6 +8,13 @@
       "when": 1789767858991,
       "tag": "0000_systemize_core_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789769141587,
+      "tag": "0001_systemize_multi_tenant_foundation",
+      "breakpoints": true
     }
   ]
 }
