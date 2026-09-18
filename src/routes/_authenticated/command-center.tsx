@@ -5,21 +5,21 @@ import { money, shortDate, STATUS_LABELS } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_authenticated/command-center")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Systemize" },
+      { title: "Command Center — Systemize" },
       { name: "description", content: "Today's jobs, open estimates and shop revenue." },
-      { property: "og:title", content: "Dashboard — Systemize" },
+      { property: "og:title", content: "Command Center — Systemize" },
       { property: "og:description", content: "Today's jobs, open estimates and shop revenue." },
     ],
   }),
-  component: Dashboard,
+  component: CommandCenter,
 });
 
-function Dashboard() {
+function CommandCenter() {
   const { data, isLoading } = useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["command-center"],
     queryFn: async () => {
       const [jobs, customers, estimates] = await Promise.all([
         supabase.from("jobs").select("*").order("scheduled_start", { ascending: true }),
@@ -52,8 +52,8 @@ function Dashboard() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold uppercase tracking-tight">Shop dashboard</h1>
-          <p className="text-sm text-muted-foreground">Everything moving through your bays today.</p>
+          <h1 className="display-title text-3xl font-bold">Command Center</h1>
+          <p className="text-sm text-muted-foreground">Everything moving through your shop today.</p>
         </div>
         <Button asChild>
           <Link to="/schedule">New job</Link>

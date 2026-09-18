@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Systemize design system — dark shop-floor theme.
- * Charcoal surfaces, high-contrast amber accent, condensed display type.
+ * Systemize design system — premium automotive restyling OS.
+ * Near-black graphite surfaces, white type, warm bronze accent.
+ * Geometric display type (Space Grotesk), Inter body.
  */
 
 @theme inline {
@@ -15,7 +16,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --font-display: "Barlow Condensed", ui-sans-serif, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -52,45 +53,45 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-glow: 0 0 0 1px oklch(0.78 0.17 68 / 0.25), 0 18px 40px -18px oklch(0.78 0.17 68 / 0.45);
+  --shadow-glow: 0 0 0 1px oklch(0.65 0.11 55 / 0.25), 0 18px 40px -18px oklch(0.65 0.11 55 / 0.35);
 }
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.17 0.012 260);
+  --background: oklch(0.145 0.01 260);
   --foreground: oklch(0.96 0.005 250);
-  --card: oklch(0.22 0.014 260);
+  --card: oklch(0.195 0.012 260);
   --card-foreground: oklch(0.96 0.005 250);
-  --popover: oklch(0.21 0.014 260);
+  --popover: oklch(0.185 0.012 260);
   --popover-foreground: oklch(0.96 0.005 250);
-  --primary: oklch(0.78 0.17 68);
-  --primary-foreground: oklch(0.18 0.02 60);
-  --secondary: oklch(0.27 0.016 260);
+  --primary: oklch(0.62 0.11 55);
+  --primary-foreground: oklch(0.98 0.005 250);
+  --secondary: oklch(0.24 0.014 260);
   --secondary-foreground: oklch(0.95 0.005 250);
-  --muted: oklch(0.26 0.014 260);
-  --muted-foreground: oklch(0.7 0.015 260);
-  --accent: oklch(0.62 0.13 215);
-  --accent-foreground: oklch(0.98 0.005 250);
-  --destructive: oklch(0.62 0.2 25);
+  --muted: oklch(0.23 0.014 260);
+  --muted-foreground: oklch(0.68 0.015 260);
+  --accent: oklch(0.28 0.02 260);
+  --accent-foreground: oklch(0.95 0.005 250);
+  --destructive: oklch(0.58 0.18 25);
   --destructive-foreground: oklch(0.98 0.005 250);
-  --success: oklch(0.7 0.15 150);
+  --success: oklch(0.65 0.14 150);
   --success-foreground: oklch(0.18 0.02 150);
-  --border: oklch(0.32 0.014 260);
-  --input: oklch(0.3 0.014 260);
-  --ring: oklch(0.78 0.17 68);
-  --chart-1: oklch(0.78 0.17 68);
-  --chart-2: oklch(0.62 0.13 215);
-  --chart-3: oklch(0.7 0.15 150);
-  --chart-4: oklch(0.65 0.18 320);
-  --chart-5: oklch(0.72 0.1 90);
-  --sidebar: oklch(0.2 0.013 260);
+  --border: oklch(0.28 0.014 260);
+  --input: oklch(0.26 0.014 260);
+  --ring: oklch(0.62 0.11 55);
+  --chart-1: oklch(0.62 0.11 55);
+  --chart-2: oklch(0.55 0.1 215);
+  --chart-3: oklch(0.65 0.14 150);
+  --chart-4: oklch(0.6 0.16 320);
+  --chart-5: oklch(0.7 0.09 90);
+  --sidebar: oklch(0.155 0.012 260);
   --sidebar-foreground: oklch(0.93 0.005 250);
-  --sidebar-primary: oklch(0.78 0.17 68);
-  --sidebar-primary-foreground: oklch(0.18 0.02 60);
-  --sidebar-accent: oklch(0.27 0.016 260);
+  --sidebar-primary: oklch(0.62 0.11 55);
+  --sidebar-primary-foreground: oklch(0.98 0.005 250);
+  --sidebar-accent: oklch(0.23 0.014 260);
   --sidebar-accent-foreground: oklch(0.95 0.005 250);
-  --sidebar-border: oklch(0.3 0.014 260);
-  --sidebar-ring: oklch(0.78 0.17 68);
+  --sidebar-border: oklch(0.27 0.014 260);
+  --sidebar-ring: oklch(0.62 0.11 55);
 }
 
 .dark {
@@ -113,19 +114,24 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
   }
 }
 
 @utility display-title {
   font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 @utility surface-grid {
   background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+    linear-gradient(to right, oklch(1 0 0 / 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.035) 1px, transparent 1px);
   background-size: 44px 44px;
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }

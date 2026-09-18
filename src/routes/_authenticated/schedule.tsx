@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +41,9 @@ export const Route = createFileRoute("/_authenticated/schedule")({
 function SchedulePage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const { organization, location } = useRouteContext({ from: "/_authenticated" });
+  const orgId = organization?.id;
+  const locId = location?.id;
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["jobs"],
@@ -65,6 +68,7 @@ function SchedulePage() {
 
   const createJob = useMutation({
     mutationFn: async (form: FormData) => {
+      if (!orgId) throw new Error("No organization selected");
       const start = String(form.get("scheduled_start") || "");
       const customerId = String(form.get("customer_id") || "");
       const { error } = await supabase.from("jobs").insert({
@@ -77,6 +81,8 @@ function SchedulePage() {
         notes: String(form.get("notes") || "") || null,
         scheduled_start: start ? new Date(start).toISOString() : null,
         customer_id: customerId || null,
+        organization_id: orgId,
+        location_id: locId,
       });
       if (error) throw error;
     },
@@ -84,7 +90,7 @@ function SchedulePage() {
       toast.success("Job added");
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["jobs"] });
-      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["command-center"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
