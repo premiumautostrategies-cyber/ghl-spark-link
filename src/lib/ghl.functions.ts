@@ -1,12 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { encryptConnectionKey, decryptConnectionKey } from "@/server/connectionKeyCrypto";
 
 const GHL_BASE = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-07-28";
 
+const crypto = () => import("@/server/connectionKeyCrypto");
+
 async function loadGhl(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { decryptConnectionKey } = await crypto();
   const { data, error } = await supabaseAdmin
     .from("ghl_connections")
     .select("location_id, api_key_ciphertext")
@@ -48,6 +50,7 @@ export const saveGhlCredentials = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { encryptConnectionKey } = await crypto();
     const { error } = await supabaseAdmin.from("ghl_connections").upsert(
       {
         user_id: context.userId,

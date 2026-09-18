@@ -13,13 +13,13 @@ import {
   importHubspotContacts,
   startHubspotConnect,
   completeHubspotConnection,
-} from "@/server/hubspot";
+} from "@/lib/hubspot.functions";
 import {
   disconnectGhl,
   getGhlStatus,
   importGhlContacts,
   saveGhlCredentials,
-} from "@/server/ghl";
+} from "@/lib/ghl.functions";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({

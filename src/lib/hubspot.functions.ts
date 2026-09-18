@@ -1,18 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  appUserReconnectRequired,
-  authorizeAppUserOAuth,
-  callAsAppUser,
-  disconnectAppUser,
-  exchangeAppUserOAuthCode,
-} from "@/integrations/lovable/appUserConnector";
-import {
-  deleteConnectionForUser,
-  getConnectionKeyForUser,
-  saveConnectionKeyForUser,
-} from "@/server/appUserConnections.server";
 
 const GATEWAY_BASE_URL = "https://connector-gateway.lovable.dev";
 const CONNECTOR_ID = "hubspot";
@@ -24,6 +12,9 @@ export const HUBSPOT_SCOPES = [
   "crm.objects.deals.read",
   "crm.objects.owners.read",
 ];
+
+const connector = () => import("@/integrations/lovable/appUserConnector");
+const store = () => import("@/server/appUserConnections.server");
 
 export const startHubspotConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -42,8 +33,10 @@ export const startHubspotConnect = createServerFn({ method: "POST" })
       sandboxHost ? `https://${sandboxHost}` : url.origin,
     ).toString();
 
+    const { getConnectionKeyForUser } = await store();
     const existing = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
 
+    const { authorizeAppUserOAuth } = await connector();
     const { authorizationUrl } = await authorizeAppUserOAuth({
       gatewayBaseUrl: GATEWAY_BASE_URL,
       connectorId: CONNECTOR_ID,
@@ -60,11 +53,13 @@ export const completeHubspotConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { code: string }) => input)
   .handler(async ({ data, context }) => {
+    const { exchangeAppUserOAuthCode } = await connector();
     const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
       GATEWAY_BASE_URL,
       data.code,
     );
     if (connectorId !== CONNECTOR_ID) throw new Error("OAuth returned the wrong service");
+    const { saveConnectionKeyForUser } = await store();
     await saveConnectionKeyForUser(context.userId, connectorId, connectionAPIKey);
     return { ok: true };
   });
@@ -74,8 +69,10 @@ export const getHubspotStatus = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const configured = Boolean(process.env["HUBSPOT_APP_USER_CONNECTOR_CLIENT_API_KEY"]);
     if (!configured) return { configured: false, connected: false };
+    const { getConnectionKeyForUser } = await store();
     const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
     if (!key) return { configured: true, connected: false };
+    const { callAsAppUser, appUserReconnectRequired } = await connector();
     const res = await callAsAppUser({
       gatewayBaseUrl: GATEWAY_BASE_URL,
       connectionAPIKey: key,
@@ -97,9 +94,11 @@ export const getHubspotStatus = createServerFn({ method: "GET" })
 export const importHubspotContacts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { getConnectionKeyForUser } = await store();
     const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
     if (!key) return { imported: 0, connected: false };
 
+    const { callAsAppUser, appUserReconnectRequired } = await connector();
     const res = await callAsAppUser({
       gatewayBaseUrl: GATEWAY_BASE_URL,
       connectionAPIKey: key,
@@ -141,8 +140,10 @@ export const importHubspotContacts = createServerFn({ method: "POST" })
 export const disconnectHubspot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { getConnectionKeyForUser, deleteConnectionForUser } = await store();
     const key = await getConnectionKeyForUser(context.userId, CONNECTOR_ID);
     if (key) {
+      const { disconnectAppUser } = await connector();
       await disconnectAppUser({
         gatewayBaseUrl: GATEWAY_BASE_URL,
         connectionAPIKey: key,
