@@ -54,9 +54,6 @@ function Landing() {
         <span className="display-title text-2xl font-bold">
           System<span className="text-primary">ize</span>
         </span>
-        <Button asChild size="sm">
-          <Link to="/auth">Sign in</Link>
-        </Button>
       </header>
 
       <section className="surface-grid border-y border-border/70">
@@ -72,14 +69,6 @@ function Landing() {
             schedule and customer history in one place — wired straight into your GoHighLevel or
             HubSpot.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/auth">Start free</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/auth">See the dashboard</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
