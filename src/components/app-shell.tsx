@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bot,
@@ -26,7 +27,9 @@ import {
   Wrench,
 } from "lucide-react";
 
-const NAV_GROUPS = [
+type NavItem = { to: string; label: string; icon: LucideIcon };
+
+const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   {
     group: "Sales",
     items: [
@@ -63,9 +66,9 @@ const NAV_GROUPS = [
       { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
-] as const;
+];
 
-const NAV = NAV_GROUPS.flatMap((g) => g.items);
+const NAV: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -99,7 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {group.items.map((item) => (
                   <Link
                     key={item.to}
-                    to={item.to}
+                    to={item.to as never}
                     className={cn(
                       "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
                       isActive(item.to)
@@ -167,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {NAV.map((item) => (
             <Link
               key={item.to}
-              to={item.to}
+              to={item.to as never}
               className={cn(
                 "flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium",
                 isActive(item.to)
