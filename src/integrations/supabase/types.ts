@@ -99,6 +99,62 @@ export type Database = {
           },
         ]
       }
+      automations: {
+        Row: {
+          channel: string
+          created_at: string
+          delay_minutes: number
+          deleted_at: string | null
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          name: string
+          organization_id: string | null
+          run_count: number
+          template: string | null
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          delay_minutes?: number
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name: string
+          organization_id?: string | null
+          run_count?: number
+          template?: string | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          delay_minutes?: number
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name?: string
+          organization_id?: string | null
+          run_count?: number
+          template?: string | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           company: string | null
@@ -167,6 +223,208 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          deleted_at: string | null
+          estimate_id: string | null
+          expected_close: string | null
+          id: string
+          job_id: string | null
+          last_activity_at: string | null
+          location_id: string | null
+          notes: string | null
+          organization_id: string | null
+          owner_name: string | null
+          probability: number
+          source: string | null
+          stage: string
+          title: string
+          updated_at: string
+          value: number
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          deleted_at?: string | null
+          estimate_id?: string | null
+          expected_close?: string | null
+          id?: string
+          job_id?: string | null
+          last_activity_at?: string | null
+          location_id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          owner_name?: string | null
+          probability?: number
+          source?: string | null
+          stage?: string
+          title: string
+          updated_at?: string
+          value?: number
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          deleted_at?: string | null
+          estimate_id?: string | null
+          expected_close?: string | null
+          id?: string
+          job_id?: string | null
+          last_activity_at?: string | null
+          location_id?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          owner_name?: string | null
+          probability?: number
+          source?: string | null
+          stage?: string
+          title?: string
+          updated_at?: string
+          value?: number
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          body: string | null
+          created_at: string
+          customer_id: string | null
+          deleted_at: string | null
+          doc_type: string
+          file_url: string | null
+          id: string
+          job_id: string | null
+          location_id: string | null
+          name: string
+          organization_id: string | null
+          signed_at: string | null
+          signer_name: string | null
+          status: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          customer_id?: string | null
+          deleted_at?: string | null
+          doc_type?: string
+          file_url?: string | null
+          id?: string
+          job_id?: string | null
+          location_id?: string | null
+          name: string
+          organization_id?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          customer_id?: string | null
+          deleted_at?: string | null
+          doc_type?: string
+          file_url?: string | null
+          id?: string
+          job_id?: string | null
+          location_id?: string | null
+          name?: string
+          organization_id?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -362,6 +620,133 @@ export type Database = {
           },
         ]
       }
+      inventory_items: {
+        Row: {
+          brand: string | null
+          category: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          location_id: string | null
+          name: string
+          notes: string | null
+          organization_id: string | null
+          quantity_on_hand: number
+          reorder_point: number
+          sku: string | null
+          supplier: string | null
+          unit: string
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          location_id?: string | null
+          name: string
+          notes?: string | null
+          organization_id?: string | null
+          quantity_on_hand?: number
+          reorder_point?: number
+          sku?: string | null
+          supplier?: string | null
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          location_id?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string | null
+          quantity_on_hand?: number
+          reorder_point?: number
+          sku?: string | null
+          supplier?: string | null
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_services: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          job_id: string
+          organization_id: string | null
+          quantity: number
+          service_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          job_id: string
+          organization_id?: string | null
+          quantity?: number
+          service_id?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          job_id?: string
+          organization_id?: string | null
+          quantity?: number
+          service_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_services_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_services_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           bay: string | null
@@ -549,6 +934,99 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_id: string | null
+          deleted_at: string | null
+          estimate_id: string | null
+          id: string
+          job_id: string | null
+          kind: string
+          location_id: string | null
+          method: string
+          notes: string | null
+          organization_id: string | null
+          paid_at: string | null
+          reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          customer_id?: string | null
+          deleted_at?: string | null
+          estimate_id?: string | null
+          id?: string
+          job_id?: string | null
+          kind?: string
+          location_id?: string | null
+          method?: string
+          notes?: string | null
+          organization_id?: string | null
+          paid_at?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_id?: string | null
+          deleted_at?: string | null
+          estimate_id?: string | null
+          id?: string
+          job_id?: string | null
+          kind?: string
+          location_id?: string | null
+          method?: string
+          notes?: string | null
+          organization_id?: string | null
+          paid_at?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -634,6 +1112,141 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          base_price: number
+          category: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          location_id: string | null
+          name: string
+          organization_id: string | null
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          name: string
+          organization_id?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          category?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          name?: string
+          organization_id?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          commission_rate: number
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          location_id: string | null
+          organization_id: string | null
+          pay_rate: number
+          pay_type: string
+          phone: string | null
+          specialties: string[]
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          commission_rate?: number
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          organization_id?: string | null
+          pay_rate?: number
+          pay_type?: string
+          phone?: string | null
+          specialties?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          commission_rate?: number
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          organization_id?: string | null
+          pay_rate?: number
+          pay_type?: string
+          phone?: string | null
+          specialties?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
