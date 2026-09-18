@@ -223,8 +223,11 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { panel: "rear_bumper", defect_type: "scratch", severity: "critical", note: "Deep scratch through clear, needs correction before wrap", inspection_id: iid("JPK-BRC") },
     { panel: "roof", defect_type: "swirl", severity: "minor", note: "Wash swirls across roof panel", inspection_id: iid("JPK-BRC") },
   ]
-    .filter((d) => d.inspection_id)
-    .map((d) => ({ ...d, organization_id: orgId, pos_x: 0, pos_y: 0 }));
+    .flatMap((d) =>
+      d.inspection_id
+        ? [{ ...d, inspection_id: d.inspection_id, organization_id: orgId, pos_x: 0, pos_y: 0 }]
+        : [],
+    );
   if (defectRows.length) {
     const defRes = await supabase.from("inspection_defects").insert(defectRows);
     if (defRes.error) throw defRes.error;
