@@ -50,7 +50,7 @@ export const startHubspotConnect = createServerFn({ method: "POST" })
       appUserId: context.userId,
       clientAPIKey: clientKey,
       returnUrl,
-      connectionAPIKey: existing ?? undefined,
+      ...(existing ? { connectionAPIKey: existing } : {}),
       credentialsConfiguration: { scopes: HUBSPOT_SCOPES },
     });
     return { authorizationUrl };
@@ -117,17 +117,20 @@ export const importHubspotContacts = createServerFn({ method: "POST" })
     const payload = (await res.json()) as {
       results?: Array<{ id: string; properties: Record<string, string | null> }>;
     };
-    const rows = (payload.results ?? []).map((r) => ({
-      owner_id: context.userId,
-      hubspot_contact_id: r.id,
-      name:
-        [r.properties.firstname, r.properties.lastname].filter(Boolean).join(" ").trim() ||
-        r.properties.email ||
-        "HubSpot contact",
-      email: r.properties.email,
-      phone: r.properties.phone,
-      company: r.properties.company,
-    }));
+    const rows = (payload.results ?? []).map((r) => {
+      const p = r.properties;
+      return {
+        owner_id: context.userId,
+        hubspot_contact_id: r.id,
+        name:
+          [p["firstname"], p["lastname"]].filter(Boolean).join(" ").trim() ||
+          p["email"] ||
+          "HubSpot contact",
+        email: p["email"] ?? null,
+        phone: p["phone"] ?? null,
+        company: p["company"] ?? null,
+      };
+    });
     if (rows.length === 0) return { imported: 0, connected: true };
 
     const { error } = await context.supabase.from("customers").insert(rows);
