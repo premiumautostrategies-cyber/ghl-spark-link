@@ -1,23 +1,33 @@
 # Systemize Build Roadmap
 
-## In Progress
-- [ ] First Build: multi-tenant architecture, auth/roles, navigation shell, design system
+## Done
+- [x] Multi-tenant architecture, auth/roles, navigation shell, design system
+- [x] Command Center
+- [x] Customers · Vehicles (with service history)
+- [x] Service Catalog
+- [x] Quotes / Estimates
+- [x] Scheduling
+- [x] Jobs / Production board (stage moves, installer filter)
+- [x] Native sales pipeline (stages, forecast, close rate)
+- [x] Documents (types, signature status)
+- [x] Inventory (reorder alerts, stock value)
+- [x] Payments (deposits, balances, mark paid)
+- [x] Team (roles, pay, workload)
+- [x] Automations (trigger → delay → channel, pause/resume)
+- [x] Analytics + Shop Health
+- [x] Settings + one-click demo shop loader
+- [x] HubSpot / GoHighLevel integration page
 
 ## Queued
-- [ ] Command Center
-- [ ] Customers
-- [ ] Vehicles
-- [ ] Service Catalog
-- [ ] Quotes / Proposals
-- [ ] Scheduling
-- [ ] Jobs / Production board
-- [ ] Technician mobile view
-- [ ] Documents / SOP builder
-- [ ] Native sales pipeline
-- [ ] Seed demo data across all modules
-- [ ] HubSpot / GoHighLevel integration adapters
-- [ ] Inventory, payments, automations, AI assistant, analytics, customer portal
+- [ ] Technician mobile view (My Day, task timers, photo capture)
+- [ ] Inspections / check-in templates with damage markers
+- [ ] QC checklists gating job completion
+- [ ] Warranty records and claims
+- [ ] Customer portal (approve quote, pay deposit, sign)
+- [ ] Systemize AI (rough notes → SOPs, checklists, forms)
+- [ ] Vendors / purchase orders
+- [ ] Multi-location switcher
 
 ## Notes
-- Source of truth: MASTER PRODUCT BUILD SPECIFICATION (2026-09-18)
-- Initial focus is application, not marketing site.
+- Source of truth: MASTER PRODUCT BUILD SPECIFICATION
+- HubSpot app provisioning authorization still pending from the user.
