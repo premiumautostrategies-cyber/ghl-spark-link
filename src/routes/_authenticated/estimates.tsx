@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,9 @@ function EstimatesPage() {
   const qc = useQueryClient();
   const [openNew, setOpenNew] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const { organization, location } = useRouteContext({ from: "/_authenticated" });
+  const orgId = organization?.id;
+  const locId = location?.id ?? null;
 
   const { data: estimates = [] } = useQuery({
     queryKey: ["estimates"],

@@ -77,6 +77,7 @@ function CustomersPage() {
 
   const addVehicle = useMutation({
     mutationFn: async ({ form, customerId }: { form: FormData; customerId: string }) => {
+      if (!orgId) throw new Error("No workspace selected");
       const year = String(form.get("year") || "");
       const { error } = await supabase.from("vehicles").insert({
         customer_id: customerId,
@@ -86,6 +87,8 @@ function CustomersPage() {
         color: String(form.get("color") || "") || null,
         vin: String(form.get("vin") || "") || null,
         plate: String(form.get("plate") || "") || null,
+        organization_id: orgId,
+        location_id: locId,
       });
       if (error) throw error;
     },
