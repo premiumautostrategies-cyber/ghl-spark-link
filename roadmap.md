@@ -31,3 +31,8 @@
 ## Notes
 - Source of truth: MASTER PRODUCT BUILD SPECIFICATION
 - HubSpot app provisioning authorization still pending from the user.
+
+- [x] Luxury obsidian/bronze design system ported (Shine OS reference)
+- [x] Drag-and-drop sales pipeline board
+- [x] Bay x hour schedule board with conflict detection
+- [x] Vehicle inspections with panel damage map and customer sign-off
