@@ -121,7 +121,7 @@ function SchedulePage() {
       return d;
     });
   }, []);
-  const day = days[dayIndex] ?? days[0];
+  const day = (days[dayIndex] ?? days[0]) as Date;
 
   const dayJobs = jobs.filter((j) => sameDay(j.scheduled_start, day));
   const unscheduled = jobs.filter(
@@ -370,7 +370,7 @@ function SchedulePage() {
                       const end = j.scheduled_end ? new Date(j.scheduled_end) : null;
                       const startH = start.getHours() + start.getMinutes() / 60;
                       const endH = end ? end.getHours() + end.getMinutes() / 60 : startH + 2;
-                      const left = ((startH - BAY_HOURS[0]) / BAY_HOURS.length) * 100;
+                      const left = ((startH - (BAY_HOURS[0] as number)) / BAY_HOURS.length) * 100;
                       const width = (Math.max(endH - startH, 0.75) / BAY_HOURS.length) * 100;
                       const clash = conflictIds.has(j.id);
                       return (
