@@ -68,6 +68,7 @@ function SchedulePage() {
 
   const createJob = useMutation({
     mutationFn: async (form: FormData) => {
+      if (!orgId) throw new Error("No organization selected");
       const start = String(form.get("scheduled_start") || "");
       const customerId = String(form.get("customer_id") || "");
       const { error } = await supabase.from("jobs").insert({
@@ -80,6 +81,8 @@ function SchedulePage() {
         notes: String(form.get("notes") || "") || null,
         scheduled_start: start ? new Date(start).toISOString() : null,
         customer_id: customerId || null,
+        organization_id: orgId,
+        location_id: locId,
       });
       if (error) throw error;
     },
@@ -87,7 +90,7 @@ function SchedulePage() {
       toast.success("Job added");
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["jobs"] });
-      qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["command-center"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
