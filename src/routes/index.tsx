@@ -69,14 +69,6 @@ function Landing() {
             schedule and customer history in one place — wired straight into your GoHighLevel or
             HubSpot.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/auth">Start free</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/auth">See the dashboard</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
