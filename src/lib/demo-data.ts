@@ -46,7 +46,7 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { full_name: "Dani Ortiz", title: "Tint specialist", email: "dani@shop.test", phone: "(704) 555-0119", specialties: ["tint"], pay_type: "commission", pay_rate: 0, commission_rate: 35 },
     { full_name: "Corey Lang", title: "Wrap installer", email: "corey@shop.test", phone: "(704) 555-0188", specialties: ["wrap", "color_change", "commercial_graphics"], pay_type: "hourly", pay_rate: 31 },
     { full_name: "Priya Raman", title: "Service advisor", email: "priya@shop.test", phone: "(704) 555-0163", specialties: ["sales"], pay_type: "salary", pay_rate: 58000, commission_rate: 5 },
-  ].map((t) => ({ ...t, ...org }));
+  ].map((t) => ({ commission_rate: 0, ...t, ...org }));
 
   // --- Automations --------------------------------------------------------
   const automations = [
