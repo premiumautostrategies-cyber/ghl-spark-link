@@ -16,7 +16,6 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authenticated/command-center'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedEstimatesRouteImport } from './routes/_authenticated/estimates'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
@@ -65,11 +64,6 @@ const AuthenticatedCommandCenterRoute =
 const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
@@ -146,7 +140,6 @@ export interface FileRoutesByFullPath {
   '/automations': typeof AuthenticatedAutomationsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
   '/customers': typeof AuthenticatedCustomersRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
@@ -168,7 +161,6 @@ export interface FileRoutesByTo {
   '/automations': typeof AuthenticatedAutomationsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
   '/customers': typeof AuthenticatedCustomersRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
@@ -192,7 +184,6 @@ export interface FileRoutesById {
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/command-center': typeof AuthenticatedCommandCenterRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/estimates': typeof AuthenticatedEstimatesRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
@@ -216,7 +207,6 @@ export interface FileRouteTypes {
     | '/automations'
     | '/command-center'
     | '/customers'
-    | '/dashboard'
     | '/documents'
     | '/estimates'
     | '/integrations'
@@ -238,7 +228,6 @@ export interface FileRouteTypes {
     | '/automations'
     | '/command-center'
     | '/customers'
-    | '/dashboard'
     | '/documents'
     | '/estimates'
     | '/integrations'
@@ -261,7 +250,6 @@ export interface FileRouteTypes {
     | '/_authenticated/automations'
     | '/_authenticated/command-center'
     | '/_authenticated/customers'
-    | '/_authenticated/dashboard'
     | '/_authenticated/documents'
     | '/_authenticated/estimates'
     | '/_authenticated/integrations'
@@ -333,13 +321,6 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/customers'
       preLoaderRoute: typeof AuthenticatedCustomersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/documents': {
@@ -441,7 +422,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedCommandCenterRoute: typeof AuthenticatedCommandCenterRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedEstimatesRoute: typeof AuthenticatedEstimatesRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
@@ -461,7 +441,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedCommandCenterRoute: AuthenticatedCommandCenterRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedEstimatesRoute: AuthenticatedEstimatesRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
