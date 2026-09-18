@@ -76,7 +76,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/dashboard", replace: true });
+    navigate({ to: "/command-center", replace: true });
   }
 
   return (
