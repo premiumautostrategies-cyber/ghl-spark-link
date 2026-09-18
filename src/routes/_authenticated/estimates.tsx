@@ -69,6 +69,7 @@ function EstimatesPage() {
 
   const createEstimate = useMutation({
     mutationFn: async (form: FormData) => {
+      if (!orgId) throw new Error("No workspace selected");
       const customerId = String(form.get("customer_id") || "");
       const { data, error } = await supabase
         .from("estimates")
@@ -76,6 +77,8 @@ function EstimatesPage() {
           title: String(form.get("title")),
           customer_id: customerId || null,
           tax_rate: Number(form.get("tax_rate") || 0),
+          organization_id: orgId,
+          location_id: locId,
         })
         .select("id")
         .single();
@@ -97,6 +100,7 @@ function EstimatesPage() {
         description: String(form.get("description")),
         quantity: Number(form.get("quantity") || 1),
         unit_price: Number(form.get("unit_price") || 0),
+        organization_id: orgId,
       });
       if (error) throw error;
     },
