@@ -54,9 +54,6 @@ function Landing() {
         <span className="display-title text-2xl font-bold">
           System<span className="text-primary">ize</span>
         </span>
-        <Button asChild size="sm">
-          <Link to="/auth">Sign in</Link>
-        </Button>
       </header>
 
       <section className="surface-grid border-y border-border/70">
