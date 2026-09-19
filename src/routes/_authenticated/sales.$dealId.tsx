@@ -601,7 +601,7 @@ function DealDesk() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Bay</Label>
-                <Select name="bay" defaultValue={job?.bay ?? BAYS[0]}>
+                <Select name="bay" defaultValue={job?.bay ?? "Bay 1"}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {BAYS.map((b) => (
@@ -612,7 +612,7 @@ function DealDesk() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Installer</Label>
-                <Select name="installer" defaultValue={job?.installer ?? undefined}>
+                <Select name="installer" {...(job?.installer ? { defaultValue: job.installer } : {})}>
                   <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
                   <SelectContent>
                     {team.map((t) => (
