@@ -43,6 +43,13 @@
       "when": 1789824512145,
       "tag": "0005_service_variants_and_addons",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789825044225,
+      "tag": "0006_service_customization_controls",
+      "breakpoints": true
     }
   ]
 }
