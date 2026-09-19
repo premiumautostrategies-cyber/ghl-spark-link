@@ -315,7 +315,7 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     DEFAULT_MESSAGE_TEMPLATES.map((t, i) => ({
       organization_id: orgId,
       name: t.name,
-      channel: t.channel,
+      channel: "sms",
       category: t.category,
       body: t.body,
       sort_order: i,
