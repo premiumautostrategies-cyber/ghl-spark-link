@@ -703,14 +703,31 @@ function ServicesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sv-dur">Bay time (minutes)</Label>
+                <Label htmlFor="sv-dur">Estimated hours</Label>
                 <Input
                   id="sv-dur"
-                  name="duration_minutes"
+                  name="estimated_hours"
                   type="number"
-                  defaultValue={String(editing?.duration_minutes ?? 120)}
+                  step="0.25"
+                  defaultValue={String(
+                    editing?.estimated_hours ?? (editing ? editing.duration_minutes / 60 : 2),
+                  )}
                 />
               </div>
+              <label className="flex items-center justify-between gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2 sm:col-span-2">
+                <span>
+                  <span className="block text-sm font-medium">Allow add-ons</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Lets advisors attach extras from the add-on library when quoting.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  name="supports_add_ons"
+                  defaultChecked={editing?.supports_add_ons ?? true}
+                  className="size-4 accent-bronze"
+                />
+              </label>
               <div className="space-y-2">
                 <Label htmlFor="sv-img">Photo URL</Label>
                 <Input
