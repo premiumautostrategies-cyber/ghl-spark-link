@@ -51,3 +51,6 @@
 - [x] 7. QC gate with edge temp + key release lock
 - [x] 8. Warranty certificates + day 3/14/15 aftercare cadence
 - [ ] Automated sending of queued aftercare texts (needs a live SMS provider; "Send now" works today)
+
+## Verified end to end (Sep 19)
+Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay booking -> inspection -> phase timers -> QC gate/key release -> warranty certificate -> aftercare cadence. Fixed: warranty certificate dates on the customer page showed a time instead of the coverage year.
