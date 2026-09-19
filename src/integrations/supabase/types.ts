@@ -21,12 +21,14 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           estimated_hours: number
+          hourly_rate: number
           id: string
           is_active: boolean
           is_global: boolean
           name: string
           organization_id: string | null
           price: number
+          pricing_mode: string
           service_id: string | null
           sort_order: number
           swatch_color: string | null
@@ -38,12 +40,14 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           estimated_hours?: number
+          hourly_rate?: number
           id?: string
           is_active?: boolean
           is_global?: boolean
           name: string
           organization_id?: string | null
           price?: number
+          pricing_mode?: string
           service_id?: string | null
           sort_order?: number
           swatch_color?: string | null
@@ -55,12 +59,14 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           estimated_hours?: number
+          hourly_rate?: number
           id?: string
           is_active?: boolean
           is_global?: boolean
           name?: string
           organization_id?: string | null
           price?: number
+          pricing_mode?: string
           service_id?: string | null
           sort_order?: number
           swatch_color?: string | null
@@ -1610,18 +1616,24 @@ export type Database = {
           created_at: string
           customer_description: string | null
           deleted_at: string | null
+          deposit_type: string
+          deposit_value: number
           description: string | null
           duration_minutes: number
           estimated_hours: number | null
           id: string
           image_url: string | null
           is_active: boolean
+          is_internal: boolean
+          is_public: boolean
           location_id: string | null
           name: string
           organization_id: string | null
+          pricing_mode: string
           sort_order: number
           supports_add_ons: boolean
           swatch_color: string | null
+          tags: string[]
           unit: string
           updated_at: string
         }
@@ -1633,18 +1645,24 @@ export type Database = {
           created_at?: string
           customer_description?: string | null
           deleted_at?: string | null
+          deposit_type?: string
+          deposit_value?: number
           description?: string | null
           duration_minutes?: number
           estimated_hours?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_internal?: boolean
+          is_public?: boolean
           location_id?: string | null
           name: string
           organization_id?: string | null
+          pricing_mode?: string
           sort_order?: number
           supports_add_ons?: boolean
           swatch_color?: string | null
+          tags?: string[]
           unit?: string
           updated_at?: string
         }
@@ -1656,18 +1674,24 @@ export type Database = {
           created_at?: string
           customer_description?: string | null
           deleted_at?: string | null
+          deposit_type?: string
+          deposit_value?: number
           description?: string | null
           duration_minutes?: number
           estimated_hours?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_internal?: boolean
+          is_public?: boolean
           location_id?: string | null
           name?: string
           organization_id?: string | null
+          pricing_mode?: string
           sort_order?: number
           supports_add_ons?: boolean
           swatch_color?: string | null
+          tags?: string[]
           unit?: string
           updated_at?: string
         }
