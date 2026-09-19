@@ -1055,7 +1055,7 @@ function ServicesPage() {
             </Button>
           </form>
 
-          {editing && (
+          {editing && pricingMode === "tiered" && (
             <div className="space-y-3 border-t border-elevated pt-4">
               <p className="micro-label">Vehicle-size tiers</p>
               <div className="space-y-2">
