@@ -82,6 +82,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
 
+  const activeGroup = NAV_GROUPS.find((g) => g.items.some((i) => isActive(i.to)));
+  const activeItem = activeGroup?.items.find((i) => isActive(i.to));
+
   return (
     <div className="flex min-h-screen bg-background">
       <AccentTheme />
@@ -143,6 +146,33 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/command-center" className="display-title text-xl font-bold lg:hidden">
             System<span className="text-primary">ize</span>
           </Link>
+          {/* Section switcher */}
+          <div className="hidden items-center gap-1 rounded-full border border-border/60 bg-secondary/40 p-1 md:flex">
+            {NAV_GROUPS.map((g) => {
+              const active = g.group === activeGroup?.group;
+              const first = g.items[0]!;
+              return (
+                <Link
+                  key={g.group}
+                  to={first.to as never}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors",
+                    active
+                      ? "bg-surface-2 text-bronze shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {g.group}
+                </Link>
+              );
+            })}
+          </div>
+          {activeItem && (
+            <div className="hidden items-center gap-2 text-sm text-muted-foreground xl:flex">
+              <span className="text-border">/</span>
+              <span className="font-medium text-foreground">{activeItem.label}</span>
+            </div>
+          )}
           <div className="relative hidden max-w-md flex-1 md:block">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
