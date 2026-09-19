@@ -808,7 +808,7 @@ function ServicesPage() {
                     )}
                     <p className="font-display text-lg">
                       {g.name}{" "}
-                      <span className="text-sm text-muted-foreground">
+                      <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
                         ({g.items.length} {g.items.length === 1 ? "service" : "services"})
                       </span>
                     </p>
@@ -823,8 +823,6 @@ function ServicesPage() {
                 {!isCollapsed && (
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {g.items.map((s) => {
-            const cat = s.category_id ? catById[s.category_id] : undefined;
-            const opts = optionsFor(s.id);
             return (
               <Panel
                 key={s.id}
