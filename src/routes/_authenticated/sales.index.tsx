@@ -15,7 +15,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
 import { EmptyState, PageHeader } from "@/components/page-header";
-import { FilterPills, Kpi, Tag } from "@/components/os-ui";
+import { FilterPills, Tag } from "@/components/os-ui";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
