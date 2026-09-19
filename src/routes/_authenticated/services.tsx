@@ -186,6 +186,42 @@ function ServicesPage() {
     },
   });
 
+  const { data: variants = [] } = useQuery({
+    queryKey: ["service-variants"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_variants")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order");
+      if (error) throw error;
+      return data as unknown as Variant[];
+    },
+  });
+
+  const { data: addOns = [] } = useQuery({
+    queryKey: ["add-ons"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("add_ons")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name");
+      if (error) throw error;
+      return data as unknown as AddOn[];
+    },
+  });
+
+  const { data: addOnLinks = [] } = useQuery({
+    queryKey: ["service-add-ons"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("service_add_ons").select("*");
+      if (error) throw error;
+      return data as unknown as ServiceAddOnLink[];
+    },
+  });
+
   const optionsFor = (serviceId: string) => options.filter((o) => o.service_id === serviceId);
   const catById = useMemo(
     () => Object.fromEntries(categories.map((c) => [c.id, c])) as Record<string, Category>,
