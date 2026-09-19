@@ -457,24 +457,6 @@ function DealDesk() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {DEAL_STAGES.map((s) => (
-          <button
-            key={s}
-            type="button"
-            disabled={setStage.isPending || s === deal.stage}
-            onClick={() => setStage.mutate(s)}
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              s === deal.stage
-                ? "border-bronze/60 bg-bronze/10 text-bronze"
-                : "border-elevated bg-surface text-muted-foreground hover:border-hairline hover:text-foreground",
-            )}
-          >
-            {label(s)}
-          </button>
-        ))}
-      </div>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Quote builder */}
