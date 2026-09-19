@@ -371,6 +371,98 @@ function ServicesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const addVariant = useMutation({
+    mutationFn: async ({ serviceId, form }: { serviceId: string; form: FormData }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error } = await supabase.from("service_variants").insert({
+        service_id: serviceId,
+        organization_id: orgId,
+        tier_name: String(form.get("tier_name")),
+        description: String(form.get("description") || "") || null,
+        price: Number(form.get("price") || 0),
+        estimated_hours: Number(form.get("estimated_hours") || 0),
+        sort_order: variantsFor(serviceId).length,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Tier added");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeVariant = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("service_variants").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveAddOn = useMutation({
+    mutationFn: async (form: FormData) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const categoryId = String(form.get("category_id") || "");
+      const { error } = await supabase.from("add_ons").insert({
+        organization_id: orgId,
+        name: String(form.get("name")),
+        description: String(form.get("description") || "") || null,
+        price: Number(form.get("price") || 0),
+        estimated_hours: Number(form.get("estimated_hours") || 0),
+        category_id: categoryId && categoryId !== "global" ? categoryId : null,
+        is_global: !categoryId || categoryId === "global",
+        sort_order: addOns.length,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Add-on saved");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeAddOn = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("add_ons")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleLink = useMutation({
+    mutationFn: async ({
+      serviceId,
+      addOnId,
+      link,
+    }: {
+      serviceId: string;
+      addOnId: string;
+      link?: ServiceAddOnLink;
+    }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      if (link) {
+        const { error } = await supabase.from("service_add_ons").delete().eq("id", link.id);
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.from("service_add_ons").insert({
+        service_id: serviceId,
+        add_on_id: addOnId,
+        organization_id: orgId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const visible = services.filter((s) => (activeCat === "all" ? true : s.category_id === activeCat));
   const active = services.filter((s) => s.is_active);
   const avg = active.length
