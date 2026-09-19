@@ -101,6 +101,56 @@ function SettingsPage() {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Brand colour</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Pick the highlight colour used across buttons, pricing and charts so the app matches your
+          company.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {ACCENT_PRESETS.map((p) => (
+            <button
+              key={p.hex}
+              type="button"
+              title={p.name}
+              onClick={() => setAccent.mutate(p.hex)}
+              className={`h-9 w-9 rounded-full border-2 transition-transform hover:scale-105 ${
+                accent.toLowerCase() === p.hex.toLowerCase()
+                  ? "border-foreground"
+                  : "border-transparent"
+              }`}
+              style={{ backgroundColor: p.hex }}
+            />
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap items-end gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="accent">Custom colour</Label>
+            <input
+              id="accent"
+              type="color"
+              value={accent}
+              onChange={(e) => {
+                setLocalAccent(e.target.value);
+                applyAccent(e.target.value);
+              }}
+              className="h-10 w-20 cursor-pointer rounded-lg border border-border bg-transparent p-1"
+            />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setAccent.mutate(accent)}
+            disabled={setAccent.isPending}
+          >
+            Save colour
+          </Button>
+          <Button variant="ghost" onClick={() => setAccent.mutate(DEFAULT_ACCENT)}>
+            Reset
+          </Button>
+        </div>
+      </div>
+
+
+      <div className="rounded-xl border border-border bg-card p-5">
         <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Locations</h2>
         <div className="mt-4 space-y-2">
           {locations.map((l) => (
