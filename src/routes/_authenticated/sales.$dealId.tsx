@@ -605,20 +605,34 @@ function DealDesk() {
                   id="s-date"
                   name="date"
                   type="date"
-                  defaultValue={job?.scheduled_start ? String(job.scheduled_start).slice(0, 10) : ""}
+                  value={schedDate}
+                  onChange={(e) => setSchedDate(e.target.value)}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="s-time" className="text-xs">Start</Label>
-                <Input id="s-time" name="time" type="time" defaultValue="09:00" />
+                <Input
+                  id="s-time"
+                  name="time"
+                  type="time"
+                  value={schedTime}
+                  onChange={(e) => setSchedTime(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="s-hours" className="text-xs">Hours in bay</Label>
-                <Input id="s-hours" name="hours" type="number" step="0.5" defaultValue="4" />
+                <Input
+                  id="s-hours"
+                  name="hours"
+                  type="number"
+                  step="0.5"
+                  value={schedHours}
+                  onChange={(e) => setSchedHours(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Bay</Label>
-                <Select name="bay" defaultValue={job?.bay ?? "Bay 1"}>
+                <Select name="bay" value={schedBay} onValueChange={setSchedBay}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {BAYS.map((b) => (
@@ -626,6 +640,19 @@ function DealDesk() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="sm:col-span-2">
+                <DayAvailability
+                  date={schedDate}
+                  jobs={dayJobs}
+                  currentJobId={job?.id ?? null}
+                  hours={Number(schedHours) || 1}
+                  selected={{ bay: schedBay, time: schedTime }}
+                  onPick={(bay, time) => {
+                    setSchedBay(bay);
+                    setSchedTime(time);
+                  }}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Installer</Label>
