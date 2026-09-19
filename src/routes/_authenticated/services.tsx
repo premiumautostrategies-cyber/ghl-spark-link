@@ -729,7 +729,16 @@ function ServicesPage() {
           }}
         >
           <Input name="name" placeholder="Add-on name" required />
-          <Input name="price" type="number" step="0.01" placeholder="Price" />
+          <select
+            name="pricing_mode"
+            className="h-10 rounded-md border border-elevated bg-surface-2 px-3 text-sm"
+            defaultValue="flat"
+          >
+            <option value="flat">Flat rate</option>
+            <option value="hourly">Per labour hour</option>
+          </select>
+          <Input name="price" type="number" step="0.01" placeholder="Flat price" />
+          <Input name="hourly_rate" type="number" step="0.01" placeholder="$ / hr" />
           <Input name="estimated_hours" type="number" step="0.25" placeholder="Hours" />
           <select
             name="category_id"
