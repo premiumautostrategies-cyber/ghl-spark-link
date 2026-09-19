@@ -306,7 +306,7 @@ function ServicesPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      setActiveCat("all");
+      setSelCats([]);
       toast.success("Category archived");
       invalidate();
     },
@@ -490,7 +490,48 @@ function ServicesPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const visible = services.filter((s) => (activeCat === "all" ? true : s.category_id === activeCat));
+  const q = query.trim().toLowerCase();
+  const filtered = services.filter((s) => {
+    if (selCats.length > 0 && !selCats.includes(s.category_id ?? "")) return false;
+    if (!q) return true;
+    const catName = s.category_id ? (catById[s.category_id]?.name ?? "") : "";
+    const haystack = [s.name, s.description ?? "", s.customer_description ?? "", catName, ...(s.tags ?? [])]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(q);
+  });
+  const sorted = [...filtered].sort((a, b) => {
+    switch (sort) {
+      case "price_desc":
+        return Number(b.base_price) - Number(a.base_price);
+      case "price_asc":
+        return Number(a.base_price) - Number(b.base_price);
+      case "duration":
+        return b.duration_minutes - a.duration_minutes;
+      case "popular": {
+        const pop = (s: Service) =>
+          (s.tags ?? []).some((t) => /popular|best/i.test(t)) ? 1 : 0;
+        return pop(b) - pop(a) || Number(b.base_price) - Number(a.base_price);
+      }
+      default:
+        return a.name.localeCompare(b.name);
+    }
+  });
+  const singleCat = selCats.length === 1 ? selCats[0]! : null;
+  const groups: { key: string; name: string; accent: string | null; items: Service[] }[] = singleCat
+    ? [{ key: singleCat, name: catById[singleCat]?.name ?? "", accent: catById[singleCat]?.accent_color ?? null, items: sorted }]
+    : categories
+        .map((c) => ({
+          key: c.id,
+          name: c.name,
+          accent: c.accent_color,
+          items: sorted.filter((s) => s.category_id === c.id),
+        }))
+        .filter((g) => g.items.length > 0);
+  const uncategorized = sorted.filter((s) => !s.category_id || !catById[s.category_id]);
+  if (!singleCat && uncategorized.length > 0)
+    groups.push({ key: "uncat", name: "Uncategorized", accent: null, items: uncategorized });
+  const visible = sorted;
   const active = services.filter((s) => s.is_active);
   const avg = active.length
     ? active.reduce((t, s) => t + Number(s.base_price), 0) / active.length
