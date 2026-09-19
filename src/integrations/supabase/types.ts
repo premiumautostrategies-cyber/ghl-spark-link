@@ -372,6 +372,7 @@ export type Database = {
           organization_id: string | null
           owner_name: string | null
           probability: number
+          service_tags: string[]
           source: string | null
           stage: string
           title: string
@@ -394,6 +395,7 @@ export type Database = {
           organization_id?: string | null
           owner_name?: string | null
           probability?: number
+          service_tags?: string[]
           source?: string | null
           stage?: string
           title: string
@@ -416,6 +418,7 @@ export type Database = {
           organization_id?: string | null
           owner_name?: string | null
           probability?: number
+          service_tags?: string[]
           source?: string | null
           stage?: string
           title?: string

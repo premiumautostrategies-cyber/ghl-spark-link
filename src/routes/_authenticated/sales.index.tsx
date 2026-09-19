@@ -12,6 +12,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { MessageSquare, Phone, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
 import { EmptyState, PageHeader } from "@/components/page-header";
@@ -50,7 +51,9 @@ type Deal = {
   last_activity_at: string | null;
   notes: string | null;
   created_at: string;
-  customers: { name: string } | null;
+  service_tags: string[] | null;
+  customers: { name: string; phone: string | null; email: string | null } | null;
+  vehicles: { year: number | null; make: string | null; model: string | null } | null;
 };
 
 type FilterKey = "all" | "untouched" | "high" | "closing";
@@ -83,6 +86,7 @@ function SalesPage() {
   const { orgId, locId } = useOrg();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -91,7 +95,7 @@ function SalesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deals")
-        .select("*, customers(name)")
+        .select("*, customers(name, phone, email), vehicles(year, make, model)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -122,6 +126,10 @@ function SalesPage() {
         notes: String(form.get("notes") || "") || null,
         expected_close: close || null,
         customer_id: customerId || null,
+        service_tags: String(form.get("service_tags") || "")
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
         organization_id: orgId,
         location_id: locId,
       });
@@ -155,16 +163,34 @@ function SalesPage() {
     : 0;
 
   const visible = useMemo(() => {
+    let list = deals;
     if (filter === "untouched")
-      return deals.filter(
+      list = list.filter(
         (d) =>
           !d.last_activity_at ||
           Date.now() - new Date(d.last_activity_at).getTime() > 3 * 86400000,
       );
-    if (filter === "high") return deals.filter((d) => Number(d.value) >= 2500);
-    if (filter === "closing") return deals.filter((d) => d.probability >= 60);
-    return deals;
-  }, [deals, filter]);
+    if (filter === "high") list = list.filter((d) => Number(d.value) >= 2500);
+    if (filter === "closing") list = list.filter((d) => d.probability >= 60);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((d) => {
+        const hay = [
+          d.title,
+          d.customers?.name,
+          d.source,
+          d.notes,
+          d.vehicles ? `${d.vehicles.year ?? ""} ${d.vehicles.make ?? ""} ${d.vehicles.model ?? ""}` : "",
+          ...(d.service_tags ?? []),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return list;
+  }, [deals, filter, search]);
 
   return (
     <div className="min-w-0 space-y-6">
@@ -244,6 +270,14 @@ function SalesPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="service_tags">Service tags</Label>
+                  <Input
+                    id="service_tags"
+                    name="service_tags"
+                    placeholder="ppf, full front, ceramic — comma separated"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea id="notes" name="notes" />
                 </div>
@@ -269,6 +303,15 @@ function SalesPage() {
           value={filter}
           onChange={(v) => setFilter(v as FilterKey)}
         />
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, vehicle, service tag…"
+            className="h-8 w-64 pl-8 text-xs"
+          />
+        </div>
         <p className="text-xs text-muted-foreground">Drag a card between stages to move the deal.</p>
       </div>
 
@@ -302,6 +345,7 @@ function SalesPage() {
                       deal={d}
                       dragging={dragging === d.id}
                       onOpen={() => navigate({ to: "/sales/$dealId", params: { dealId: d.id } })}
+                      onTag={(t) => setSearch(t)}
                     />
                   ))}
                 </StageColumn>
@@ -348,7 +392,7 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-[208px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
+        "flex w-[264px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
         isOver ? "border-bronze/60 bg-surface-2" : "border-elevated",
       )}
     >
@@ -373,15 +417,22 @@ function DealCard({
   deal,
   dragging,
   onOpen,
+  onTag,
 }: {
   deal: Deal;
   dragging: boolean;
   onOpen: () => void;
+  onTag: (tag: string) => void;
 }) {
   const { attributes, listeners, setNodeRef } = useDraggable({ id: deal.id });
   const age = deal.last_activity_at
     ? Math.round((Date.now() - new Date(deal.last_activity_at).getTime()) / 86400000)
     : null;
+  const isNewLead = deal.stage === "new_lead";
+  const vehicle = deal.vehicles
+    ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ")
+    : null;
+  const phone = deal.customers?.phone ?? null;
   return (
     <div
       ref={setNodeRef}
@@ -389,28 +440,79 @@ function DealCard({
       {...attributes}
       onClick={onOpen}
       className={cn(
-        "cursor-grab touch-none rounded-lg border border-elevated bg-surface-2 p-2 transition-colors hover:border-hairline active:cursor-grabbing",
+        "cursor-grab touch-none rounded-xl border border-elevated bg-surface-2 p-3 transition-colors hover:border-hairline active:cursor-grabbing",
         dragging && "opacity-40",
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold leading-tight">{deal.title}</p>
-        <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-bronze">
-          {money(deal.value)}
-        </span>
+        <p className="text-sm font-semibold leading-snug">{deal.title}</p>
+        {!isNewLead && (
+          <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-bronze">
+            {money(deal.value)}
+          </span>
+        )}
       </div>
-      <p className="mt-1 truncate text-[11px] text-muted-foreground">
+
+      <p className="mt-1.5 text-xs text-muted-foreground">
         {deal.customers?.name ?? "No customer"}
         {deal.source ? ` · ${deal.source}` : ""}
       </p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-1">
-        {age !== null && age > 3 ? (
-          <Tag tone="critical" className="text-[10px]">{age}d</Tag>
-        ) : (
-          <Tag tone="muted" className="text-[10px]">{deal.probability}%</Tag>
-        )}
-        {deal.expected_close && (
-          <Tag tone="muted" className="text-[10px]">{dayDate(deal.expected_close)}</Tag>
+
+      {vehicle && (
+        <p className="mt-1 text-xs font-medium text-foreground/90">{vehicle}</p>
+      )}
+
+      {(deal.service_tags ?? []).length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {(deal.service_tags ?? []).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTag(t);
+              }}
+              className="rounded-full border border-elevated bg-surface px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-bronze/60 hover:text-bronze"
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-2.5 flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1">
+          {age !== null && age > 3 ? (
+            <Tag tone="critical" className="text-[10px]">{age}d</Tag>
+          ) : (
+            !isNewLead && <Tag tone="muted" className="text-[10px]">{deal.probability}%</Tag>
+          )}
+          {deal.expected_close && (
+            <Tag tone="muted" className="text-[10px]">{dayDate(deal.expected_close)}</Tag>
+          )}
+        </div>
+        {phone && (
+          <div className="flex shrink-0 items-center gap-1">
+            <a
+              href={`tel:${phone}`}
+              aria-label={`Call ${deal.customers?.name ?? "customer"}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="grid h-7 w-7 place-items-center rounded-full border border-elevated text-muted-foreground transition-colors hover:border-bronze/60 hover:text-bronze"
+            >
+              <Phone className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href={`sms:${phone}`}
+              aria-label={`Text ${deal.customers?.name ?? "customer"}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="grid h-7 w-7 place-items-center rounded-full border border-elevated text-muted-foreground transition-colors hover:border-bronze/60 hover:text-bronze"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+            </a>
+          </div>
         )}
       </div>
     </div>
