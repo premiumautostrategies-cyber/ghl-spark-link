@@ -19,6 +19,9 @@ import { cn } from "@/lib/utils";
 import { DEAL_STAGES, DOC_TYPES, PAYMENT_METHODS, dayDate, label, money, shortDate } from "@/lib/format";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PanelCoverage } from "@/components/panel-coverage";
+import { OPTION_KIND_LABELS, catalogImage } from "@/lib/catalog";
 
 export const Route = createFileRoute("/_authenticated/sales/$dealId")({
   head: () => ({
@@ -36,6 +39,41 @@ export const Route = createFileRoute("/_authenticated/sales/$dealId")({
 });
 
 const BAYS = ["Bay 1", "Bay 2", "Bay 3", "Detail bay"];
+
+type CatalogCategory = {
+  id: string;
+  name: string;
+  slug: string | null;
+  accent_color: string | null;
+  image_url: string | null;
+  description: string | null;
+};
+
+type CatalogService = {
+  id: string;
+  name: string;
+  category: string;
+  category_id: string | null;
+  base_price: number | string;
+  duration_minutes: number;
+  description: string | null;
+  customer_description: string | null;
+  image_url: string | null;
+  swatch_color: string | null;
+  coverage_panels: string[];
+};
+
+type CatalogOption = {
+  id: string;
+  service_id: string;
+  name: string;
+  description: string | null;
+  kind: string;
+  price_delta: number | string;
+  duration_delta_minutes: number;
+  swatch_color: string | null;
+  coverage_panels: string[];
+};
 
 function DealDesk() {
   const { dealId } = Route.useParams();
@@ -70,11 +108,41 @@ function DealDesk() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id,name,category,base_price,duration_minutes,description")
+        .select(
+          "id,name,category,category_id,base_price,duration_minutes,description,customer_description,image_url,swatch_color,coverage_panels",
+        )
         .eq("is_active", true)
-        .order("category");
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name");
       if (error) throw error;
-      return data;
+      return data as unknown as CatalogService[];
+    },
+  });
+
+  const { data: catalogCategories = [] } = useQuery({
+    queryKey: ["service-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_categories")
+        .select("id,name,slug,accent_color,image_url,description")
+        .is("deleted_at", null)
+        .order("sort_order");
+      if (error) throw error;
+      return data as unknown as CatalogCategory[];
+    },
+  });
+
+  const { data: catalogOptions = [] } = useQuery({
+    queryKey: ["service-options"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_options")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order");
+      if (error) throw error;
+      return data as unknown as CatalogOption[];
     },
   });
 
@@ -467,33 +535,12 @@ function DealDesk() {
             right={<Tag tone={estimate?.status === "sent" ? "comms" : "muted"}>{label(estimate?.status ?? "draft")}</Tag>}
           />
           <div className="border-t border-elevated p-5">
-            <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
-              {services.length === 0 && (
-                <p className="text-xs text-muted-foreground">
-                  No services yet — add them in the Catalog.
-                </p>
-              )}
-              {services.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() =>
-                    addLine.mutate({
-                      description: s.name,
-                      quantity: 1,
-                      unit_price: Number(s.base_price),
-                    })
-                  }
-                  className="w-[190px] shrink-0 rounded-xl border border-elevated bg-surface-2 p-3 text-left transition-colors hover:border-bronze/50"
-                >
-                  <p className="text-sm font-semibold leading-tight">{s.name}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{label(s.category)}</p>
-                  <p className="mt-2 text-sm font-semibold tabular-nums text-bronze">
-                    {money(s.base_price)}
-                  </p>
-                </button>
-              ))}
-            </div>
+            <ServicePicker
+              services={services}
+              categories={catalogCategories}
+              options={catalogOptions}
+              onAdd={(line) => addLine.mutate(line)}
+            />
 
             <div className="mt-5 space-y-2">
               {items.length === 0 ? (
@@ -971,6 +1018,307 @@ function DayAvailability({
         <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-[3px] bg-bronze" /> This job</span>
         <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-[3px] bg-critical/25" /> Booked</span>
         <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-[3px] bg-elevated/60" /> Open</span>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- catalog picker ---------- */
+
+function ServicePicker({
+  services,
+  categories,
+  options,
+  onAdd,
+}: {
+  services: CatalogService[];
+  categories: CatalogCategory[];
+  options: CatalogOption[];
+  onAdd: (line: { description: string; quantity: number; unit_price: number }) => void;
+}) {
+  const [cat, setCat] = useState<string>("all");
+  const [picked, setPicked] = useState<CatalogService | null>(null);
+
+  const visible = services.filter((s) => (cat === "all" ? true : s.category_id === cat));
+  const catById = Object.fromEntries(categories.map((c) => [c.id, c])) as Record<
+    string,
+    CatalogCategory
+  >;
+
+  if (services.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        No services yet — build your library in the Catalog.
+      </p>
+    );
+  }
+
+  return (
+    <div className="min-w-0">
+      <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-2">
+        <PickPill label="All" active={cat === "all"} onClick={() => setCat("all")} />
+        {categories.map((c) => (
+          <PickPill
+            key={c.id}
+            label={c.name}
+            accent={c.accent_color}
+            active={cat === c.id}
+            onClick={() => setCat(c.id)}
+          />
+        ))}
+      </div>
+
+      <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
+        {visible.map((s) => {
+          const c = s.category_id ? catById[s.category_id] : undefined;
+          const count = options.filter((o) => o.service_id === s.id).length;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setPicked(s)}
+              className="w-[196px] shrink-0 overflow-hidden rounded-xl border border-elevated bg-surface-2 text-left transition-colors hover:border-bronze/50"
+            >
+              <img
+                src={catalogImage(s.image_url, c?.slug ?? s.category, c?.image_url)}
+                alt={s.name}
+                loading="lazy"
+                className="h-20 w-full object-cover"
+              />
+              <div className="p-3">
+                <p className="text-sm font-semibold leading-tight">{s.name}</p>
+                <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">
+                  {s.customer_description || s.description || (c?.name ?? label(s.category))}
+                </p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold tabular-nums text-bronze">
+                    {money(s.base_price)}
+                  </span>
+                  {count > 0 && <Tag tone="muted">{count} options</Tag>}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <Dialog open={!!picked} onOpenChange={(o) => !o && setPicked(null)}>
+        <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
+          {picked && (
+            <ServiceConfigurator
+              service={picked}
+              category={picked.category_id ? catById[picked.category_id] : undefined}
+              options={options.filter((o) => o.service_id === picked.id)}
+              onAdd={(line) => {
+                onAdd(line);
+                setPicked(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function PickPill({
+  label: text,
+  active,
+  accent,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  accent?: string | null;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors",
+        active
+          ? "border-bronze bg-bronze/15 text-bronze"
+          : "border-elevated bg-surface text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {accent && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />}
+      {text}
+    </button>
+  );
+}
+
+function ServiceConfigurator({
+  service,
+  category,
+  options,
+  onAdd,
+}: {
+  service: CatalogService;
+  category?: CatalogCategory | undefined;
+  options: CatalogOption[];
+  onAdd: (line: { description: string; quantity: number; unit_price: number }) => void;
+}) {
+  const single = options.filter((o) => o.kind !== "addon");
+  const addons = options.filter((o) => o.kind === "addon");
+  const groups = Array.from(new Set(single.map((o) => o.kind)));
+
+  const [choice, setChoice] = useState<Record<string, string>>({});
+  const [extras, setExtras] = useState<string[]>([]);
+  const [qty, setQty] = useState("1");
+
+  const chosen = [
+    ...groups.map((g) => single.find((o) => o.id === choice[g])).filter(Boolean),
+    ...addons.filter((o) => extras.includes(o.id)),
+  ] as CatalogOption[];
+
+  const price = Number(service.base_price) + chosen.reduce((t, o) => t + Number(o.price_delta), 0);
+  const minutes =
+    service.duration_minutes + chosen.reduce((t, o) => t + o.duration_delta_minutes, 0);
+  const coverage = chosen.reduce<string[]>(
+    (acc, o) => (o.coverage_panels?.length ? o.coverage_panels : acc),
+    service.coverage_panels ?? [],
+  );
+
+  return (
+    <div className="space-y-4">
+      <DialogHeader>
+        <DialogTitle>{service.name}</DialogTitle>
+      </DialogHeader>
+      <img
+        src={catalogImage(service.image_url, category?.slug ?? service.category, category?.image_url)}
+        alt={service.name}
+        loading="lazy"
+        className="h-44 w-full rounded-xl object-cover"
+      />
+      <p className="text-sm text-muted-foreground">
+        {service.customer_description || service.description || "No description yet."}
+      </p>
+
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="min-w-0 space-y-4">
+          {groups.map((g) => (
+            <div key={g} className="space-y-2">
+              <p className="micro-label">{OPTION_KIND_LABELS[g] ?? g}</p>
+              <div className="flex flex-wrap gap-2">
+                {single
+                  .filter((o) => o.kind === g)
+                  .map((o) => {
+                    const on = choice[g] === o.id;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() =>
+                          setChoice((p) => ({ ...p, [g]: on ? "" : o.id }))
+                        }
+                        className={cn(
+                          "flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs transition-colors",
+                          on
+                            ? "border-bronze bg-bronze/10 text-foreground"
+                            : "border-elevated bg-surface-2 text-muted-foreground hover:border-bronze/40",
+                        )}
+                      >
+                        {o.swatch_color && (
+                          <span
+                            className="h-4 w-4 rounded-full border border-hairline"
+                            style={{ backgroundColor: o.swatch_color }}
+                          />
+                        )}
+                        <span>
+                          <span className="block font-semibold text-foreground">{o.name}</span>
+                          <span className="tabular-nums">
+                            {Number(o.price_delta) === 0
+                              ? "Included"
+                              : `${Number(o.price_delta) > 0 ? "+" : ""}${money(o.price_delta)}`}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
+
+          {addons.length > 0 && (
+            <div className="space-y-2">
+              <p className="micro-label">Add-ons</p>
+              <div className="flex flex-wrap gap-2">
+                {addons.map((o) => {
+                  const on = extras.includes(o.id);
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      onClick={() =>
+                        setExtras((p) => (on ? p.filter((x) => x !== o.id) : [...p, o.id]))
+                      }
+                      className={cn(
+                        "rounded-xl border px-3 py-2 text-left text-xs transition-colors",
+                        on
+                          ? "border-bronze bg-bronze/10"
+                          : "border-elevated bg-surface-2 text-muted-foreground hover:border-bronze/40",
+                      )}
+                    >
+                      <span className="block font-semibold text-foreground">{o.name}</span>
+                      <span className="tabular-nums">
+                        {Number(o.price_delta) > 0 ? "+" : ""}
+                        {money(o.price_delta)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {coverage.length > 0 && (
+          <div className="rounded-xl border border-elevated bg-surface-2 p-3">
+            <p className="micro-label mb-2">Panels covered</p>
+            <PanelCoverage panels={coverage} compact accent={category?.accent_color} />
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              {coverage.length} panels
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-end justify-between gap-3 border-t border-elevated pt-4">
+        <div className="w-24 space-y-1.5">
+          <Label htmlFor="cfg-qty" className="text-xs">Qty</Label>
+          <Input
+            id="cfg-qty"
+            type="number"
+            step="1"
+            min="1"
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+          />
+        </div>
+        <div className="text-right">
+          <p className="micro-label">Line total</p>
+          <p className="font-display text-2xl tabular-nums text-bronze">
+            {money(price * (Number(qty) || 1))}
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            {(minutes / 60).toFixed(1)}h in the bay
+          </p>
+        </div>
+        <Button
+          onClick={() =>
+            onAdd({
+              description: chosen.length
+                ? `${service.name} — ${chosen.map((o) => o.name).join(", ")}`
+                : service.name,
+              quantity: Number(qty) || 1,
+              unit_price: price,
+            })
+          }
+        >
+          Add to quote
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { ALL_PANELS, STARTER_CATEGORIES } from "@/lib/catalog";
 
 function daysFromNow(days: number, hour = 9) {
   const d = new Date();
@@ -15,19 +16,39 @@ function daysFromNow(days: number, hour = 9) {
 export async function seedDemoData(orgId: string, locId: string | null) {
   const org = { organization_id: orgId, location_id: locId };
 
-  // --- Service menu -------------------------------------------------------
+  // --- Service library ----------------------------------------------------
+  const categoryRows = STARTER_CATEGORIES.map((c, i) => ({
+    ...c,
+    sort_order: i,
+    ...org,
+  }));
+  const catIns = await supabase
+    .from("service_categories")
+    .insert(categoryRows)
+    .select("id,slug");
+  if (catIns.error) throw catIns.error;
+  const catId = (slug: string) => catIns.data?.find((c) => c.slug === slug)?.id ?? null;
+
+  const FRONT = ["front_bumper", "hood", "fender_l", "fender_r", "mirror_l", "mirror_r"];
   const services = [
-    { name: "Full front PPF", category: "ppf", base_price: 2400, duration_minutes: 600, description: "Hood, fenders, bumper, mirrors, headlights." },
-    { name: "Full body PPF", category: "ppf", base_price: 6800, duration_minutes: 2400, description: "Complete paint protection coverage." },
-    { name: "Ceramic tint — full vehicle", category: "tint", base_price: 549, duration_minutes: 180, description: "Nano-ceramic, lifetime warranty." },
+    { name: "Full front PPF", category: "ppf", base_price: 2400, duration_minutes: 600, description: "Hood, fenders, bumper, mirrors, headlights.", customer_description: "Impact protection across every panel the road hits first.", coverage_panels: [...FRONT, "a_pillars"] },
+    { name: "Partial front PPF", category: "ppf", base_price: 1250, duration_minutes: 360, customer_description: "Bumper, partial hood and fenders — the high-value basics.", coverage_panels: FRONT },
+    { name: "Full body PPF", category: "ppf", base_price: 6800, duration_minutes: 2400, description: "Complete paint protection coverage.", customer_description: "Every painted panel wrapped in self-healing film.", coverage_panels: ALL_PANELS },
+    { name: "Ceramic tint — full vehicle", category: "tint", base_price: 549, duration_minutes: 180, description: "Nano-ceramic, lifetime warranty.", customer_description: "Heat rejection you feel on the first drive." },
     { name: "Windshield tint strip", category: "tint", base_price: 120, duration_minutes: 45 },
-    { name: "Color change wrap — full", category: "color_change", base_price: 4200, duration_minutes: 2880, description: "Premium cast vinyl, full disassembly." },
+    { name: "Color change wrap — full", category: "wrap", base_price: 4200, duration_minutes: 2880, description: "Premium cast vinyl, full disassembly.", customer_description: "A brand-new colour without touching the factory paint.", coverage_panels: ALL_PANELS },
     { name: "Commercial fleet graphics", category: "commercial_graphics", base_price: 1800, duration_minutes: 720, description: "Cut vinyl logos and lettering." },
-    { name: "Ceramic coating — 5 year", category: "ceramic", base_price: 1650, duration_minutes: 960 },
+    { name: "Ceramic coating — 5 year", category: "ceramic", base_price: 1650, duration_minutes: 960, customer_description: "Five years of gloss, chemical resistance and easy washing." },
     { name: "Two-step paint correction", category: "paint_correction", base_price: 900, duration_minutes: 600 },
-    { name: "Maintenance detail", category: "detail", base_price: 225, duration_minutes: 180 },
-    { name: "Protection package — Track", category: "protection_package", base_price: 8900, duration_minutes: 3600, description: "Full PPF + ceramic + tint bundle." },
-  ].map((s) => ({ ...s, ...org }));
+    { name: "Maintenance detail", category: "paint_correction", base_price: 225, duration_minutes: 180 },
+    { name: "Protection package — Track", category: "ppf", base_price: 8900, duration_minutes: 3600, description: "Full PPF + ceramic + tint bundle.", coverage_panels: ALL_PANELS },
+  ].map((s, i) => ({
+    coverage_panels: [] as string[],
+    ...s,
+    category_id: catId(s.category),
+    sort_order: i,
+    ...org,
+  }));
 
   // --- Inventory ----------------------------------------------------------
   const inventory = [
@@ -67,6 +88,52 @@ export async function seedDemoData(orgId: string, locId: string | null) {
   if (inv.error) throw inv.error;
   const menu = svc.data ?? [];
   const priceOf = (name: string) => Number(menu.find((m) => m.name === name)?.base_price ?? 0);
+  const svcId = (name: string) => menu.find((m) => m.name === name)?.id ?? null;
+
+  // --- Options, tiers and shades -----------------------------------------
+  const optionRows = [
+    ...["Full front PPF", "Partial front PPF", "Full body PPF"].flatMap((s) => [
+      { service: s, name: "Standard gloss film", kind: "tier", price_delta: 0, description: "10-year self-healing film." },
+      { service: s, name: "Premium gloss film", kind: "tier", price_delta: 450, description: "12-year film, superior clarity." },
+      { service: s, name: "Satin / stealth film", kind: "tier", price_delta: 900, swatch_color: "#4b4f57", description: "Matte finish over factory gloss." },
+      { service: s, name: "Ceramic top coat", kind: "addon", price_delta: 550, duration_delta_minutes: 240 },
+      { service: s, name: "Headlight & fog protection", kind: "addon", price_delta: 180, duration_delta_minutes: 60 },
+    ]),
+    { service: "Ceramic tint — full vehicle", name: "Carbon film", kind: "tier", price_delta: -120, description: "Colour-stable, no signal interference." },
+    { service: "Ceramic tint — full vehicle", name: "Nano-ceramic IR", kind: "tier", price_delta: 0, description: "98% infrared rejection." },
+    { service: "Ceramic tint — full vehicle", name: "Ceramic IR Max", kind: "tier", price_delta: 220, description: "Top-tier heat rejection, lifetime warranty." },
+    { service: "Ceramic tint — full vehicle", name: "5% Limo", kind: "shade", price_delta: 0, swatch_color: "#0b0b0d" },
+    { service: "Ceramic tint — full vehicle", name: "20% Dark", kind: "shade", price_delta: 0, swatch_color: "#2a2b30" },
+    { service: "Ceramic tint — full vehicle", name: "35% Medium", kind: "shade", price_delta: 0, swatch_color: "#4a4c53" },
+    { service: "Ceramic tint — full vehicle", name: "70% Clear IR", kind: "shade", price_delta: 60, swatch_color: "#9aa0ab" },
+    { service: "Ceramic tint — full vehicle", name: "Windshield full tint", kind: "addon", price_delta: 210, duration_delta_minutes: 60 },
+    { service: "Ceramic tint — full vehicle", name: "Sunroof tint", kind: "addon", price_delta: 130, duration_delta_minutes: 45 },
+    { service: "Color change wrap — full", name: "Satin black", kind: "color", price_delta: 0, swatch_color: "#1b1c1e" },
+    { service: "Color change wrap — full", name: "Gloss nardo grey", kind: "color", price_delta: 0, swatch_color: "#9b9e9f" },
+    { service: "Color change wrap — full", name: "Midnight blue metallic", kind: "color", price_delta: 300, swatch_color: "#1d2f52" },
+    { service: "Color change wrap — full", name: "Colour-shift purple/gold", kind: "color", price_delta: 1400, swatch_color: "#6b4b9b" },
+    { service: "Color change wrap — full", name: "Chrome delete", kind: "addon", price_delta: 450, duration_delta_minutes: 240 },
+    { service: "Color change wrap — full", name: "Roof & mirrors only", kind: "coverage", price_delta: -2900, coverage_panels: ["roof", "mirror_l", "mirror_r"] },
+    { service: "Ceramic coating — 5 year", name: "Paint only", kind: "coverage", price_delta: 0 },
+    { service: "Ceramic coating — 5 year", name: "Paint + glass + wheels", kind: "coverage", price_delta: 420, duration_delta_minutes: 180 },
+    { service: "Ceramic coating — 5 year", name: "Interior fabric & leather", kind: "addon", price_delta: 260, duration_delta_minutes: 120 },
+    { service: "Commercial fleet graphics", name: "Single-side lettering", kind: "coverage", price_delta: -600 },
+    { service: "Commercial fleet graphics", name: "Full three-side branding", kind: "coverage", price_delta: 0 },
+    { service: "Commercial fleet graphics", name: "Reflective vinyl upgrade", kind: "addon", price_delta: 340 },
+  ]
+    .map((o) => ({
+      duration_delta_minutes: 0,
+      coverage_panels: [] as string[],
+      swatch_color: null as string | null,
+      description: null as string | null,
+      ...o,
+      service_id: svcId(o.service),
+      organization_id: orgId,
+    }))
+    .filter((o) => o.service_id)
+    .map(({ service: _s, ...rest }) => rest);
+  const optIns = await supabase.from("service_options").insert(optionRows);
+  if (optIns.error) throw optIns.error;
 
   // --- Customers ----------------------------------------------------------
   const customerRows = [

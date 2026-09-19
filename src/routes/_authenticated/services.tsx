@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
-import { EmptyState, PageHeader, StatCard } from "@/components/page-header";
+import { EmptyState, PageHeader } from "@/components/page-header";
+import { Kpi, Panel, SectionTitle, Tag } from "@/components/os-ui";
+import { PanelCoverage } from "@/components/panel-coverage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -24,28 +25,102 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { label, money, SERVICE_TYPES } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { label, money } from "@/lib/format";
+import {
+  COVERAGE_PRESETS,
+  OPTION_KINDS,
+  OPTION_KIND_LABELS,
+  STARTER_CATEGORIES,
+  catalogImage,
+} from "@/lib/catalog";
 import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/services")({
   head: () => ({
     meta: [
-      { title: "Service Menu — Systemize" },
-      { name: "description", content: "Priced service menu for tint, PPF, wrap and coatings." },
-      { property: "og:title", content: "Service Menu — Systemize" },
+      { title: "Service Library — Systemize" },
+      {
+        name: "description",
+        content: "Your categories, packages, film tiers and coverage maps in one library.",
+      },
+      { property: "og:title", content: "Service Library — Systemize" },
       {
         property: "og:description",
-        content: "Priced service menu for tint, PPF, wrap and coatings.",
+        content: "Your categories, packages, film tiers and coverage maps in one library.",
       },
     ],
   }),
   component: ServicesPage,
 });
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  accent_color: string | null;
+  image_url: string | null;
+  sort_order: number;
+};
+
+type ServiceOption = {
+  id: string;
+  service_id: string;
+  name: string;
+  description: string | null;
+  kind: string;
+  price_delta: number | string;
+  duration_delta_minutes: number;
+  swatch_color: string | null;
+  coverage_panels: string[];
+};
+
+type Service = {
+  id: string;
+  name: string;
+  category: string;
+  category_id: string | null;
+  description: string | null;
+  customer_description: string | null;
+  base_price: number | string;
+  duration_minutes: number;
+  unit: string;
+  is_active: boolean;
+  image_url: string | null;
+  swatch_color: string | null;
+  coverage_panels: string[];
+};
+
 function ServicesPage() {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
-  const [open, setOpen] = useState(false);
+  const [activeCat, setActiveCat] = useState<string>("all");
+  const [newService, setNewService] = useState(false);
+  const [editing, setEditing] = useState<Service | null>(null);
+  const [draftPanels, setDraftPanels] = useState<string[]>([]);
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["service-categories"] });
+    qc.invalidateQueries({ queryKey: ["services"] });
+    qc.invalidateQueries({ queryKey: ["service-options"] });
+    qc.invalidateQueries({ queryKey: ["services-catalog"] });
+  };
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["service-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_categories")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name");
+      if (error) throw error;
+      return data as Category[];
+    },
+  });
 
   const { data: services = [] } = useQuery({
     queryKey: ["services"],
@@ -53,32 +128,124 @@ function ServicesPage() {
       const { data, error } = await supabase
         .from("services")
         .select("*")
-        .order("category")
+        .is("deleted_at", null)
+        .order("sort_order")
         .order("name");
       if (error) throw error;
-      return data;
+      return data as unknown as Service[];
     },
   });
 
-  const addService = useMutation({
-    mutationFn: async (form: FormData) => {
+  const { data: options = [] } = useQuery({
+    queryKey: ["service-options"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_options")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name");
+      if (error) throw error;
+      return data as unknown as ServiceOption[];
+    },
+  });
+
+  const optionsFor = (serviceId: string) => options.filter((o) => o.service_id === serviceId);
+  const catById = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c])) as Record<string, Category>,
+    [categories],
+  );
+
+  const addStarterCategories = useMutation({
+    mutationFn: async () => {
       if (!orgId) throw new Error("No workspace selected");
-      const { error } = await supabase.from("services").insert({
-        name: String(form.get("name")),
-        category: String(form.get("category")),
-        description: String(form.get("description") || "") || null,
-        base_price: Number(form.get("base_price") || 0),
-        duration_minutes: Number(form.get("duration_minutes") || 120),
-        unit: String(form.get("unit") || "job"),
-        organization_id: orgId,
-        location_id: locId,
-      });
+      const { error } = await supabase.from("service_categories").insert(
+        STARTER_CATEGORIES.map((c, i) => ({
+          ...c,
+          sort_order: i,
+          organization_id: orgId,
+          location_id: locId,
+        })),
+      );
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Service added");
-      setOpen(false);
-      qc.invalidateQueries({ queryKey: ["services"] });
+      toast.success("Starter categories added");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveCategory = useMutation({
+    mutationFn: async ({ id, form }: { id?: string; form: FormData }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const payload = {
+        name: String(form.get("name")),
+        slug: String(form.get("slug") || "") || null,
+        description: String(form.get("description") || "") || null,
+        accent_color: String(form.get("accent_color") || "#c99a5b"),
+        image_url: String(form.get("image_url") || "") || null,
+      };
+      const { error } = id
+        ? await supabase.from("service_categories").update(payload).eq("id", id)
+        : await supabase
+            .from("service_categories")
+            .insert({ ...payload, sort_order: categories.length, organization_id: orgId, location_id: locId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Category saved");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const archiveCategory = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("service_categories")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setActiveCat("all");
+      toast.success("Category archived");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveService = useMutation({
+    mutationFn: async ({ id, form }: { id?: string; form: FormData }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const categoryId = String(form.get("category_id") || "") || null;
+      const cat = categoryId ? catById[categoryId] : undefined;
+      const payload = {
+        name: String(form.get("name")),
+        category_id: categoryId,
+        category: cat?.slug || cat?.name?.toLowerCase().replace(/\s+/g, "_") || "other",
+        description: String(form.get("description") || "") || null,
+        customer_description: String(form.get("customer_description") || "") || null,
+        base_price: Number(form.get("base_price") || 0),
+        duration_minutes: Number(form.get("duration_minutes") || 120),
+        unit: String(form.get("unit") || "job"),
+        image_url: String(form.get("image_url") || "") || null,
+        swatch_color: String(form.get("swatch_color") || "") || null,
+        coverage_panels: draftPanels,
+      };
+      const { error } = id
+        ? await supabase.from("services").update(payload).eq("id", id)
+        : await supabase
+            .from("services")
+            .insert({ ...payload, organization_id: orgId, location_id: locId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Service saved");
+      setNewService(false);
+      setEditing(null);
+      invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -88,135 +255,592 @@ function ServicesPage() {
       const { error } = await supabase.from("services").update({ is_active }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["services"] }),
+    onSuccess: invalidate,
   });
 
+  const addOption = useMutation({
+    mutationFn: async ({ serviceId, form, panels }: { serviceId: string; form: FormData; panels: string[] }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error } = await supabase.from("service_options").insert({
+        service_id: serviceId,
+        organization_id: orgId,
+        name: String(form.get("name")),
+        description: String(form.get("description") || "") || null,
+        kind: String(form.get("kind") || "addon"),
+        price_delta: Number(form.get("price_delta") || 0),
+        duration_delta_minutes: Number(form.get("duration_delta_minutes") || 0),
+        swatch_color: String(form.get("swatch_color") || "") || null,
+        coverage_panels: panels,
+        sort_order: options.length,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Option added");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeOption = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("service_options").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const visible = services.filter((s) => (activeCat === "all" ? true : s.category_id === activeCat));
   const active = services.filter((s) => s.is_active);
   const avg = active.length
     ? active.reduce((t, s) => t + Number(s.base_price), 0) / active.length
     : 0;
-  const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
-    (acc[s.category] ||= []).push(s);
-    return acc;
-  }, {});
+
+  function openNew() {
+    setDraftPanels([]);
+    setNewService(true);
+  }
+  function openEdit(s: Service) {
+    setDraftPanels(s.coverage_panels ?? []);
+    setEditing(s);
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageHeader
-        title="Service Menu"
-        subtitle="Every service you sell, priced and timed for scheduling."
+        title="Service Library"
+        subtitle="Categories, packages, film tiers and the panels each one covers."
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>New service</Button>
-            </DialogTrigger>
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>New service</DialogTitle>
-              </DialogHeader>
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  addService.mutate(new FormData(e.currentTarget));
-                }}
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" name="name" placeholder="Full front PPF" required />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Category</Label>
-                    <Select name="category" defaultValue="ppf">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SERVICE_TYPES.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {label(s)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="unit">Sold by</Label>
-                    <Input id="unit" name="unit" defaultValue="job" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="base_price">Base price</Label>
-                    <Input id="base_price" name="base_price" type="number" step="0.01" defaultValue="0" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="duration_minutes">Bay time (minutes)</Label>
-                    <Input
-                      id="duration_minutes"
-                      name="duration_minutes"
-                      type="number"
-                      defaultValue="120"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" />
-                </div>
-                <Button type="submit" className="w-full" disabled={addService.isPending}>
-                  Save service
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <CategoryDialog
+              categories={categories}
+              onSave={(form) => saveCategory.mutate({ form })}
+            />
+            <Button onClick={openNew}>New service</Button>
+          </div>
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Active services" value={String(active.length)} />
-        <StatCard label="Average ticket" value={money(avg)} />
-        <StatCard label="Categories" value={String(Object.keys(grouped).length)} />
+        <Kpi label="Categories" value={String(categories.length)} />
+        <Kpi label="Active services" value={String(active.length)} tone="rig" />
+        <Kpi label="Average ticket" value={money(avg)} tone="revenue" />
       </div>
 
-      {services.length === 0 ? (
+      {categories.length === 0 && (
+        <Panel className="flex flex-wrap items-center justify-between gap-4 p-5">
+          <div>
+            <p className="text-sm font-semibold">No categories yet</p>
+            <p className="text-xs text-muted-foreground">
+              Load a starter set — PPF, tint, wrap, graphics, coatings, correction — then rename or
+              add your own.
+            </p>
+          </div>
+          <Button onClick={() => addStarterCategories.mutate()} disabled={addStarterCategories.isPending}>
+            Add starter categories
+          </Button>
+        </Panel>
+      )}
+
+      {categories.length > 0 && (
+        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+          <CatPill
+            name="All services"
+            count={services.length}
+            active={activeCat === "all"}
+            onClick={() => setActiveCat("all")}
+          />
+          {categories.map((c) => (
+            <CatPill
+              key={c.id}
+              name={c.name}
+              accent={c.accent_color}
+              count={services.filter((s) => s.category_id === c.id).length}
+              active={activeCat === c.id}
+              onClick={() => setActiveCat(c.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {activeCat !== "all" && catById[activeCat] && (
+        <Panel className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div>
+            <p className="font-display text-xl">{catById[activeCat]!.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {catById[activeCat]!.description || "No description"}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <CategoryDialog
+              categories={categories}
+              category={catById[activeCat]}
+              onSave={(form) => saveCategory.mutate({ id: activeCat, form })}
+            />
+            <Button
+              variant="outline"
+              onClick={() => archiveCategory.mutate(activeCat)}
+              disabled={archiveCategory.isPending}
+            >
+              Archive
+            </Button>
+          </div>
+        </Panel>
+      )}
+
+      {visible.length === 0 ? (
         <EmptyState
-          title="No services yet"
-          body="Add your menu, or load the demo shop from Settings to see a full example."
+          title="No services in this category"
+          body="Add a package, film tier or one-off service — each with its own photo and coverage map."
         />
       ) : (
-        Object.entries(grouped).map(([cat, list]) => (
-          <div key={cat} className="rounded-xl border border-border bg-card">
-            <div className="border-b border-border px-5 py-3">
-              <h2 className="text-sm uppercase tracking-widest text-muted-foreground">
-                {label(cat)}
-              </h2>
-            </div>
-            <div className="divide-y divide-border">
-              {list.map((s) => (
-                <div key={s.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{s.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {s.description || "No description"} · {Math.round(s.duration_minutes / 60)}h
-                      bay time · per {s.unit}
-                    </p>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {visible.map((s) => {
+            const cat = s.category_id ? catById[s.category_id] : undefined;
+            const opts = optionsFor(s.id);
+            return (
+              <Panel key={s.id} className="overflow-hidden">
+                <button type="button" className="block w-full text-left" onClick={() => openEdit(s)}>
+                  <img
+                    src={catalogImage(s.image_url, cat?.slug ?? s.category, cat?.image_url)}
+                    alt={s.name}
+                    loading="lazy"
+                    className="h-36 w-full object-cover"
+                  />
+                </button>
+                <div className="space-y-3 p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{s.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {cat?.name ?? label(s.category)} · {Math.round(s.duration_minutes / 60)}h · per{" "}
+                        {s.unit}
+                      </p>
+                    </div>
+                    <span className="whitespace-nowrap font-display text-lg tabular-nums text-bronze">
+                      {money(s.base_price)}
+                    </span>
                   </div>
-                  <span className="font-semibold">{money(s.base_price)}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={s.is_active ? "secondary" : "outline"}>
-                      {s.is_active ? "Active" : "Hidden"}
-                    </Badge>
-                    <Switch
-                      checked={s.is_active}
-                      onCheckedChange={(v) => toggleActive.mutate({ id: s.id, is_active: v })}
-                    />
+                  <p className="line-clamp-2 text-xs text-muted-foreground">
+                    {s.customer_description || s.description || "No description yet."}
+                  </p>
+                  {(s.coverage_panels?.length ?? 0) > 0 && (
+                    <div className="flex items-center gap-3 rounded-xl border border-elevated bg-surface-2 p-3">
+                      <PanelCoverage panels={s.coverage_panels} compact accent={cat?.accent_color} />
+                      <p className="text-[11px] text-muted-foreground">
+                        {s.coverage_panels.length} panels covered
+                      </p>
+                    </div>
+                  )}
+                  {opts.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {opts.slice(0, 5).map((o) => (
+                        <span
+                          key={o.id}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground"
+                        >
+                          {o.swatch_color && (
+                            <span
+                              className="h-2 w-2 rounded-full"
+                              style={{ backgroundColor: o.swatch_color }}
+                            />
+                          )}
+                          {o.name}
+                        </span>
+                      ))}
+                      {opts.length > 5 && <Tag tone="muted">+{opts.length - 5}</Tag>}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-2 border-t border-elevated pt-3">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(s)}>
+                      Edit &amp; options
+                    </Button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                        {s.is_active ? "Live" : "Hidden"}
+                      </span>
+                      <Switch
+                        checked={s.is_active}
+                        onCheckedChange={(v) => toggleActive.mutate({ id: s.id, is_active: v })}
+                      />
+                    </div>
                   </div>
                 </div>
-              ))}
+              </Panel>
+            );
+          })}
+        </div>
+      )}
+
+      {/* New / edit service */}
+      <Dialog
+        open={newService || !!editing}
+        onOpenChange={(o) => {
+          if (!o) {
+            setNewService(false);
+            setEditing(null);
+          }
+        }}
+      >
+        <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editing ? editing.name : "New service"}</DialogTitle>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              saveService.mutate({
+                ...(editing ? { id: editing.id } : {}),
+                form: new FormData(e.currentTarget),
+              });
+            }}
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="sv-name">Name</Label>
+                <Input id="sv-name" name="name" defaultValue={editing?.name ?? ""} required />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  name="category_id"
+                  defaultValue={editing?.category_id ?? (activeCat !== "all" ? activeCat : "")}
+                >
+                  <SelectTrigger><SelectValue placeholder="Choose category" /></SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sv-unit">Sold by</Label>
+                <Input id="sv-unit" name="unit" defaultValue={editing?.unit ?? "job"} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sv-price">Base price</Label>
+                <Input
+                  id="sv-price"
+                  name="base_price"
+                  type="number"
+                  step="0.01"
+                  defaultValue={String(editing?.base_price ?? 0)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sv-dur">Bay time (minutes)</Label>
+                <Input
+                  id="sv-dur"
+                  name="duration_minutes"
+                  type="number"
+                  defaultValue={String(editing?.duration_minutes ?? 120)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sv-img">Photo URL</Label>
+                <Input
+                  id="sv-img"
+                  name="image_url"
+                  placeholder="https://…  (leave blank for the category photo)"
+                  defaultValue={editing?.image_url ?? ""}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sv-swatch">Swatch colour</Label>
+                <Input
+                  id="sv-swatch"
+                  name="swatch_color"
+                  type="color"
+                  defaultValue={editing?.swatch_color ?? "#c99a5b"}
+                  className="h-10 p-1"
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="sv-cdesc">Customer-facing description</Label>
+                <Textarea
+                  id="sv-cdesc"
+                  name="customer_description"
+                  defaultValue={editing?.customer_description ?? ""}
+                  placeholder="What the client reads on the proposal."
+                />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="sv-desc">Internal notes</Label>
+                <Textarea id="sv-desc" name="description" defaultValue={editing?.description ?? ""} />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-elevated p-4">
+              <p className="micro-label">Panels covered</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {COVERAGE_PRESETS.map((p) => (
+                  <Button
+                    key={p.name}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setDraftPanels(p.panels)}
+                  >
+                    {p.name}
+                  </Button>
+                ))}
+                <Button type="button" size="sm" variant="ghost" onClick={() => setDraftPanels([])}>
+                  Clear
+                </Button>
+              </div>
+              <div className="mt-4">
+                <PanelCoverage
+                  panels={draftPanels}
+                  onToggle={(p) =>
+                    setDraftPanels((prev) =>
+                      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
+                    )
+                  }
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={saveService.isPending}>
+              Save service
+            </Button>
+          </form>
+
+          {editing && (
+            <div className="space-y-3 border-t border-elevated pt-4">
+              <p className="micro-label">Options, tiers &amp; add-ons</p>
+              <div className="space-y-2">
+                {optionsFor(editing.id).length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    No options yet — add film tiers, shades, coverage levels or add-ons.
+                  </p>
+                )}
+                {optionsFor(editing.id).map((o) => (
+                  <div
+                    key={o.id}
+                    className="flex items-center gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2"
+                  >
+                    {o.swatch_color && (
+                      <span
+                        className="h-4 w-4 shrink-0 rounded-full border border-hairline"
+                        style={{ backgroundColor: o.swatch_color }}
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{o.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {OPTION_KIND_LABELS[o.kind] ?? o.kind}
+                        {o.description ? ` · ${o.description}` : ""}
+                      </p>
+                    </div>
+                    <span className="text-sm tabular-nums text-bronze">
+                      {Number(o.price_delta) >= 0 ? "+" : ""}
+                      {money(o.price_delta)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeOption.mutate(o.id)}
+                      className="text-muted-foreground hover:text-critical"
+                      aria-label="Remove option"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <OptionForm
+                pending={addOption.isPending}
+                onSubmit={(form, panels) =>
+                  addOption.mutate({ serviceId: editing.id, form, panels })
+                }
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function CatPill({
+  name,
+  count,
+  active,
+  accent,
+  onClick,
+}: {
+  name: string;
+  count: number;
+  active: boolean;
+  accent?: string | null;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] transition-colors",
+        active
+          ? "border-bronze bg-bronze/15 text-bronze"
+          : "border-elevated bg-surface text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {accent && <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />}
+      {name}
+      <span className="tabular-nums opacity-70">{count}</span>
+    </button>
+  );
+}
+
+function CategoryDialog({
+  category,
+  categories,
+  onSave,
+}: {
+  category?: Category;
+  categories: Category[];
+  onSave: (form: FormData) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">{category ? "Edit category" : "New category"}</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{category ? "Edit category" : "New category"}</DialogTitle>
+        </DialogHeader>
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSave(new FormData(e.currentTarget));
+            setOpen(false);
+          }}
+        >
+          <div className="space-y-2">
+            <Label htmlFor="c-name">Name</Label>
+            <Input
+              id="c-name"
+              name="name"
+              defaultValue={category?.name ?? ""}
+              placeholder="Paint protection film"
+              required
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="c-slug">Short code</Label>
+              <Input
+                id="c-slug"
+                name="slug"
+                defaultValue={category?.slug ?? ""}
+                placeholder="ppf"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="c-accent">Accent colour</Label>
+              <Input
+                id="c-accent"
+                name="accent_color"
+                type="color"
+                defaultValue={category?.accent_color ?? "#c99a5b"}
+                className="h-10 p-1"
+              />
             </div>
           </div>
-        ))
+          <div className="space-y-2">
+            <Label htmlFor="c-img">Category photo URL</Label>
+            <Input id="c-img" name="image_url" defaultValue={category?.image_url ?? ""} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="c-desc">Description</Label>
+            <Textarea id="c-desc" name="description" defaultValue={category?.description ?? ""} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {categories.length} categories in your library.
+          </p>
+          <Button type="submit" className="w-full">Save category</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function OptionForm({
+  pending,
+  onSubmit,
+}: {
+  pending: boolean;
+  onSubmit: (form: FormData, panels: string[]) => void;
+}) {
+  const [panels, setPanels] = useState<string[]>([]);
+  const [showPanels, setShowPanels] = useState(false);
+  return (
+    <form
+      className="space-y-3 rounded-xl border border-dashed border-elevated p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(new FormData(e.currentTarget), panels);
+        e.currentTarget.reset();
+        setPanels([]);
+      }}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="o-name" className="text-xs">Option name</Label>
+          <Input id="o-name" name="name" placeholder="Ceramic IR 35%" required />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Type</Label>
+          <Select name="kind" defaultValue="tier">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {OPTION_KINDS.map((k) => (
+                <SelectItem key={k} value={k}>{OPTION_KIND_LABELS[k]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="o-price" className="text-xs">Price change</Label>
+          <Input id="o-price" name="price_delta" type="number" step="0.01" defaultValue="0" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="o-dur" className="text-xs">Extra minutes</Label>
+          <Input id="o-dur" name="duration_delta_minutes" type="number" defaultValue="0" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="o-swatch" className="text-xs">Swatch</Label>
+          <Input id="o-swatch" name="swatch_color" type="color" defaultValue="#1f2937" className="h-10 p-1" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="o-desc" className="text-xs">Description</Label>
+          <Input id="o-desc" name="description" placeholder="Lifetime warranty, 98% IR block" />
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => setShowPanels((v) => !v)}
+        className="text-xs font-semibold uppercase tracking-[0.1em] text-bronze"
+      >
+        {showPanels ? "Hide coverage map" : `Coverage map (${panels.length})`}
+      </button>
+      {showPanels && (
+        <PanelCoverage
+          panels={panels}
+          onToggle={(p) =>
+            setPanels((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]))
+          }
+        />
       )}
-    </div>
+      <Button type="submit" variant="outline" disabled={pending}>
+        <Plus className="mr-1 h-4 w-4" /> Add option
+      </Button>
+    </form>
   );
 }
