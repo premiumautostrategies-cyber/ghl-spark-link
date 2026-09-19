@@ -153,8 +153,8 @@ export function DealProposal({
   });
 
   const patchTier = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
-      const { error } = await supabase.from("proposal_tiers").update(patch).eq("id", id);
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Tier> }) => {
+      const { error } = await supabase.from("proposal_tiers").update(patch as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -162,8 +162,8 @@ export function DealProposal({
   });
 
   const patchAddon = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, unknown> }) => {
-      const { error } = await supabase.from("proposal_addons").update(patch).eq("id", id);
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<Addon> }) => {
+      const { error } = await supabase.from("proposal_addons").update(patch as never).eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
