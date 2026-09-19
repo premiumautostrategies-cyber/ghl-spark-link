@@ -302,6 +302,15 @@ function SalesPage() {
           value={filter}
           onChange={(v) => setFilter(v as FilterKey)}
         />
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, vehicle, service tag…"
+            className="h-8 w-64 pl-8 text-xs"
+          />
+        </div>
         <p className="text-xs text-muted-foreground">Drag a card between stages to move the deal.</p>
       </div>
 
@@ -335,6 +344,7 @@ function SalesPage() {
                       deal={d}
                       dragging={dragging === d.id}
                       onOpen={() => navigate({ to: "/sales/$dealId", params: { dealId: d.id } })}
+                      onTag={(t) => setSearch(t)}
                     />
                   ))}
                 </StageColumn>
@@ -381,7 +391,7 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-[208px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
+        "flex w-[264px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
         isOver ? "border-bronze/60 bg-surface-2" : "border-elevated",
       )}
     >
