@@ -256,15 +256,11 @@ function SalesPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Open pipeline" value={money(openValue)} hint={`${openDeals.length} live opportunities`} />
-        <Kpi label="Weighted forecast" value={money(weighted)} tone="rig" hint="Value × probability" />
-        <Kpi
-          label="Won"
-          value={money(won.reduce((t, d) => t + Number(d.value), 0))}
-          tone="revenue"
-        />
-        <Kpi label="Close rate" value={`${closeRate}%`} tone="urgent" />
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-elevated bg-surface px-4 py-2.5">
+        <Stat label="Open pipeline" value={money(openValue)} hint={`${openDeals.length} live`} className="text-bronze" />
+        <Stat label="Weighted forecast" value={money(weighted)} className="text-rig" />
+        <Stat label="Won" value={money(won.reduce((t, d) => t + Number(d.value), 0))} className="text-revenue" />
+        <Stat label="Close rate" value={`${closeRate}%`} className="text-urgent" />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
