@@ -826,105 +826,48 @@ function ServicesPage() {
             const cat = s.category_id ? catById[s.category_id] : undefined;
             const opts = optionsFor(s.id);
             return (
-              <Panel key={s.id} className="self-start overflow-hidden">
-                <button type="button" className="block w-full text-left" onClick={() => openEdit(s)}>
-                  <img
-                    src={catalogImage(s.image_url, cat?.slug ?? s.category, cat?.image_url)}
-                    alt={s.name}
-                    loading="lazy"
-                    className="h-36 w-full object-cover"
-                  />
-                </button>
-                <div className="space-y-3 p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{s.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {cat?.name ?? label(s.category)} · {Math.round(s.duration_minutes / 60)}h · per{" "}
-                        {s.unit}
-                      </p>
-                    </div>
-                    <span className="whitespace-nowrap font-display text-lg tabular-nums text-bronze">
-                      {money(s.base_price)}
-                    </span>
-                  </div>
-                  {((s.tags?.length ?? 0) > 0 ||
-                    !s.is_public ||
-                    s.deposit_type !== "none" ||
-                    s.pricing_mode === "tiered") && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {(s.tags ?? []).map((t) => (
-                        <span
-                          key={t}
-                          className="rounded-full border border-bronze/50 bg-bronze/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-bronze"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                      {s.pricing_mode === "tiered" && (
-                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                          Size pricing
-                        </span>
-                      )}
-                      {s.deposit_type !== "none" && (
-                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                          Deposit{" "}
-                          {s.deposit_type === "percent"
-                            ? `${Number(s.deposit_value)}%`
-                            : money(s.deposit_value)}
-                        </span>
-                      )}
-                      {!s.is_public && (
-                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                          Internal only
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <p className="line-clamp-2 text-xs text-muted-foreground">
-                    {s.customer_description || s.description || "No description yet."}
-                  </p>
-                  {(s.coverage_panels?.length ?? 0) > 0 && (
-                    <div className="flex items-center gap-3 rounded-xl border border-elevated bg-surface-2 p-3">
-                      <PanelCoverage panels={s.coverage_panels} compact accent={cat?.accent_color} />
-                      <p className="text-[11px] text-muted-foreground">
-                        {s.coverage_panels.length} panels covered
-                      </p>
-                    </div>
-                  )}
-                  {opts.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {opts.slice(0, 5).map((o) => (
-                        <span
-                          key={o.id}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground"
-                        >
-                          {o.swatch_color && (
-                            <span
-                              className="h-2 w-2 rounded-full"
-                              style={{ backgroundColor: o.swatch_color }}
-                            />
-                          )}
-                          {o.name}
-                        </span>
-                      ))}
-                      {opts.length > 5 && <Tag tone="muted">+{opts.length - 5}</Tag>}
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between gap-2 border-t border-elevated pt-3">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(s)}>
-                      Edit &amp; options
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                        {s.is_active ? "Live" : "Hidden"}
+              <Panel
+                key={s.id}
+                className="flex cursor-pointer flex-col gap-3 self-start p-5 transition-colors hover:border-bronze/40"
+                onClick={() => openEdit(s)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="min-w-0 truncate font-semibold">{s.name}</p>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {s.pricing_mode === "tiered" && (
+                      <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                        Size varies
                       </span>
+                    )}
+                    {s.pricing_mode !== "tiered" && (s.tags ?? [])[0] && (
+                      <span className="rounded-full border border-bronze/50 bg-bronze/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-bronze">
+                        {(s.tags ?? [])[0]}
+                      </span>
+                    )}
+                    <span onClick={(e) => e.stopPropagation()}>
                       <Switch
                         checked={s.is_active}
                         onCheckedChange={(v) => toggleActive.mutate({ id: s.id, is_active: v })}
                       />
-                    </div>
+                    </span>
                   </div>
+                </div>
+                <p className="line-clamp-2 min-h-8 text-xs text-muted-foreground">
+                  {s.customer_description || s.description || "No description yet."}
+                </p>
+                <div className="mt-auto flex items-center justify-between gap-2 border-t border-elevated pt-3">
+                  <span className="font-display text-lg font-bold tabular-nums text-bronze">
+                    {money(priceFor(s))}
+                    {s.pricing_mode === "tiered" && vehClass === "any" && (
+                      <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.1em] text-muted-foreground">
+                        from
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    {fmtDuration(s.duration_minutes)}
+                  </span>
                 </div>
               </Panel>
                     );
