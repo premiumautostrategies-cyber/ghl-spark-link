@@ -88,6 +88,12 @@ type Service = {
   duration_minutes: number;
   estimated_hours: number | string | null;
   supports_add_ons: boolean;
+  pricing_mode: string;
+  tags: string[];
+  is_public: boolean;
+  is_internal: boolean;
+  deposit_type: string;
+  deposit_value: number | string;
   unit: string;
   is_active: boolean;
   image_url: string | null;
