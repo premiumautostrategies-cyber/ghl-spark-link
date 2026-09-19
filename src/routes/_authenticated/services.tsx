@@ -132,10 +132,16 @@ function ServicesPage() {
   const [draftPanels, setDraftPanels] = useState<string[]>([]);
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["service-categories"] });
-    qc.invalidateQueries({ queryKey: ["services"] });
-    qc.invalidateQueries({ queryKey: ["service-options"] });
-    qc.invalidateQueries({ queryKey: ["services-catalog"] });
+    for (const k of [
+      "service-categories",
+      "services",
+      "service-options",
+      "services-catalog",
+      "service-variants",
+      "add-ons",
+      "service-add-ons",
+    ])
+      qc.invalidateQueries({ queryKey: [k] });
   };
 
   const { data: categories = [] } = useQuery({
