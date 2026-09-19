@@ -61,8 +61,31 @@ export const saveGhlCredentials = createServerFn({ method: "POST" })
       { onConflict: "user_id" },
     );
     if (error) throw error;
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const orgId = (profile as { organization_id: string | null } | null)?.organization_id ?? null;
+    if (orgId) {
+      await supabaseAdmin.from("integration_connections").upsert(
+        {
+          organization_id: orgId,
+          provider: "ghl",
+          status: "connected",
+          connected_by: context.userId,
+          account_label: `GoHighLevel ${data.locationId}`,
+          external_id: data.locationId,
+          settings: { customers: true },
+          last_error: null,
+        },
+        { onConflict: "organization_id,provider" },
+      );
+    }
     return { ok: true };
   });
+
 
 export const disconnectGhl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -71,6 +71,13 @@
       "when": 1789835780005,
       "tag": "0009_deal_service_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789836775538,
+      "tag": "0010_integration_sync_engine",
+      "breakpoints": true
     }
   ]
 }

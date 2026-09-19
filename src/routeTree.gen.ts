@@ -31,7 +31,10 @@ import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/t
 import { Route as AuthenticatedVehiclesRouteImport } from './routes/_authenticated/vehicles'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
+import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync-drain'
+import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/connector/return'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
+import { Route as OauthQuickbooksReturnRouteImport } from './routes/oauth/quickbooks/return'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -147,9 +150,24 @@ const AuthenticatedSalesDealIdRoute =
     path: '/sales/$dealId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicSyncDrainRoute = ApiPublicSyncDrainRouteImport.update({
+  id: '/api/public/sync-drain',
+  path: '/api/public/sync-drain',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthConnectorReturnRoute = OauthConnectorReturnRouteImport.update({
+  id: '/oauth/connector/return',
+  path: '/oauth/connector/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OauthHubspotReturnRoute = OauthHubspotReturnRouteImport.update({
   id: '/oauth/hubspot/return',
   path: '/oauth/hubspot/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthQuickbooksReturnRoute = OauthQuickbooksReturnRouteImport.update({
+  id: '/oauth/quickbooks/return',
+  path: '/oauth/quickbooks/return',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -174,7 +192,10 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
+  '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
+  '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
+  '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -198,7 +219,10 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
+  '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
+  '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
+  '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -224,7 +248,10 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/vehicles': typeof AuthenticatedVehiclesRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
+  '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
+  '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
+  '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -250,7 +277,10 @@ export interface FileRouteTypes {
     | '/team'
     | '/vehicles'
     | '/sales/$dealId'
+    | '/api/public/sync-drain'
+    | '/oauth/connector/return'
     | '/oauth/hubspot/return'
+    | '/oauth/quickbooks/return'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -274,7 +304,10 @@ export interface FileRouteTypes {
     | '/team'
     | '/vehicles'
     | '/sales/$dealId'
+    | '/api/public/sync-drain'
+    | '/oauth/connector/return'
     | '/oauth/hubspot/return'
+    | '/oauth/quickbooks/return'
     | '/sales'
   id:
     | '__root__'
@@ -299,7 +332,10 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/vehicles'
     | '/_authenticated/sales/$dealId'
+    | '/api/public/sync-drain'
+    | '/oauth/connector/return'
     | '/oauth/hubspot/return'
+    | '/oauth/quickbooks/return'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -307,7 +343,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicSyncDrainRoute: typeof ApiPublicSyncDrainRoute
+  OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
   OauthHubspotReturnRoute: typeof OauthHubspotReturnRoute
+  OauthQuickbooksReturnRoute: typeof OauthQuickbooksReturnRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -466,11 +505,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesDealIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/sync-drain': {
+      id: '/api/public/sync-drain'
+      path: '/api/public/sync-drain'
+      fullPath: '/api/public/sync-drain'
+      preLoaderRoute: typeof ApiPublicSyncDrainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/connector/return': {
+      id: '/oauth/connector/return'
+      path: '/oauth/connector/return'
+      fullPath: '/oauth/connector/return'
+      preLoaderRoute: typeof OauthConnectorReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/oauth/hubspot/return': {
       id: '/oauth/hubspot/return'
       path: '/oauth/hubspot/return'
       fullPath: '/oauth/hubspot/return'
       preLoaderRoute: typeof OauthHubspotReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/quickbooks/return': {
+      id: '/oauth/quickbooks/return'
+      path: '/oauth/quickbooks/return'
+      fullPath: '/oauth/quickbooks/return'
+      preLoaderRoute: typeof OauthQuickbooksReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -527,7 +587,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicSyncDrainRoute: ApiPublicSyncDrainRoute,
+  OauthConnectorReturnRoute: OauthConnectorReturnRoute,
   OauthHubspotReturnRoute: OauthHubspotReturnRoute,
+  OauthQuickbooksReturnRoute: OauthQuickbooksReturnRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

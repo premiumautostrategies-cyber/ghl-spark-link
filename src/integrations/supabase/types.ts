@@ -911,6 +911,138 @@ export type Database = {
           },
         ]
       }
+      integration_connections: {
+        Row: {
+          account_label: string | null
+          connected_by: string | null
+          created_at: string
+          external_id: string | null
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          organization_id: string
+          provider: string
+          scopes: string[]
+          settings: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_label?: string | null
+          connected_by?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          organization_id: string
+          provider: string
+          scopes?: string[]
+          settings?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_label?: string | null
+          connected_by?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          organization_id?: string
+          provider?: string
+          scopes?: string[]
+          settings?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_connections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_mappings: {
+        Row: {
+          id: string
+          local_id: string
+          local_type: string
+          organization_id: string
+          provider: string
+          remote_id: string
+          remote_url: string | null
+          synced_at: string
+        }
+        Insert: {
+          id?: string
+          local_id: string
+          local_type: string
+          organization_id: string
+          provider: string
+          remote_id: string
+          remote_url?: string | null
+          synced_at?: string
+        }
+        Update: {
+          id?: string
+          local_id?: string
+          local_type?: string
+          organization_id?: string
+          provider?: string
+          remote_id?: string
+          remote_url?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_mappings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_secrets: {
+        Row: {
+          access_token: string | null
+          connection_id: string
+          expires_at: string | null
+          realm_id: string | null
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          connection_id: string
+          expires_at?: string | null
+          realm_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          connection_id?: string
+          expires_at?: string | null
+          realm_id?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_secrets_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: true
+            referencedRelation: "integration_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_items: {
         Row: {
           brand: string | null
@@ -1768,6 +1900,71 @@ export type Database = {
           },
           {
             foreignKeyName: "services_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          direction: string
+          event_type: string
+          id: string
+          last_error: string | null
+          local_id: string | null
+          local_type: string | null
+          next_attempt_at: string
+          organization_id: string
+          payload: Json
+          provider: string
+          remote_id: string | null
+          status: string
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          direction?: string
+          event_type: string
+          id?: string
+          last_error?: string | null
+          local_id?: string | null
+          local_type?: string | null
+          next_attempt_at?: string
+          organization_id: string
+          payload?: Json
+          provider: string
+          remote_id?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          direction?: string
+          event_type?: string
+          id?: string
+          last_error?: string | null
+          local_id?: string | null
+          local_type?: string | null
+          next_attempt_at?: string
+          organization_id?: string
+          payload?: Json
+          provider?: string
+          remote_id?: string | null
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_events_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
