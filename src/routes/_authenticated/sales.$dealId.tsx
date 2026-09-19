@@ -441,9 +441,9 @@ function DealDesk() {
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Quote builder */}
-        <Panel>
+        <Panel className="min-w-0">
           <SectionTitle
             title="Quote builder"
             hint="Pick services from the menu or add a custom line."
@@ -567,7 +567,7 @@ function DealDesk() {
           </div>
         </Panel>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* Scheduling */}
           <Panel>
             <SectionTitle
