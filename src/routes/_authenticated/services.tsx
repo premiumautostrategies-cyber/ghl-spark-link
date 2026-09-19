@@ -721,7 +721,7 @@ function ServicesPage() {
           </div>
         )}
         <form
-          className="grid gap-2 sm:grid-cols-6"
+          className="grid gap-2 sm:grid-cols-4"
           onSubmit={(e) => {
             e.preventDefault();
             saveAddOn.mutate(new FormData(e.currentTarget));
