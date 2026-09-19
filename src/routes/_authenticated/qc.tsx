@@ -1,0 +1,351 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrg } from "@/lib/use-org";
+import { Kpi, Panel, SectionTitle, Tag } from "@/components/os-ui";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { label, shortDate } from "@/lib/format";
+import { QC_TEMPLATE } from "@/lib/shop";
+import { toast } from "sonner";
+import { Lock, LockOpen } from "lucide-react";
+
+export const Route = createFileRoute("/_authenticated/qc")({
+  head: () => ({
+    meta: [
+      { title: "Quality control — Systemize" },
+      { name: "description", content: "Foreman sign-off gate: post-heat temps, bubble checks and key release." },
+      { property: "og:title", content: "Quality control — Systemize" },
+      { property: "og:description", content: "Foreman sign-off gate: post-heat temps, bubble checks and key release." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: QcPage,
+});
+
+type Item = {
+  id: string;
+  label: string;
+  kind: string;
+  is_required: boolean;
+  passed: boolean;
+  value_text: string | null;
+  sort_order: number;
+};
+
+function QcPage() {
+  const qc = useQueryClient();
+  const { orgId } = useOrg();
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["qc-jobs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*, customers(name), vehicles(year,make,model)")
+        .in("status", ["in_progress", "ready_for_pickup", "scheduled"])
+        .is("deleted_at", null)
+        .order("scheduled_start");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: checklists = [] } = useQuery({
+    queryKey: ["qc-checklists"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("qc_checklists")
+        .select("*, qc_items(*)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["qc-checklists"] });
+    qc.invalidateQueries({ queryKey: ["qc-jobs"] });
+    qc.invalidateQueries({ queryKey: ["jobs"] });
+  };
+
+  const startChecklist = useMutation({
+    mutationFn: async (jobId: string) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { data, error } = await supabase
+        .from("qc_checklists")
+        .insert({ organization_id: orgId, job_id: jobId })
+        .select("id")
+        .single();
+      if (error) throw error;
+      const { error: e2 } = await supabase.from("qc_items").insert(
+        QC_TEMPLATE.map((t, i) => ({
+          organization_id: orgId,
+          checklist_id: data.id,
+          label: t.label,
+          kind: t.kind,
+          is_required: t.required,
+          sort_order: i,
+        })),
+      );
+      if (e2) throw e2;
+      await supabase.from("jobs").update({ qc_status: "in_review" }).eq("id", jobId);
+    },
+    onSuccess: () => {
+      toast.success("QC checklist opened");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleItem = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: { passed?: boolean; value_text?: string } }) => {
+      const { error } = await supabase.from("qc_items").update(patch as never).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const signOff = useMutation({
+    mutationFn: async ({
+      checklistId,
+      jobId,
+      inspector,
+      temp,
+      notes,
+      items,
+    }: {
+      checklistId: string;
+      jobId: string;
+      inspector: string;
+      temp: number;
+      notes: string;
+      items: Item[];
+    }) => {
+      const missing = items.filter((i) => i.is_required && !i.passed);
+      if (missing.length) throw new Error(`${missing.length} required check(s) still open`);
+      if (!inspector.trim()) throw new Error("Enter the lead installer or foreman name");
+      if (!(temp >= 190 && temp <= 200)) throw new Error("Log a post-heat edge temp between 190°F and 200°F");
+      const { error } = await supabase
+        .from("qc_checklists")
+        .update({
+          status: "passed",
+          inspector: inspector.trim(),
+          edge_temp_f: temp,
+          notes: notes || null,
+          signed_at: new Date().toISOString(),
+        })
+        .eq("id", checklistId);
+      if (error) throw error;
+      await supabase
+        .from("jobs")
+        .update({ qc_status: "passed", key_released: true, status: "ready_for_pickup" })
+        .eq("id", jobId);
+    },
+    onSuccess: () => {
+      toast.success("QC passed — keys released and invoicing unlocked");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const failQc = useMutation({
+    mutationFn: async ({ checklistId, jobId }: { checklistId: string; jobId: string }) => {
+      await supabase.from("qc_checklists").update({ status: "failed" }).eq("id", checklistId);
+      await supabase
+        .from("jobs")
+        .update({ qc_status: "failed", key_released: false, status: "in_progress" })
+        .eq("id", jobId);
+    },
+    onSuccess: () => {
+      toast.warning("Sent back to the installer for correction");
+      invalidate();
+    },
+  });
+
+  const checklistFor = (jobId: string) => checklists.find((c) => c.job_id === jobId) ?? null;
+  const current = jobs.find((j) => j.id === selected) ?? null;
+  const currentList = current ? checklistFor(current.id) : null;
+  const currentItems = (((currentList?.qc_items ?? []) as Item[]) ?? []).sort(
+    (a, b) => a.sort_order - b.sort_order,
+  );
+
+  const awaiting = jobs.filter((j) => j.qc_status !== "passed");
+  const passed = jobs.filter((j) => j.qc_status === "passed");
+
+  return (
+    <div className="space-y-5">
+      <div className="border-b border-elevated pb-5">
+        <p className="micro-label">Installation</p>
+        <h1 className="display-title mt-1 text-3xl font-semibold">Quality control</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          No vehicle reaches ready for pickup until the foreman signs every required check.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Kpi label="Awaiting QC" value={String(awaiting.length)} tone={awaiting.length ? "urgent" : "muted"} />
+        <Kpi label="Passed & keys released" value={String(passed.length)} tone="revenue" />
+        <Kpi
+          label="Failed / reworking"
+          value={String(jobs.filter((j) => j.qc_status === "failed").length)}
+          tone="critical"
+        />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,340px)_1fr]">
+        <Panel>
+          <SectionTitle title="Vehicles in production" />
+          <div className="divide-y divide-elevated">
+            {jobs.length === 0 && (
+              <p className="px-5 py-8 text-center text-xs text-muted-foreground">Nothing in production.</p>
+            )}
+            {jobs.map((j) => {
+              const list = checklistFor(j.id);
+              return (
+                <button
+                  key={j.id}
+                  type="button"
+                  onClick={() => setSelected(j.id)}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 px-5 py-3 text-left",
+                    selected === j.id && "bg-surface-2",
+                  )}
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{j.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {j.customers?.name ?? "No customer"} · {shortDate(j.scheduled_start)}
+                    </p>
+                  </div>
+                  <Tag
+                    tone={
+                      j.qc_status === "passed" ? "revenue" : j.qc_status === "failed" ? "critical" : list ? "urgent" : "muted"
+                    }
+                  >
+                    {label(j.qc_status ?? "not_started")}
+                  </Tag>
+                </button>
+              );
+            })}
+          </div>
+        </Panel>
+
+        {current ? (
+          <Panel>
+            <SectionTitle
+              title={current.title}
+              hint={`${current.customers?.name ?? "No customer"} · ${current.installer ?? "Unassigned"}`}
+              right={
+                current.key_released ? (
+                  <Tag tone="revenue"><LockOpen className="mr-1 inline h-3 w-3" /> Keys released</Tag>
+                ) : (
+                  <Tag tone="critical"><Lock className="mr-1 inline h-3 w-3" /> Keys locked</Tag>
+                )
+              }
+            />
+            <div className="border-t border-elevated p-4">
+              {!currentList ? (
+                <div className="rounded-xl border border-dashed border-elevated p-8 text-center">
+                  <p className="text-sm text-muted-foreground">No QC checklist opened for this vehicle.</p>
+                  <Button className="mt-3" onClick={() => startChecklist.mutate(current.id)} disabled={startChecklist.isPending}>
+                    Open QC checklist
+                  </Button>
+                </div>
+              ) : (
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const f = new FormData(e.currentTarget);
+                    signOff.mutate({
+                      checklistId: currentList.id,
+                      jobId: current.id,
+                      inspector: String(f.get("inspector") || ""),
+                      temp: Number(f.get("temp") || 0),
+                      notes: String(f.get("notes") || ""),
+                      items: currentItems,
+                    });
+                  }}
+                >
+                  <div className="space-y-2">
+                    {currentItems.map((i) => (
+                      <label
+                        key={i.id}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-xl border p-3",
+                          i.passed ? "border-revenue/40 bg-revenue/10" : "border-elevated bg-surface-2",
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          className="h-5 w-5 accent-current"
+                          checked={i.passed}
+                          onChange={(e) => toggleItem.mutate({ id: i.id, patch: { passed: e.target.checked } })}
+                        />
+                        <span className="min-w-0 flex-1 text-sm">{i.label}</span>
+                        {i.is_required && <Tag tone="muted">required</Tag>}
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="temp" className="text-xs">Post-heat edge temp (°F)</Label>
+                      <Input
+                        id="temp"
+                        name="temp"
+                        type="number"
+                        step="1"
+                        defaultValue={currentList.edge_temp_f ?? 195}
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="inspector" className="text-xs">Signed off by</Label>
+                      <Input
+                        id="inspector"
+                        name="inspector"
+                        placeholder="Lead installer or foreman"
+                        defaultValue={currentList.inspector ?? current.installer ?? ""}
+                      />
+                    </div>
+                  </div>
+                  <Textarea name="notes" rows={2} placeholder="Notes for the file" defaultValue={currentList.notes ?? ""} />
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="submit" disabled={signOff.isPending || currentList.status === "passed"}>
+                      Pass QC &amp; release keys
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => failQc.mutate({ checklistId: currentList.id, jobId: current.id })}
+                    >
+                      Fail — send back to installer
+                    </Button>
+                  </div>
+                  {currentList.status === "passed" && (
+                    <p className="text-xs text-revenue">
+                      Passed by {currentList.inspector} at {Number(currentList.edge_temp_f)}°F — invoicing unlocked.
+                    </p>
+                  )}
+                </form>
+              )}
+            </div>
+          </Panel>
+        ) : (
+          <Panel className="p-10 text-center">
+            <p className="text-sm text-muted-foreground">Pick a vehicle to run its quality gate.</p>
+          </Panel>
+        )}
+      </div>
+    </div>
+  );
+}
