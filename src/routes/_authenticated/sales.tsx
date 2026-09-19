@@ -48,6 +48,8 @@ type Deal = {
   owner_name: string | null;
   expected_close: string | null;
   last_activity_at: string | null;
+  notes: string | null;
+  created_at: string;
   customers: { name: string } | null;
 };
 
@@ -81,6 +83,7 @@ function SalesPage() {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [dragging, setDragging] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const { data: deals = [] } = useQuery({
