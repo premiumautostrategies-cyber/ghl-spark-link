@@ -400,7 +400,7 @@ function ServicesPage() {
             const cat = s.category_id ? catById[s.category_id] : undefined;
             const opts = optionsFor(s.id);
             return (
-              <Panel key={s.id} className="overflow-hidden">
+              <Panel key={s.id} className="self-start overflow-hidden">
                 <button type="button" className="block w-full text-left" onClick={() => openEdit(s)}>
                   <img
                     src={catalogImage(s.image_url, cat?.slug ?? s.category, cat?.image_url)}
