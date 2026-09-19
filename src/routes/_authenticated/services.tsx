@@ -327,6 +327,12 @@ function ServicesPage() {
         image_url: String(form.get("image_url") || "") || null,
         swatch_color: String(form.get("swatch_color") || "") || null,
         coverage_panels: draftPanels,
+        pricing_mode: pricingMode,
+        tags: draftTags,
+        is_public: form.get("is_public") === "on",
+        is_internal: form.get("is_internal") === "on",
+        deposit_type: depositType,
+        deposit_value: depositType === "none" ? 0 : Number(form.get("deposit_value") || 0),
       };
       const { error } = id
         ? await supabase.from("services").update(payload).eq("id", id)
