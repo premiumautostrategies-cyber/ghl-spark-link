@@ -29,6 +29,7 @@ import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedVehiclesRouteImport } from './routes/_authenticated/vehicles'
+import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 
 const IndexRoute = IndexRouteImport.update({
@@ -134,6 +135,12 @@ const AuthenticatedVehiclesRoute = AuthenticatedVehiclesRouteImport.update({
   path: '/vehicles',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSalesDealIdRoute =
+  AuthenticatedSalesDealIdRouteImport.update({
+    id: '/$dealId',
+    path: '/$dealId',
+    getParentRoute: () => AuthenticatedSalesRoute,
+  } as any)
 const OauthHubspotReturnRoute = OauthHubspotReturnRouteImport.update({
   id: '/oauth/hubspot/return',
   path: '/oauth/hubspot/return',
@@ -154,12 +161,13 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
-  '/sales': typeof AuthenticatedSalesRoute
+  '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
+  '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
 export interface FileRoutesByTo {
@@ -176,12 +184,13 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
-  '/sales': typeof AuthenticatedSalesRoute
+  '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
+  '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
 export interface FileRoutesById {
@@ -200,12 +209,13 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
-  '/_authenticated/sales': typeof AuthenticatedSalesRoute
+  '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/vehicles': typeof AuthenticatedVehiclesRoute
+  '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
 }
 export interface FileRouteTypes {
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/vehicles'
+    | '/sales/$dealId'
     | '/oauth/hubspot/return'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/vehicles'
+    | '/sales/$dealId'
     | '/oauth/hubspot/return'
   id:
     | '__root__'
@@ -275,6 +287,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/team'
     | '/_authenticated/vehicles'
+    | '/_authenticated/sales/$dealId'
     | '/oauth/hubspot/return'
   fileRoutesById: FileRoutesById
 }
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVehiclesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sales/$dealId': {
+      id: '/_authenticated/sales/$dealId'
+      path: '/$dealId'
+      fullPath: '/sales/$dealId'
+      preLoaderRoute: typeof AuthenticatedSalesDealIdRouteImport
+      parentRoute: typeof AuthenticatedSalesRoute
+    }
     '/oauth/hubspot/return': {
       id: '/oauth/hubspot/return'
       path: '/oauth/hubspot/return'
@@ -436,6 +456,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedSalesRouteChildren {
+  AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
+}
+
+const AuthenticatedSalesRouteChildren: AuthenticatedSalesRouteChildren = {
+  AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
+}
+
+const AuthenticatedSalesRouteWithChildren =
+  AuthenticatedSalesRoute._addFileChildren(AuthenticatedSalesRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
@@ -449,7 +480,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
-  AuthenticatedSalesRoute: typeof AuthenticatedSalesRoute
+  AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -469,7 +500,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
-  AuthenticatedSalesRoute: AuthenticatedSalesRoute,
+  AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
