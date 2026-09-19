@@ -57,6 +57,7 @@ export const JOB_STATUSES = [
   "estimate",
   "scheduled",
   "in_progress",
+  "ready_for_pickup",
   "completed",
   "invoiced",
 ] as const;
@@ -105,6 +106,7 @@ export const STATUS_LABELS: Record<string, string> = {
   estimate: "Estimate sent",
   scheduled: "Scheduled",
   in_progress: "In progress",
+  ready_for_pickup: "Ready for pickup",
   completed: "Completed",
   invoiced: "Invoiced",
   draft: "Draft",

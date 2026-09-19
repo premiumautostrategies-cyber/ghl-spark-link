@@ -78,6 +78,13 @@
       "when": 1789836775538,
       "tag": "0010_integration_sync_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789839474588,
+      "tag": "0011_shop_floor_overhaul",
+      "breakpoints": true
     }
   ]
 }

@@ -38,6 +38,9 @@ import {
 } from "@/components/ui/select";
 import { DEAL_STAGES, dayDate, label, money } from "@/lib/format";
 import { toast } from "sonner";
+import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/shop";
+
+const SPEED_TO_LEAD_BODY = DEFAULT_MESSAGE_TEMPLATES[0].body;
 
 type Deal = {
   id: string;
@@ -116,7 +119,7 @@ function SalesPage() {
       if (!orgId) throw new Error("No workspace selected");
       const customerId = String(form.get("customer_id") || "");
       const close = String(form.get("expected_close") || "");
-      const { error } = await supabase.from("deals").insert({
+      const { data: created, error } = await supabase.from("deals").insert({
         title: String(form.get("title")),
         stage: String(form.get("stage")),
         value: Number(form.get("value") || 0),
@@ -132,11 +135,27 @@ function SalesPage() {
           .filter(Boolean),
         organization_id: orgId,
         location_id: locId,
-      });
+      }).select("id,stage,customer_id").single();
       if (error) throw error;
+
+      // Speed to lead: fire the first text automatically on brand-new leads.
+      if (created?.stage === "new_lead") {
+        const now = new Date().toISOString();
+        await supabase.from("messages").insert({
+          organization_id: orgId,
+          location_id: locId,
+          deal_id: created.id,
+          customer_id: created.customer_id,
+          channel: "sms",
+          direction: "out",
+          is_automated: true,
+          body: SPEED_TO_LEAD_BODY,
+        });
+        await supabase.from("deals").update({ speed_to_lead_at: now }).eq("id", created.id);
+      }
     },
     onSuccess: () => {
-      toast.success("Opportunity added");
+      toast.success("Opportunity added — speed-to-lead text sent");
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["deals"] });
     },

@@ -22,6 +22,7 @@ import { Route as AuthenticatedInspectionsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
+import { Route as AuthenticatedKioskRouteImport } from './routes/_authenticated/kiosk'
 import { Route as AuthenticatedPackagesRouteImport } from './routes/_authenticated/packages'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
@@ -35,6 +36,9 @@ import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/connector/return'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 import { Route as OauthQuickbooksReturnRouteImport } from './routes/oauth/quickbooks/return'
+import { Route as PProposalTokenRouteImport } from './routes/p/proposal.$token'
+import { Route as PWaiverTokenRouteImport } from './routes/p/waiver.$token'
+import { Route as PWarrantyTokenRouteImport } from './routes/p/warranty.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -104,6 +108,11 @@ const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedKioskRoute = AuthenticatedKioskRouteImport.update({
+  id: '/kiosk',
+  path: '/kiosk',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPackagesRoute = AuthenticatedPackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
@@ -170,6 +179,21 @@ const OauthQuickbooksReturnRoute = OauthQuickbooksReturnRouteImport.update({
   path: '/oauth/quickbooks/return',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PProposalTokenRoute = PProposalTokenRouteImport.update({
+  id: '/p/proposal/$token',
+  path: '/p/proposal/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PWaiverTokenRoute = PWaiverTokenRouteImport.update({
+  id: '/p/waiver/$token',
+  path: '/p/waiver/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PWarrantyTokenRoute = PWarrantyTokenRouteImport.update({
+  id: '/p/warranty/$token',
+  path: '/p/warranty/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -184,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
+  '/kiosk': typeof AuthenticatedKioskRoute
   '/packages': typeof AuthenticatedPackagesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
@@ -196,6 +221,9 @@ export interface FileRoutesByFullPath {
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
+  '/p/proposal/$token': typeof PProposalTokenRoute
+  '/p/waiver/$token': typeof PWaiverTokenRoute
+  '/p/warranty/$token': typeof PWarrantyTokenRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -211,6 +239,7 @@ export interface FileRoutesByTo {
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
+  '/kiosk': typeof AuthenticatedKioskRoute
   '/packages': typeof AuthenticatedPackagesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/schedule': typeof AuthenticatedScheduleRoute
@@ -223,6 +252,9 @@ export interface FileRoutesByTo {
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
+  '/p/proposal/$token': typeof PProposalTokenRoute
+  '/p/waiver/$token': typeof PWaiverTokenRoute
+  '/p/warranty/$token': typeof PWarrantyTokenRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -240,6 +272,7 @@ export interface FileRoutesById {
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRoute
+  '/_authenticated/kiosk': typeof AuthenticatedKioskRoute
   '/_authenticated/packages': typeof AuthenticatedPackagesRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
@@ -252,6 +285,9 @@ export interface FileRoutesById {
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
+  '/p/proposal/$token': typeof PProposalTokenRoute
+  '/p/waiver/$token': typeof PWaiverTokenRoute
+  '/p/warranty/$token': typeof PWarrantyTokenRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -269,6 +305,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/inventory'
     | '/jobs'
+    | '/kiosk'
     | '/packages'
     | '/payments'
     | '/schedule'
@@ -281,6 +318,9 @@ export interface FileRouteTypes {
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
+    | '/p/proposal/$token'
+    | '/p/waiver/$token'
+    | '/p/warranty/$token'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -296,6 +336,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/inventory'
     | '/jobs'
+    | '/kiosk'
     | '/packages'
     | '/payments'
     | '/schedule'
@@ -308,6 +349,9 @@ export interface FileRouteTypes {
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
+    | '/p/proposal/$token'
+    | '/p/waiver/$token'
+    | '/p/warranty/$token'
     | '/sales'
   id:
     | '__root__'
@@ -324,6 +368,7 @@ export interface FileRouteTypes {
     | '/_authenticated/integrations'
     | '/_authenticated/inventory'
     | '/_authenticated/jobs'
+    | '/_authenticated/kiosk'
     | '/_authenticated/packages'
     | '/_authenticated/payments'
     | '/_authenticated/schedule'
@@ -336,6 +381,9 @@ export interface FileRouteTypes {
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
+    | '/p/proposal/$token'
+    | '/p/waiver/$token'
+    | '/p/warranty/$token'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -347,6 +395,9 @@ export interface RootRouteChildren {
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
   OauthHubspotReturnRoute: typeof OauthHubspotReturnRoute
   OauthQuickbooksReturnRoute: typeof OauthQuickbooksReturnRoute
+  PProposalTokenRoute: typeof PProposalTokenRoute
+  PWaiverTokenRoute: typeof PWaiverTokenRoute
+  PWarrantyTokenRoute: typeof PWarrantyTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -442,6 +493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJobsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/kiosk': {
+      id: '/_authenticated/kiosk'
+      path: '/kiosk'
+      fullPath: '/kiosk'
+      preLoaderRoute: typeof AuthenticatedKioskRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/packages': {
       id: '/_authenticated/packages'
       path: '/packages'
@@ -533,6 +591,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthQuickbooksReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/proposal/$token': {
+      id: '/p/proposal/$token'
+      path: '/p/proposal/$token'
+      fullPath: '/p/proposal/$token'
+      preLoaderRoute: typeof PProposalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/waiver/$token': {
+      id: '/p/waiver/$token'
+      path: '/p/waiver/$token'
+      fullPath: '/p/waiver/$token'
+      preLoaderRoute: typeof PWaiverTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/warranty/$token': {
+      id: '/p/warranty/$token'
+      path: '/p/warranty/$token'
+      fullPath: '/p/warranty/$token'
+      preLoaderRoute: typeof PWarrantyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -547,6 +626,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
+  AuthenticatedKioskRoute: typeof AuthenticatedKioskRoute
   AuthenticatedPackagesRoute: typeof AuthenticatedPackagesRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
@@ -569,6 +649,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRoute,
+  AuthenticatedKioskRoute: AuthenticatedKioskRoute,
   AuthenticatedPackagesRoute: AuthenticatedPackagesRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
@@ -591,6 +672,9 @@ const rootRouteChildren: RootRouteChildren = {
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
   OauthHubspotReturnRoute: OauthHubspotReturnRoute,
   OauthQuickbooksReturnRoute: OauthQuickbooksReturnRoute,
+  PProposalTokenRoute: PProposalTokenRoute,
+  PWaiverTokenRoute: PWaiverTokenRoute,
+  PWarrantyTokenRoute: PWarrantyTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
