@@ -139,6 +139,7 @@ function ServicesPage() {
   const [selCats, setSelCats] = useState<string[]>([]);
   const [vehClass, setVehClass] = useState("any");
   const [showPills, setShowPills] = useState(false);
+  const [filmsOnly, setFilmsOnly] = useState(false);
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"alpha" | "price_desc" | "price_asc" | "duration" | "popular">(
@@ -534,7 +535,41 @@ function ServicesPage() {
   const uncategorized = sorted.filter((s) => !s.category_id || !catById[s.category_id]);
   if (!singleCat && uncategorized.length > 0)
     groups.push({ key: "uncat", name: "Uncategorized", accent: null, items: uncategorized });
-  const visible = sorted;
+  const visible = filmsOnly ? sorted.filter((s) => optionsFor(s.id).length > 0) : sorted;
+
+  const VEHICLE_CLASSES = [
+    "Sedan",
+    "Compact",
+    "Coupe",
+    "SUV",
+    "Full-Size SUV",
+    "Truck",
+    "Sports Car",
+    "Exotic",
+  ];
+  const classTierRe = (cls: string) => {
+    if (["Compact", "Coupe", "Sports Car"].includes(cls)) return /small|coupe|compact/i;
+    if (cls === "Sedan") return /midsize|sedan/i;
+    if (["SUV", "Full-Size SUV", "Truck"].includes(cls)) return /large|suv|truck|oversized/i;
+    return /exotic|large|oversized/i;
+  };
+  const priceFor = (s: Service) => {
+    if (vehClass !== "any") {
+      const re = classTierRe(vehClass);
+      const v = variantsFor(s.id).find((v) => re.test(v.tier_name));
+      if (v) return Number(v.price);
+    }
+    return Number(s.base_price);
+  };
+  const fmtDuration = (mins: number) => {
+    if (mins < 60) return `${mins} min`;
+    if (mins < 8 * 60) {
+      const h = Math.round(mins / 60);
+      return `${h} hr${h === 1 ? "" : "s"}`;
+    }
+    const d = Math.round(mins / (8 * 60));
+    return `${d} day${d === 1 ? "" : "s"}`;
+  };
   const active = services.filter((s) => s.is_active);
   const avg = active.length
     ? active.reduce((t, s) => t + Number(s.base_price), 0) / active.length
