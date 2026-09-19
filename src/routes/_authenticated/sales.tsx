@@ -420,3 +420,205 @@ function DealCard({
     </div>
   );
 }
+
+function DealDetail({ deal, onClose }: { deal: Deal | null; onClose: () => void }) {
+  return (
+    <Dialog open={!!deal} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        {deal && <DealDetailBody key={deal.id} deal={deal} onClose={onClose} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DealDetailBody({ deal, onClose }: { deal: Deal; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [title, setTitle] = useState(deal.title);
+  const [value, setValue] = useState(String(deal.value));
+  const [probability, setProbability] = useState(String(deal.probability));
+  const [source, setSource] = useState(deal.source ?? "");
+  const [owner, setOwner] = useState(deal.owner_name ?? "");
+  const [expectedClose, setExpectedClose] = useState(deal.expected_close ?? "");
+  const [notes, setNotes] = useState(deal.notes ?? "");
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("deals")
+        .update({
+          title,
+          value: Number(value || 0),
+          probability: Number(probability || 0),
+          source: source || null,
+          owner_name: owner || null,
+          expected_close: expectedClose || null,
+          notes: notes || null,
+          last_activity_at: new Date().toISOString(),
+        })
+        .eq("id", deal.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Opportunity updated");
+      qc.invalidateQueries({ queryKey: ["deals"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const setStage = useMutation({
+    mutationFn: async (stage: string) => {
+      const { error } = await supabase
+        .from("deals")
+        .update({ stage, last_activity_at: new Date().toISOString() })
+        .eq("id", deal.id);
+      if (error) throw error;
+    },
+    onSuccess: (_d, stage) => {
+      toast.success(`Moved to ${label(stage)}`);
+      qc.invalidateQueries({ queryKey: ["deals"] });
+      if (stage === "won" || stage === "lost") onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("deals").delete().eq("id", deal.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Opportunity deleted");
+      qc.invalidateQueries({ queryKey: ["deals"] });
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const open = !["won", "lost"].includes(deal.stage);
+
+  return (
+    <div className="space-y-5">
+      <DialogHeader>
+        <DialogTitle className="pr-8 leading-tight">{deal.title}</DialogTitle>
+      </DialogHeader>
+
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <Tag tone={STAGE_TONE[deal.stage] ?? "muted"}>{label(deal.stage)}</Tag>
+        <span>{deal.customers?.name ?? "No customer"}</span>
+        <span>·</span>
+        <span>Open since {dayDate(deal.created_at)}</span>
+      </div>
+
+      {/* Stage controls */}
+      <div className="space-y-2">
+        <p className="micro-label">Move to stage</p>
+        <div className="flex flex-wrap gap-1.5">
+          {DEAL_STAGES.map((s) => (
+            <button
+              key={s}
+              type="button"
+              disabled={setStage.isPending || s === deal.stage}
+              onClick={() => setStage.mutate(s)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                s === deal.stage
+                  ? "border-bronze/60 bg-bronze/10 text-bronze"
+                  : "border-elevated bg-surface text-muted-foreground hover:border-hairline hover:text-foreground",
+              )}
+            >
+              {label(s)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="d-title">Title</Label>
+          <Input id="d-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="d-value">Value</Label>
+          <Input
+            id="d-value"
+            type="number"
+            step="0.01"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="d-prob">Probability %</Label>
+          <Input
+            id="d-prob"
+            type="number"
+            value={probability}
+            onChange={(e) => setProbability(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="d-source">Source</Label>
+          <Input id="d-source" value={source} onChange={(e) => setSource(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="d-owner">Owner</Label>
+          <Input id="d-owner" value={owner} onChange={(e) => setOwner(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="d-close">Expected close</Label>
+          <Input
+            id="d-close"
+            type="date"
+            value={expectedClose}
+            onChange={(e) => setExpectedClose(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="d-notes">Notes</Label>
+          <Textarea
+            id="d-notes"
+            rows={4}
+            placeholder="Conversation notes, next steps, customer preferences…"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button onClick={() => save.mutate()} disabled={save.isPending}>
+          Save changes
+        </Button>
+        {open && (
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setStage.mutate("won")}
+              disabled={setStage.isPending}
+            >
+              Mark won
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setStage.mutate("lost")}
+              disabled={setStage.isPending}
+            >
+              Mark lost
+            </Button>
+          </>
+        )}
+        <Button
+          variant="ghost"
+          className="ml-auto text-critical hover:text-critical"
+          onClick={() => {
+            if (window.confirm("Delete this opportunity? This cannot be undone."))
+              remove.mutate();
+          }}
+          disabled={remove.isPending}
+        >
+          Delete
+        </Button>
+      </div>
+    </div>
+  );
+}
