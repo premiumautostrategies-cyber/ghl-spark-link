@@ -1070,32 +1070,33 @@ function ServicePicker({
 
       <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
         {visible.map((s) => {
-          const c = s.category_id ? catById[s.category_id] : undefined;
           const count = options.filter((o) => o.service_id === s.id).length;
           return (
             <button
               key={s.id}
               type="button"
-              onClick={() => setPicked(s)}
-              className="w-[196px] shrink-0 overflow-hidden rounded-xl border border-elevated bg-surface-2 text-left transition-colors hover:border-bronze/50"
+              onClick={() =>
+                count > 0
+                  ? setPicked(s)
+                  : onAdd({
+                      description: s.name,
+                      quantity: 1,
+                      unit_price: Number(s.base_price),
+                    })
+              }
+              className="w-[180px] shrink-0 rounded-xl border border-elevated bg-surface-2 p-2.5 text-left transition-colors hover:border-bronze/50"
             >
-              <img
-                src={catalogImage(s.image_url, c?.slug ?? s.category, c?.image_url)}
-                alt={s.name}
-                loading="lazy"
-                className="h-20 w-full object-cover"
-              />
-              <div className="p-3">
-                <p className="text-sm font-semibold leading-tight">{s.name}</p>
-                <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">
-                  {s.customer_description || s.description || (c?.name ?? label(s.category))}
-                </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm font-semibold tabular-nums text-bronze">
-                    {money(s.base_price)}
-                  </span>
-                  {count > 0 && <Tag tone="muted">{count} options</Tag>}
-                </div>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[13px] font-semibold leading-tight">{s.name}</p>
+                <Plus className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bronze" />
+              </div>
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <span className="text-[13px] font-semibold tabular-nums text-bronze">
+                  {money(s.base_price)}
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  {count > 0 ? `${count} options` : `${(s.duration_minutes / 60).toFixed(1)}h`}
+                </span>
               </div>
             </button>
           );
