@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -68,6 +69,11 @@ const ConnectRoute = ConnectRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformRoute = PlatformRouteImport.update({
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
+  '/faq': typeof FaqRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
+  '/faq': typeof FaqRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
+  '/faq': typeof FaqRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/demo'
+    | '/faq'
     | '/platform'
     | '/workflow'
     | '/analytics'
@@ -388,6 +398,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/demo'
+    | '/faq'
     | '/platform'
     | '/workflow'
     | '/analytics'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/connect'
     | '/demo'
+    | '/faq'
     | '/platform'
     | '/workflow'
     | '/_authenticated/analytics'
@@ -465,6 +477,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConnectRoute: typeof ConnectRoute
   DemoRoute: typeof DemoRoute
+  FaqRoute: typeof FaqRoute
   PlatformRoute: typeof PlatformRoute
   WorkflowRoute: typeof WorkflowRoute
   ApiPublicSyncDrainRoute: typeof ApiPublicSyncDrainRoute
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform': {
@@ -792,6 +812,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConnectRoute: ConnectRoute,
   DemoRoute: DemoRoute,
+  FaqRoute: FaqRoute,
   PlatformRoute: PlatformRoute,
   WorkflowRoute: WorkflowRoute,
   ApiPublicSyncDrainRoute: ApiPublicSyncDrainRoute,
