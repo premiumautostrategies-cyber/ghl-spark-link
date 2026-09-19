@@ -91,14 +91,6 @@ function PortalPage() {
           Everything on your vehicles — quotes, proposals, warranty certificates and the aftercare
           notes we have sent you.
         </p>
-        {data.shopPhone && (
-          <a
-            href={`tel:${data.shopPhone}`}
-            className="mt-3 inline-block text-sm text-bronze underline-offset-4 hover:underline"
-          >
-            Call the shop · {data.shopPhone}
-          </a>
-        )}
       </div>
 
       <Card title="Your vehicles" icon={<Car className="h-4 w-4" />}>
