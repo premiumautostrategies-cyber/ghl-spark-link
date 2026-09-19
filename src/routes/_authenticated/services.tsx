@@ -792,8 +792,37 @@ function ServicesPage() {
                 <Label htmlFor="sv-unit">Sold by</Label>
                 <Input id="sv-unit" name="unit" defaultValue={editing?.unit ?? "job"} />
               </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Pricing</Label>
+                <div className="flex gap-2">
+                  {(["flat", "tiered"] as const).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setPricingMode(m)}
+                      className={cn(
+                        "flex-1 rounded-xl border px-3 py-2 text-left text-sm transition-colors",
+                        pricingMode === m
+                          ? "border-bronze/60 bg-bronze/10 text-bronze"
+                          : "border-elevated bg-surface-2 hover:border-hairline",
+                      )}
+                    >
+                      <span className="block font-medium">
+                        {m === "flat" ? "Single base price" : "By vehicle size"}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {m === "flat"
+                          ? "One price for every vehicle."
+                          : "Coupe/sedan, midsize SUV, oversized/truck tiers."}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="space-y-2">
-                <Label htmlFor="sv-price">Base price</Label>
+                <Label htmlFor="sv-price">
+                  {pricingMode === "tiered" ? "Starting price" : "Base price"}
+                </Label>
                 <Input
                   id="sv-price"
                   name="base_price"
@@ -814,6 +843,94 @@ function ServicesPage() {
                   )}
                 />
               </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Deposit required</Label>
+                <div className="flex flex-wrap gap-2">
+                  {(["none", "percent", "fixed"] as const).map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDepositType(d)}
+                      className={cn(
+                        "rounded-xl border px-3 py-2 text-sm transition-colors",
+                        depositType === d
+                          ? "border-bronze/60 bg-bronze/10 text-bronze"
+                          : "border-elevated bg-surface-2 hover:border-hairline",
+                      )}
+                    >
+                      {d === "none" ? "No deposit" : d === "percent" ? "Percent of total" : "Fixed amount"}
+                    </button>
+                  ))}
+                  {depositType !== "none" && (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        name="deposit_value"
+                        type="number"
+                        step={depositType === "percent" ? "1" : "0.01"}
+                        className="w-32"
+                        defaultValue={String(editing?.deposit_value ?? (depositType === "percent" ? 25 : 250))}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {depositType === "percent" ? "%" : "$"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="sv-tag">Tags</Label>
+                <div className="flex flex-wrap gap-2">
+                  {draftTags.map((t) => (
+                    <span
+                      key={t}
+                      className="flex items-center gap-2 rounded-full border border-bronze/50 bg-bronze/10 px-3 py-1 text-xs text-bronze"
+                    >
+                      {t}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${t}`}
+                        onClick={() => setDraftTags((prev) => prev.filter((x) => x !== t))}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    id="sv-tag"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTag(tagInput);
+                      }
+                    }}
+                    placeholder="Most Popular, High Margin, Track Ready…"
+                  />
+                  <Button type="button" variant="outline" onClick={() => addTag(tagInput)}>
+                    Add tag
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {["Most Popular", "High Margin", "Track Ready", "Lifetime Warranty"]
+                    .filter((t) => !draftTags.includes(t))
+                    .map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => addTag(t)}
+                        className="rounded-full border border-elevated bg-surface-2 px-3 py-1 text-xs text-muted-foreground hover:border-hairline"
+                      >
+                        + {t}
+                      </button>
+                    ))}
+                </div>
+              </div>
+
               <label className="flex items-center justify-between gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2 sm:col-span-2">
                 <span>
                   <span className="block text-sm font-medium">Allow add-ons</span>
@@ -825,6 +942,34 @@ function ServicesPage() {
                   type="checkbox"
                   name="supports_add_ons"
                   defaultChecked={editing?.supports_add_ons ?? true}
+                  className="size-4 accent-bronze"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
+                <span>
+                  <span className="block text-sm font-medium">Show internally</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Available on estimates and the sales desk.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  name="is_internal"
+                  defaultChecked={editing?.is_internal ?? true}
+                  className="size-4 accent-bronze"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
+                <span>
+                  <span className="block text-sm font-medium">Show to customers</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Visible on public booking links.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  name="is_public"
+                  defaultChecked={editing?.is_public ?? true}
                   className="size-4 accent-bronze"
                 />
               </label>
