@@ -393,24 +393,29 @@ function DealCard({
       {...attributes}
       onClick={onOpen}
       className={cn(
-        "cursor-grab touch-none rounded-xl border border-elevated bg-surface-2 p-3 transition-colors hover:border-hairline active:cursor-grabbing",
+        "cursor-grab touch-none rounded-lg border border-elevated bg-surface-2 p-2 transition-colors hover:border-hairline active:cursor-grabbing",
         dragging && "opacity-40",
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-semibold leading-tight">{deal.title}</p>
-        <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-bronze">
+        <p className="text-xs font-semibold leading-tight">{deal.title}</p>
+        <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-bronze">
           {money(deal.value)}
         </span>
       </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        {deal.customers?.name ?? "No customer"} · {deal.source || "Direct"}
+      <p className="mt-1 truncate text-[11px] text-muted-foreground">
+        {deal.customers?.name ?? "No customer"}
+        {deal.source ? ` · ${deal.source}` : ""}
       </p>
-      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-        <Tag tone="muted">{deal.probability}%</Tag>
-        {deal.expected_close && <Tag tone="muted">Close {dayDate(deal.expected_close)}</Tag>}
-        {age !== null && age > 3 && <Tag tone="critical">{age}d untouched</Tag>}
-        {deal.owner_name && <Tag tone="bronze">{deal.owner_name}</Tag>}
+      <div className="mt-1.5 flex flex-wrap items-center gap-1">
+        {age !== null && age > 3 ? (
+          <Tag tone="critical" className="text-[10px]">{age}d</Tag>
+        ) : (
+          <Tag tone="muted" className="text-[10px]">{deal.probability}%</Tag>
+        )}
+        {deal.expected_close && (
+          <Tag tone="muted" className="text-[10px]">{dayDate(deal.expected_close)}</Tag>
+        )}
       </div>
     </div>
   );
