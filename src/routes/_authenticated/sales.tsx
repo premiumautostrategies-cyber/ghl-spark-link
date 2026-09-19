@@ -301,7 +301,12 @@ function SalesPage() {
               return (
                 <StageColumn key={stage} stage={stage} count={list.length} total={total}>
                   {list.map((d) => (
-                    <DealCard key={d.id} deal={d} dragging={dragging === d.id} />
+                    <DealCard
+                      key={d.id}
+                      deal={d}
+                      dragging={dragging === d.id}
+                      onOpen={() => setSelectedId(d.id)}
+                    />
                   ))}
                 </StageColumn>
               );
@@ -318,6 +323,11 @@ function SalesPage() {
           </DragOverlay>
         </DndContext>
       )}
+
+      <DealDetail
+        deal={deals.find((d) => d.id === selectedId) ?? null}
+        onClose={() => setSelectedId(null)}
+      />
     </div>
   );
 }
