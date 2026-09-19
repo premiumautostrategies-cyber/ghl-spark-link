@@ -731,6 +731,7 @@ function ServicesPage() {
               {filtered.length} of {services.length} services
             </span>
           </div>
+          {showPills && (
           <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             <CatPill
               name="All services"
