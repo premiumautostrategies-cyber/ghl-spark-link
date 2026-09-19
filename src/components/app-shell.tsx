@@ -150,7 +150,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="hidden items-center gap-1 rounded-full border border-border/60 bg-secondary/40 p-1 md:flex">
             {NAV_GROUPS.map((g) => {
               const active = g.group === activeGroup?.group;
-              const first = g.items[0];
+              const first = g.items[0]!;
               return (
                 <Link
                   key={g.group}
