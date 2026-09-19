@@ -26,6 +26,8 @@ import {
   Settings,
   Users,
   ScanLine,
+  ShieldCheck,
+  Tablet,
   Wrench,
 } from "lucide-react";
 
@@ -49,6 +51,8 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { to: "/schedule", label: "Bays", icon: CalendarRange },
       { to: "/jobs", label: "Production", icon: Wrench },
       { to: "/inspections", label: "Inspections", icon: ScanLine },
+      { to: "/kiosk", label: "Shop Floor", icon: Tablet },
+      { to: "/qc", label: "Quality Control", icon: ClipboardList },
       { to: "/team", label: "Team", icon: Gauge },
     ],
   },
@@ -58,6 +62,7 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { to: "/command-center", label: "Command Center", icon: Command },
       { to: "/documents", label: "Documents", icon: FileText },
       { to: "/inventory", label: "Stock", icon: Package },
+      { to: "/warranty", label: "Warranty & Aftercare", icon: ShieldCheck },
       { to: "/analytics", label: "Reports", icon: BarChart3 },
       { to: "/automations", label: "Automations", icon: Bot },
       { to: "/integrations", label: "Integrations", icon: Plug },

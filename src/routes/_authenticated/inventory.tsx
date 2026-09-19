@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { INVENTORY_CATEGORIES, label, money } from "@/lib/format";
 import { toast } from "sonner";
+import { FilmRolls } from "@/components/film-rolls";
 
 export const Route = createFileRoute("/_authenticated/inventory")({
   head: () => ({
@@ -252,6 +253,7 @@ function InventoryPage() {
           </table>
         </div>
       )}
+      <FilmRolls />
     </div>
   );
 }

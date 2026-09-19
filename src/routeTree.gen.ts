@@ -25,11 +25,13 @@ import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/j
 import { Route as AuthenticatedKioskRouteImport } from './routes/_authenticated/kiosk'
 import { Route as AuthenticatedPackagesRouteImport } from './routes/_authenticated/packages'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedQcRouteImport } from './routes/_authenticated/qc'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedVehiclesRouteImport } from './routes/_authenticated/vehicles'
+import { Route as AuthenticatedWarrantyRouteImport } from './routes/_authenticated/warranty'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
 import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync-drain'
@@ -123,6 +125,11 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedQcRoute = AuthenticatedQcRouteImport.update({
+  id: '/qc',
+  path: '/qc',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
@@ -146,6 +153,11 @@ const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
 const AuthenticatedVehiclesRoute = AuthenticatedVehiclesRouteImport.update({
   id: '/vehicles',
   path: '/vehicles',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedWarrantyRoute = AuthenticatedWarrantyRouteImport.update({
+  id: '/warranty',
+  path: '/warranty',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
@@ -211,11 +223,13 @@ export interface FileRoutesByFullPath {
   '/kiosk': typeof AuthenticatedKioskRoute
   '/packages': typeof AuthenticatedPackagesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/qc': typeof AuthenticatedQcRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
+  '/warranty': typeof AuthenticatedWarrantyRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -242,11 +256,13 @@ export interface FileRoutesByTo {
   '/kiosk': typeof AuthenticatedKioskRoute
   '/packages': typeof AuthenticatedPackagesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/qc': typeof AuthenticatedQcRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
+  '/warranty': typeof AuthenticatedWarrantyRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -275,11 +291,13 @@ export interface FileRoutesById {
   '/_authenticated/kiosk': typeof AuthenticatedKioskRoute
   '/_authenticated/packages': typeof AuthenticatedPackagesRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/qc': typeof AuthenticatedQcRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/vehicles': typeof AuthenticatedVehiclesRoute
+  '/_authenticated/warranty': typeof AuthenticatedWarrantyRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -308,11 +326,13 @@ export interface FileRouteTypes {
     | '/kiosk'
     | '/packages'
     | '/payments'
+    | '/qc'
     | '/schedule'
     | '/services'
     | '/settings'
     | '/team'
     | '/vehicles'
+    | '/warranty'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -339,11 +359,13 @@ export interface FileRouteTypes {
     | '/kiosk'
     | '/packages'
     | '/payments'
+    | '/qc'
     | '/schedule'
     | '/services'
     | '/settings'
     | '/team'
     | '/vehicles'
+    | '/warranty'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -371,11 +393,13 @@ export interface FileRouteTypes {
     | '/_authenticated/kiosk'
     | '/_authenticated/packages'
     | '/_authenticated/payments'
+    | '/_authenticated/qc'
     | '/_authenticated/schedule'
     | '/_authenticated/services'
     | '/_authenticated/settings'
     | '/_authenticated/team'
     | '/_authenticated/vehicles'
+    | '/_authenticated/warranty'
     | '/_authenticated/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -514,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/qc': {
+      id: '/_authenticated/qc'
+      path: '/qc'
+      fullPath: '/qc'
+      preLoaderRoute: typeof AuthenticatedQcRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/schedule': {
       id: '/_authenticated/schedule'
       path: '/schedule'
@@ -547,6 +578,13 @@ declare module '@tanstack/react-router' {
       path: '/vehicles'
       fullPath: '/vehicles'
       preLoaderRoute: typeof AuthenticatedVehiclesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/warranty': {
+      id: '/_authenticated/warranty'
+      path: '/warranty'
+      fullPath: '/warranty'
+      preLoaderRoute: typeof AuthenticatedWarrantyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sales/': {
@@ -629,11 +667,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedKioskRoute: typeof AuthenticatedKioskRoute
   AuthenticatedPackagesRoute: typeof AuthenticatedPackagesRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedQcRoute: typeof AuthenticatedQcRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedVehiclesRoute: typeof AuthenticatedVehiclesRoute
+  AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
@@ -652,11 +692,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedKioskRoute: AuthenticatedKioskRoute,
   AuthenticatedPackagesRoute: AuthenticatedPackagesRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedQcRoute: AuthenticatedQcRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedVehiclesRoute: AuthenticatedVehiclesRoute,
+  AuthenticatedWarrantyRoute: AuthenticatedWarrantyRoute,
   AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
 }
