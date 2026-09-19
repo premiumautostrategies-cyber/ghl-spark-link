@@ -14,6 +14,82 @@ export type Database = {
   }
   public: {
     Tables: {
+      add_ons: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          estimated_hours: number
+          id: string
+          is_active: boolean
+          is_global: boolean
+          name: string
+          organization_id: string | null
+          price: number
+          service_id: string | null
+          sort_order: number
+          swatch_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          estimated_hours?: number
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          name: string
+          organization_id?: string | null
+          price?: number
+          service_id?: string | null
+          sort_order?: number
+          swatch_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          estimated_hours?: number
+          id?: string
+          is_active?: boolean
+          is_global?: boolean
+          name?: string
+          organization_id?: string | null
+          price?: number
+          service_id?: string | null
+          sort_order?: number
+          swatch_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "add_ons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "add_ons_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "add_ons_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_user_connections: {
         Row: {
           connection_key_ciphertext: string
@@ -1275,6 +1351,61 @@ export type Database = {
           },
         ]
       }
+      service_add_ons: {
+        Row: {
+          add_on_id: string
+          created_at: string
+          id: string
+          is_recommended: boolean
+          organization_id: string | null
+          price_override: number | null
+          service_id: string
+          sort_order: number
+        }
+        Insert: {
+          add_on_id: string
+          created_at?: string
+          id?: string
+          is_recommended?: boolean
+          organization_id?: string | null
+          price_override?: number | null
+          service_id: string
+          sort_order?: number
+        }
+        Update: {
+          add_on_id?: string
+          created_at?: string
+          id?: string
+          is_recommended?: boolean
+          organization_id?: string | null
+          price_override?: number | null
+          service_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_add_ons_add_on_id_fkey"
+            columns: ["add_on_id"]
+            isOneToOne: false
+            referencedRelation: "add_ons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_add_ons_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_add_ons_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_categories: {
         Row: {
           accent_color: string | null
@@ -1407,6 +1538,69 @@ export type Database = {
           },
         ]
       }
+      service_variants: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          estimated_hours: number
+          id: string
+          is_active: boolean
+          is_default: boolean
+          organization_id: string | null
+          price: number
+          service_id: string
+          sort_order: number
+          tier_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          estimated_hours?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          organization_id?: string | null
+          price?: number
+          service_id: string
+          sort_order?: number
+          tier_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          estimated_hours?: number
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          organization_id?: string | null
+          price?: number
+          service_id?: string
+          sort_order?: number
+          tier_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_variants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_variants_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           base_price: number
@@ -1418,6 +1612,7 @@ export type Database = {
           deleted_at: string | null
           description: string | null
           duration_minutes: number
+          estimated_hours: number | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -1425,6 +1620,7 @@ export type Database = {
           name: string
           organization_id: string | null
           sort_order: number
+          supports_add_ons: boolean
           swatch_color: string | null
           unit: string
           updated_at: string
@@ -1439,6 +1635,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           duration_minutes?: number
+          estimated_hours?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -1446,6 +1643,7 @@ export type Database = {
           name: string
           organization_id?: string | null
           sort_order?: number
+          supports_add_ons?: boolean
           swatch_color?: string | null
           unit?: string
           updated_at?: string
@@ -1460,6 +1658,7 @@ export type Database = {
           deleted_at?: string | null
           description?: string | null
           duration_minutes?: number
+          estimated_hours?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -1467,6 +1666,7 @@ export type Database = {
           name?: string
           organization_id?: string | null
           sort_order?: number
+          supports_add_ons?: boolean
           swatch_color?: string | null
           unit?: string
           updated_at?: string

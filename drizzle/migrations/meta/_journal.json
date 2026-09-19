@@ -36,6 +36,13 @@
       "when": 1789823417669,
       "tag": "0004_service_catalog_library",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789824512145,
+      "tag": "0005_service_variants_and_addons",
+      "breakpoints": true
     }
   ]
 }
