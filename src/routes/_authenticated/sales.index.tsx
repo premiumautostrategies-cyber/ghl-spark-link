@@ -323,11 +323,6 @@ function SalesPage() {
           </DragOverlay>
         </DndContext>
       )}
-
-      <DealDetail
-        deal={deals.find((d) => d.id === selectedId) ?? null}
-        onClose={() => setSelectedId(null)}
-      />
     </div>
   );
 }
