@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,7 +35,7 @@ import {
   catalogImage,
 } from "@/lib/catalog";
 import { toast } from "sonner";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Clock, Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/services")({
   head: () => ({
