@@ -63,6 +63,30 @@ function SettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const savedAccent = (org as { accent_color?: string | null } | undefined)?.accent_color ?? null;
+  const [localAccent, setLocalAccent] = useState<string | null>(null);
+  const accent = localAccent ?? savedAccent ?? DEFAULT_ACCENT;
+
+  const setAccent = useMutation({
+    mutationFn: async (hex: string) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error } = await supabase
+        .from("organizations")
+        .update({ accent_color: hex })
+        .eq("id", orgId);
+      if (error) throw error;
+      return hex;
+    },
+    onSuccess: (hex) => {
+      setLocalAccent(hex);
+      applyAccent(hex);
+      toast.success("Brand colour updated");
+      qc.invalidateQueries({ queryKey: ["organization", orgId] });
+      qc.invalidateQueries({ queryKey: ["organization-accent", orgId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const loadDemo = useMutation({
     mutationFn: async () => {
       if (!orgId) throw new Error("No workspace selected");
