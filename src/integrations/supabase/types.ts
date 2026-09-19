@@ -1275,53 +1275,210 @@ export type Database = {
           },
         ]
       }
-      services: {
+      service_categories: {
         Row: {
-          base_price: number
-          category: string
+          accent_color: string | null
           created_at: string
           deleted_at: string | null
           description: string | null
-          duration_minutes: number
           id: string
+          image_url: string | null
           is_active: boolean
           location_id: string | null
           name: string
           organization_id: string | null
+          slug: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location_id?: string | null
+          name: string
+          organization_id?: string | null
+          slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location_id?: string | null
+          name?: string
+          organization_id?: string | null
+          slug?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_categories_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_categories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_options: {
+        Row: {
+          coverage_panels: string[]
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          duration_delta_minutes: number
+          id: string
+          is_default: boolean
+          kind: string
+          name: string
+          organization_id: string | null
+          price_delta: number
+          service_id: string
+          sort_order: number
+          swatch_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          coverage_panels?: string[]
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          duration_delta_minutes?: number
+          id?: string
+          is_default?: boolean
+          kind?: string
+          name: string
+          organization_id?: string | null
+          price_delta?: number
+          service_id: string
+          sort_order?: number
+          swatch_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          coverage_panels?: string[]
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          duration_delta_minutes?: number
+          id?: string
+          is_default?: boolean
+          kind?: string
+          name?: string
+          organization_id?: string | null
+          price_delta?: number
+          service_id?: string
+          sort_order?: number
+          swatch_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_options_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_options_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          base_price: number
+          category: string
+          category_id: string | null
+          coverage_panels: string[]
+          created_at: string
+          customer_description: string | null
+          deleted_at: string | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location_id: string | null
+          name: string
+          organization_id: string | null
+          sort_order: number
+          swatch_color: string | null
           unit: string
           updated_at: string
         }
         Insert: {
           base_price?: number
           category?: string
+          category_id?: string | null
+          coverage_panels?: string[]
           created_at?: string
+          customer_description?: string | null
           deleted_at?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           location_id?: string | null
           name: string
           organization_id?: string | null
+          sort_order?: number
+          swatch_color?: string | null
           unit?: string
           updated_at?: string
         }
         Update: {
           base_price?: number
           category?: string
+          category_id?: string | null
+          coverage_panels?: string[]
           created_at?: string
+          customer_description?: string | null
           deleted_at?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           location_id?: string | null
           name?: string
           organization_id?: string | null
+          sort_order?: number
+          swatch_color?: string | null
           unit?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "services_location_id_fkey"
             columns: ["location_id"]
