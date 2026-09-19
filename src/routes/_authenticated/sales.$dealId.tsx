@@ -495,7 +495,7 @@ function DealDesk() {
   const vehicle = deal.vehicles;
 
   return (
-    <div className="min-w-0 space-y-6 pb-16">
+    <div className="min-w-0 space-y-4 pb-10">
       <div>
         <Link
           to="/sales"
