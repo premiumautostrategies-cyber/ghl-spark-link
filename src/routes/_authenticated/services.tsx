@@ -672,12 +672,49 @@ function ServicesPage() {
       {categories.length > 0 && (
         <Panel className="space-y-3 p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search name, description or tag…"
-              className="h-9 w-full max-w-xs"
-            />
+            <div className="relative w-full max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search services..."
+                className="h-9 w-full pl-9"
+              />
+            </div>
+            <Select value={vehClass} onValueChange={setVehClass}>
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">All vehicle classes</SelectItem>
+                {VEHICLE_CLASSES.map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant={showPills ? "default" : "outline"}
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setShowPills((v) => !v)}
+              title="Toggle category filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+            <Select
+              value={selCats.length === 1 ? selCats[0]! : "all"}
+              onValueChange={(v) => setSelCats(v === "all" ? [] : [v])}
+            >
+              <SelectTrigger className="h-9 w-[190px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
               <SelectTrigger className="h-9 w-[190px]">
                 <SelectValue />
