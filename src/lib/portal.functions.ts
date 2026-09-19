@@ -250,3 +250,77 @@ export const getWarrantyByToken = createServerFn({ method: "GET" })
       vehicle: vehicle ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") : null,
     };
   });
+
+/* Customer hub — one link per customer, showing their own work only. */
+export const getCustomerPortal = createServerFn({ method: "GET" })
+  .inputValidator((d: { token: string }) => d)
+  .handler(async ({ data }) => {
+    const db = await admin();
+    const { data: customer } = await db
+      .from("customers")
+      .select("id,name,email,phone,organization_id")
+      .eq("portal_token", data.token)
+      .maybeSingle();
+    if (!customer) return null;
+
+    const [
+      { data: org },
+      { data: vehicles },
+      { data: deals },
+      { data: proposals },
+      { data: warranties },
+      { data: aftercare },
+      { data: payments },
+    ] = await Promise.all([
+      db.from("organizations").select("name,accent_color,phone,review_url").eq("id", customer.organization_id).maybeSingle(),
+      db.from("vehicles").select("id,year,make,model,color,plate").eq("customer_id", customer.id),
+      db
+        .from("deals")
+        .select("id,title,stage,value,vehicle_id,updated_at")
+        .eq("customer_id", customer.id)
+        .order("updated_at", { ascending: false }),
+      db
+        .from("proposals")
+        .select("id,token,title,status,total,deposit_amount,signed_at,updated_at,vehicle_id")
+        .eq("customer_id", customer.id)
+        .order("updated_at", { ascending: false }),
+      db
+        .from("warranties")
+        .select("id,token,certificate_number,product,issued_at,expires_at,status,roll_lots,vehicle_id")
+        .eq("customer_id", customer.id)
+        .order("issued_at", { ascending: false }),
+      db
+        .from("aftercare_tasks")
+        .select("id,kind,body,status,scheduled_for,sent_at")
+        .eq("customer_id", customer.id)
+        .order("scheduled_for"),
+      db
+        .from("payments")
+        .select("id,amount,kind,status,paid_at,method")
+        .eq("customer_id", customer.id)
+        .order("paid_at", { ascending: false }),
+    ]);
+
+    const vehicleLabel = (id: string | null) => {
+      const v = (vehicles ?? []).find((x) => x.id === id);
+      return v ? [v.year, v.make, v.model].filter(Boolean).join(" ") : null;
+    };
+
+    return {
+      shopName: org?.name ?? "Our shop",
+      shopPhone: org?.phone ?? null,
+      reviewUrl: org?.review_url ?? null,
+      accent: org?.accent_color ?? null,
+      customer: { name: customer.name, email: customer.email, phone: customer.phone },
+      vehicles: (vehicles ?? []).map((v) => ({
+        id: v.id,
+        label: [v.year, v.make, v.model, v.color].filter(Boolean).join(" ") || "Vehicle",
+        plate: v.plate,
+      })),
+      deals: (deals ?? []).map((d) => ({ ...d, vehicle: vehicleLabel(d.vehicle_id) })),
+      proposals: (proposals ?? []).map((p) => ({ ...p, vehicle: vehicleLabel(p.vehicle_id) })),
+      warranties: (warranties ?? []).map((w) => ({ ...w, vehicle: vehicleLabel(w.vehicle_id) })),
+      aftercare: (aftercare ?? []).filter((t) => t.status === "sent" || new Date(t.scheduled_for) <= new Date()),
+      payments: payments ?? [],
+    };
+  });
