@@ -86,6 +86,8 @@ type Service = {
   customer_description: string | null;
   base_price: number | string;
   duration_minutes: number;
+  estimated_hours: number | string | null;
+  supports_add_ons: boolean;
   unit: string;
   is_active: boolean;
   image_url: string | null;
