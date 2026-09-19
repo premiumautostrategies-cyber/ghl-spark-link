@@ -36,6 +36,7 @@ import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/connect
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 import { Route as OauthQuickbooksReturnRouteImport } from './routes/oauth/quickbooks/return'
 import { Route as PProposalTokenRouteImport } from './routes/p/proposal.$token'
+import { Route as PWaiverTokenRouteImport } from './routes/p/waiver.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -176,6 +177,11 @@ const PProposalTokenRoute = PProposalTokenRouteImport.update({
   path: '/p/proposal/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PWaiverTokenRoute = PWaiverTokenRouteImport.update({
+  id: '/p/waiver/$token',
+  path: '/p/waiver/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
+  '/p/waiver/$token': typeof PWaiverTokenRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -231,6 +238,7 @@ export interface FileRoutesByTo {
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
+  '/p/waiver/$token': typeof PWaiverTokenRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
+  '/p/waiver/$token': typeof PWaiverTokenRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
     | '/p/proposal/$token'
+    | '/p/waiver/$token'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
     | '/p/proposal/$token'
+    | '/p/waiver/$token'
     | '/sales'
   id:
     | '__root__'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
     | '/p/proposal/$token'
+    | '/p/waiver/$token'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -360,6 +372,7 @@ export interface RootRouteChildren {
   OauthHubspotReturnRoute: typeof OauthHubspotReturnRoute
   OauthQuickbooksReturnRoute: typeof OauthQuickbooksReturnRoute
   PProposalTokenRoute: typeof PProposalTokenRoute
+  PWaiverTokenRoute: typeof PWaiverTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -553,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProposalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/waiver/$token': {
+      id: '/p/waiver/$token'
+      path: '/p/waiver/$token'
+      fullPath: '/p/waiver/$token'
+      preLoaderRoute: typeof PWaiverTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -612,6 +632,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthHubspotReturnRoute: OauthHubspotReturnRoute,
   OauthQuickbooksReturnRoute: OauthQuickbooksReturnRoute,
   PProposalTokenRoute: PProposalTokenRoute,
+  PWaiverTokenRoute: PWaiverTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
