@@ -495,7 +495,7 @@ function DealDesk() {
   const vehicle = deal.vehicles;
 
   return (
-    <div className="min-w-0 space-y-6 pb-16">
+    <div className="min-w-0 space-y-4 pb-10">
       <div>
         <Link
           to="/sales"
@@ -503,7 +503,7 @@ function DealDesk() {
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Pipeline
         </Link>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="micro-label">Sales desk</p>
             <h1 className="display-title mt-1 text-3xl">{deal.title}</h1>
@@ -526,15 +526,15 @@ function DealDesk() {
       </div>
 
 
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Quote builder */}
         <Panel className="min-w-0">
           <SectionTitle
             title="Quote builder"
-            hint="Pick services from the menu or add a custom line."
+            hint="Tap a service to add it to the quote — ones with options open first."
             right={<Tag tone={estimate?.status === "sent" ? "comms" : "muted"}>{label(estimate?.status ?? "draft")}</Tag>}
           />
-          <div className="border-t border-elevated p-5">
+          <div className="border-t border-elevated p-4">
             <ServicePicker
               services={services}
               categories={catalogCategories}
@@ -542,7 +542,7 @@ function DealDesk() {
               onAdd={(line) => addLine.mutate(line)}
             />
 
-            <div className="mt-5 space-y-2">
+            <div className="mt-3 space-y-1.5">
               {items.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-elevated p-6 text-center text-xs text-muted-foreground">
                   Nothing on this quote yet.
@@ -576,7 +576,7 @@ function DealDesk() {
             </div>
 
             <form
-              className="mt-4 flex flex-wrap items-end gap-2"
+              className="mt-3 flex flex-wrap items-end gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
@@ -607,7 +607,7 @@ function DealDesk() {
               </Button>
             </form>
 
-            <div className="mt-5 space-y-1.5 border-t border-elevated pt-4 text-sm">
+            <div className="mt-4 space-y-1.5 border-t border-elevated pt-3 text-sm">
               <Row label="Subtotal" value={money(subtotal)} />
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -620,7 +620,7 @@ function DealDesk() {
               <Row label="Suggested deposit (30%)" value={money(total * 0.3)} />
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button onClick={() => sendProposal.mutate()} disabled={sendProposal.isPending}>
                 Send proposal to client hub
               </Button>
@@ -631,7 +631,7 @@ function DealDesk() {
           </div>
         </Panel>
 
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-4">
           {/* Scheduling */}
           <Panel>
             <SectionTitle
@@ -640,7 +640,7 @@ function DealDesk() {
               right={job ? <Tag tone="rig">{label(job.status)}</Tag> : undefined}
             />
             <form
-              className="grid gap-3 border-t border-elevated p-5 sm:grid-cols-2"
+              className="grid gap-2.5 border-t border-elevated p-4 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 schedule.mutate(new FormData(e.currentTarget));
@@ -738,7 +738,7 @@ function DealDesk() {
               hint={`${money(collected)} collected of ${money(total)}`}
             />
             <form
-              className="grid gap-3 border-t border-elevated p-5 sm:grid-cols-2"
+              className="grid gap-2.5 border-t border-elevated p-4 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 takePayment.mutate(new FormData(e.currentTarget));
@@ -786,7 +786,7 @@ function DealDesk() {
               </Button>
             </form>
             {payments.length > 0 && (
-              <div className="space-y-1.5 border-t border-elevated p-5 pt-4">
+              <div className="space-y-1.5 border-t border-elevated p-4 pt-3">
                 {payments.slice(0, 4).map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-2 text-sm">
                     <span className="text-muted-foreground">
@@ -802,7 +802,7 @@ function DealDesk() {
           {/* Client hub documents */}
           <Panel>
             <SectionTitle title="Client hub" hint="Everything the customer can see and sign." />
-            <div className="border-t border-elevated p-5">
+            <div className="border-t border-elevated p-4">
               <div className="flex flex-wrap gap-1.5">
                 {DOC_TYPES.filter((d) => d !== "invoice" && d !== "photo_set").map((d) => (
                   <Button
@@ -816,7 +816,7 @@ function DealDesk() {
                   </Button>
                 ))}
               </div>
-              <div className="mt-4 space-y-1.5">
+              <div className="mt-3 space-y-1.5">
                 {documents.length === 0 ? (
                   <p className="text-xs text-muted-foreground">Nothing shared yet.</p>
                 ) : (
@@ -895,9 +895,9 @@ function NotesPanel({
   return (
     <Panel>
       <SectionTitle title="Conversation notes" />
-      <div className="space-y-3 border-t border-elevated p-5">
+      <div className="space-y-2.5 border-t border-elevated p-4">
         <Textarea
-          rows={4}
+          rows={3}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="What the customer wants, objections, next step…"
@@ -1070,32 +1070,33 @@ function ServicePicker({
 
       <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
         {visible.map((s) => {
-          const c = s.category_id ? catById[s.category_id] : undefined;
           const count = options.filter((o) => o.service_id === s.id).length;
           return (
             <button
               key={s.id}
               type="button"
-              onClick={() => setPicked(s)}
-              className="w-[196px] shrink-0 overflow-hidden rounded-xl border border-elevated bg-surface-2 text-left transition-colors hover:border-bronze/50"
+              onClick={() =>
+                count > 0
+                  ? setPicked(s)
+                  : onAdd({
+                      description: s.name,
+                      quantity: 1,
+                      unit_price: Number(s.base_price),
+                    })
+              }
+              className="w-[180px] shrink-0 rounded-xl border border-elevated bg-surface-2 p-2.5 text-left transition-colors hover:border-bronze/50"
             >
-              <img
-                src={catalogImage(s.image_url, c?.slug ?? s.category, c?.image_url)}
-                alt={s.name}
-                loading="lazy"
-                className="h-20 w-full object-cover"
-              />
-              <div className="p-3">
-                <p className="text-sm font-semibold leading-tight">{s.name}</p>
-                <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">
-                  {s.customer_description || s.description || (c?.name ?? label(s.category))}
-                </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm font-semibold tabular-nums text-bronze">
-                    {money(s.base_price)}
-                  </span>
-                  {count > 0 && <Tag tone="muted">{count} options</Tag>}
-                </div>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[13px] font-semibold leading-tight">{s.name}</p>
+                <Plus className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bronze" />
+              </div>
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <span className="text-[13px] font-semibold tabular-nums text-bronze">
+                  {money(s.base_price)}
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  {count > 0 ? `${count} options` : `${(s.duration_minutes / 60).toFixed(1)}h`}
+                </span>
               </div>
             </button>
           );
