@@ -130,7 +130,7 @@ export async function seedDemoData(orgId: string, locId: string | null) {
       service_id: svcId(o.service),
       organization_id: orgId,
     }))
-    .filter((o) => o.service_id)
+    .filter((o): o is typeof o & { service_id: string } => !!o.service_id)
     .map(({ service: _s, ...rest }) => rest);
   const optIns = await supabase.from("service_options").insert(optionRows);
   if (optIns.error) throw optIns.error;
