@@ -431,6 +431,8 @@ function ServicesPage() {
         description: String(form.get("description") || "") || null,
         price: Number(form.get("price") || 0),
         estimated_hours: Number(form.get("estimated_hours") || 0),
+        pricing_mode: String(form.get("pricing_mode") || "flat"),
+        hourly_rate: Number(form.get("hourly_rate") || 0),
         category_id: categoryId && categoryId !== "global" ? categoryId : null,
         is_global: !categoryId || categoryId === "global",
         sort_order: addOns.length,
