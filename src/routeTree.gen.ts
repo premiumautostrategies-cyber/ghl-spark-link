@@ -37,6 +37,7 @@ import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/r
 import { Route as OauthQuickbooksReturnRouteImport } from './routes/oauth/quickbooks/return'
 import { Route as PProposalTokenRouteImport } from './routes/p/proposal.$token'
 import { Route as PWaiverTokenRouteImport } from './routes/p/waiver.$token'
+import { Route as PWarrantyTokenRouteImport } from './routes/p/warranty.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -182,6 +183,11 @@ const PWaiverTokenRoute = PWaiverTokenRouteImport.update({
   path: '/p/waiver/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PWarrantyTokenRoute = PWarrantyTokenRouteImport.update({
+  id: '/p/warranty/$token',
+  path: '/p/warranty/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
+  '/p/warranty/$token': typeof PWarrantyTokenRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
+  '/p/warranty/$token': typeof PWarrantyTokenRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -270,6 +278,7 @@ export interface FileRoutesById {
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
+  '/p/warranty/$token': typeof PWarrantyTokenRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
     | '/oauth/quickbooks/return'
     | '/p/proposal/$token'
     | '/p/waiver/$token'
+    | '/p/warranty/$token'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/oauth/quickbooks/return'
     | '/p/proposal/$token'
     | '/p/waiver/$token'
+    | '/p/warranty/$token'
     | '/sales'
   id:
     | '__root__'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/oauth/quickbooks/return'
     | '/p/proposal/$token'
     | '/p/waiver/$token'
+    | '/p/warranty/$token'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -373,6 +385,7 @@ export interface RootRouteChildren {
   OauthQuickbooksReturnRoute: typeof OauthQuickbooksReturnRoute
   PProposalTokenRoute: typeof PProposalTokenRoute
   PWaiverTokenRoute: typeof PWaiverTokenRoute
+  PWarrantyTokenRoute: typeof PWarrantyTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -573,6 +586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PWaiverTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/warranty/$token': {
+      id: '/p/warranty/$token'
+      path: '/p/warranty/$token'
+      fullPath: '/p/warranty/$token'
+      preLoaderRoute: typeof PWarrantyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -633,6 +653,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthQuickbooksReturnRoute: OauthQuickbooksReturnRoute,
   PProposalTokenRoute: PProposalTokenRoute,
   PWaiverTokenRoute: PWaiverTokenRoute,
+  PWarrantyTokenRoute: PWarrantyTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
