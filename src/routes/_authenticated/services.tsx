@@ -819,6 +819,11 @@ function ServicesPage() {
                   </div>
                 </div>
               </Panel>
+                    );
+                    })}
+                  </div>
+                )}
+              </section>
             );
           })}
         </div>
