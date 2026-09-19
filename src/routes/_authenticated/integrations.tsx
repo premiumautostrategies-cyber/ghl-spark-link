@@ -288,17 +288,20 @@ function IntegrationsPage() {
 
               {!configured && (
                 <p className="rounded-md border border-border bg-background p-2 text-xs text-muted-foreground">
-                  {def.name} setup for this app is not finished yet, so connecting is unavailable.
+                  Demo workspace: {def.name} sign-in is not switched on yet. The sync rules,
+                  toggles and activity log below are live — turn the account on when you're ready
+                  to go live.
                 </p>
               )}
 
-              {connected && (
+              {(
                 <div className="space-y-2">
                   {def.settings.map((s) => (
                     <div key={s.key} className="flex items-center justify-between gap-3">
                       <span className="text-sm">{s.label}</span>
                       <Switch
-                        checked={conn?.settings?.[s.key] !== false}
+                        checked={connected ? conn?.settings?.[s.key] !== false : false}
+                        disabled={!connected}
                         onCheckedChange={(value) =>
                           setToggle.mutate({ provider: def.id, key: s.key, value })
                         }
@@ -308,9 +311,11 @@ function IntegrationsPage() {
                   {def.twoWay && (
                     <p className="pt-1 text-xs text-muted-foreground">Two-way: {def.twoWay}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Last sync {timeAgo(conn?.lastSyncAt)}
-                  </p>
+                  {connected && (
+                    <p className="text-xs text-muted-foreground">
+                      Last sync {timeAgo(conn?.lastSyncAt)}
+                    </p>
+                  )}
                 </div>
               )}
 
