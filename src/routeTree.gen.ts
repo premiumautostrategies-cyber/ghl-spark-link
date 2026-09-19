@@ -31,6 +31,7 @@ import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedVehiclesRouteImport } from './routes/_authenticated/vehicles'
+import { Route as AuthenticatedWarrantyRouteImport } from './routes/_authenticated/warranty'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
 import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync-drain'
@@ -154,6 +155,11 @@ const AuthenticatedVehiclesRoute = AuthenticatedVehiclesRouteImport.update({
   path: '/vehicles',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedWarrantyRoute = AuthenticatedWarrantyRouteImport.update({
+  id: '/warranty',
+  path: '/warranty',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/sales/',
   path: '/sales/',
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
+  '/warranty': typeof AuthenticatedWarrantyRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/vehicles': typeof AuthenticatedVehiclesRoute
+  '/warranty': typeof AuthenticatedWarrantyRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/vehicles': typeof AuthenticatedVehiclesRoute
+  '/_authenticated/warranty': typeof AuthenticatedWarrantyRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/vehicles'
+    | '/warranty'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/vehicles'
+    | '/warranty'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -388,6 +399,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/team'
     | '/_authenticated/vehicles'
+    | '/_authenticated/warranty'
     | '/_authenticated/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -568,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVehiclesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/warranty': {
+      id: '/_authenticated/warranty'
+      path: '/warranty'
+      fullPath: '/warranty'
+      preLoaderRoute: typeof AuthenticatedWarrantyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/': {
       id: '/_authenticated/sales/'
       path: '/sales'
@@ -654,6 +673,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedVehiclesRoute: typeof AuthenticatedVehiclesRoute
+  AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
@@ -678,6 +698,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedVehiclesRoute: AuthenticatedVehiclesRoute,
+  AuthenticatedWarrantyRoute: AuthenticatedWarrantyRoute,
   AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
 }
