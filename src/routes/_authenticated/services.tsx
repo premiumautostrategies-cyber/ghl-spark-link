@@ -604,23 +604,54 @@ function ServicesPage() {
   return (
     <div className="min-w-0 space-y-6">
       <PageHeader
-        title="Service Library"
-        subtitle="Categories, packages, film tiers and the panels each one covers."
+        title="Services & Film Catalog"
+        subtitle="Manage services, pricing, and film listings"
         action={
           <div className="flex gap-2">
             <CategoryDialog
               categories={categories}
               onSave={(form) => saveCategory.mutate({ form })}
             />
-            <Button onClick={openNew}>New service</Button>
+            <Button onClick={openNew}>
+              <Plus className="mr-1.5 h-4 w-4" /> Add Service
+            </Button>
           </div>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Kpi label="Categories" value={String(categories.length)} />
-        <Kpi label="Active services" value={String(active.length)} tone="rig" />
-        <Kpi label="Average ticket" value={money(avg)} tone="revenue" />
+      {/* Sub-navigation */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setFilmsOnly(false)}
+          className={cn(
+            "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
+            !filmsOnly
+              ? "border-bronze bg-bronze/15 text-bronze"
+              : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Services
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/packages" })}
+          className="rounded-full border border-hairline/60 bg-surface-2 px-4 py-1.5 text-xs uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Vehicle Packages
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilmsOnly(true)}
+          className={cn(
+            "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
+            filmsOnly
+              ? "border-bronze bg-bronze/15 text-bronze"
+              : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Film Listings
+        </button>
       </div>
 
       {categories.length === 0 && (
