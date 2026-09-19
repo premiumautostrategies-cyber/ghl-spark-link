@@ -86,11 +86,43 @@ type Service = {
   customer_description: string | null;
   base_price: number | string;
   duration_minutes: number;
+  estimated_hours: number | string | null;
+  supports_add_ons: boolean;
   unit: string;
   is_active: boolean;
   image_url: string | null;
   swatch_color: string | null;
   coverage_panels: string[];
+};
+
+type Variant = {
+  id: string;
+  service_id: string;
+  tier_name: string;
+  description: string | null;
+  price: number | string;
+  estimated_hours: number | string;
+  sort_order: number;
+};
+
+type AddOn = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number | string;
+  estimated_hours: number | string;
+  category_id: string | null;
+  service_id: string | null;
+  is_global: boolean;
+  is_active: boolean;
+  swatch_color: string | null;
+};
+
+type ServiceAddOnLink = {
+  id: string;
+  service_id: string;
+  add_on_id: string;
+  is_recommended: boolean;
 };
 
 function ServicesPage() {
@@ -102,10 +134,16 @@ function ServicesPage() {
   const [draftPanels, setDraftPanels] = useState<string[]>([]);
 
   const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["service-categories"] });
-    qc.invalidateQueries({ queryKey: ["services"] });
-    qc.invalidateQueries({ queryKey: ["service-options"] });
-    qc.invalidateQueries({ queryKey: ["services-catalog"] });
+    for (const k of [
+      "service-categories",
+      "services",
+      "service-options",
+      "services-catalog",
+      "service-variants",
+      "add-ons",
+      "service-add-ons",
+    ])
+      qc.invalidateQueries({ queryKey: [k] });
   };
 
   const { data: categories = [] } = useQuery({
@@ -150,7 +188,49 @@ function ServicesPage() {
     },
   });
 
+  const { data: variants = [] } = useQuery({
+    queryKey: ["service-variants"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_variants")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order");
+      if (error) throw error;
+      return data as unknown as Variant[];
+    },
+  });
+
+  const { data: addOns = [] } = useQuery({
+    queryKey: ["add-ons"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("add_ons")
+        .select("*")
+        .is("deleted_at", null)
+        .order("sort_order")
+        .order("name");
+      if (error) throw error;
+      return data as unknown as AddOn[];
+    },
+  });
+
+  const { data: addOnLinks = [] } = useQuery({
+    queryKey: ["service-add-ons"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("service_add_ons").select("*");
+      if (error) throw error;
+      return data as unknown as ServiceAddOnLink[];
+    },
+  });
+
   const optionsFor = (serviceId: string) => options.filter((o) => o.service_id === serviceId);
+  const variantsFor = (serviceId: string) => variants.filter((v) => v.service_id === serviceId);
+  const linksFor = (serviceId: string) => addOnLinks.filter((l) => l.service_id === serviceId);
+  const addOnById = useMemo(
+    () => Object.fromEntries(addOns.map((a) => [a.id, a])) as Record<string, AddOn>,
+    [addOns],
+  );
   const catById = useMemo(
     () => Object.fromEntries(categories.map((c) => [c.id, c])) as Record<string, Category>,
     [categories],
@@ -228,7 +308,9 @@ function ServicesPage() {
         description: String(form.get("description") || "") || null,
         customer_description: String(form.get("customer_description") || "") || null,
         base_price: Number(form.get("base_price") || 0),
-        duration_minutes: Number(form.get("duration_minutes") || 120),
+        estimated_hours: Number(form.get("estimated_hours") || 2),
+        duration_minutes: Math.round(Number(form.get("estimated_hours") || 2) * 60),
+        supports_add_ons: form.get("supports_add_ons") === "on",
         unit: String(form.get("unit") || "job"),
         image_url: String(form.get("image_url") || "") || null,
         swatch_color: String(form.get("swatch_color") || "") || null,
@@ -285,6 +367,98 @@ function ServicesPage() {
   const removeOption = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("service_options").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const addVariant = useMutation({
+    mutationFn: async ({ serviceId, form }: { serviceId: string; form: FormData }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error } = await supabase.from("service_variants").insert({
+        service_id: serviceId,
+        organization_id: orgId,
+        tier_name: String(form.get("tier_name")),
+        description: String(form.get("description") || "") || null,
+        price: Number(form.get("price") || 0),
+        estimated_hours: Number(form.get("estimated_hours") || 0),
+        sort_order: variantsFor(serviceId).length,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Tier added");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeVariant = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("service_variants").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveAddOn = useMutation({
+    mutationFn: async (form: FormData) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const categoryId = String(form.get("category_id") || "");
+      const { error } = await supabase.from("add_ons").insert({
+        organization_id: orgId,
+        name: String(form.get("name")),
+        description: String(form.get("description") || "") || null,
+        price: Number(form.get("price") || 0),
+        estimated_hours: Number(form.get("estimated_hours") || 0),
+        category_id: categoryId && categoryId !== "global" ? categoryId : null,
+        is_global: !categoryId || categoryId === "global",
+        sort_order: addOns.length,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Add-on saved");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const removeAddOn = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("add_ons")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const toggleLink = useMutation({
+    mutationFn: async ({
+      serviceId,
+      addOnId,
+      link,
+    }: {
+      serviceId: string;
+      addOnId: string;
+      link?: ServiceAddOnLink | undefined;
+    }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      if (link) {
+        const { error } = await supabase.from("service_add_ons").delete().eq("id", link.id);
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.from("service_add_ons").insert({
+        service_id: serviceId,
+        add_on_id: addOnId,
+        organization_id: orgId,
+      });
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -473,6 +647,67 @@ function ServicesPage() {
         </div>
       )}
 
+      {/* Add-on library */}
+      <Panel className="space-y-3 p-4">
+        <div>
+          <p className="micro-label">Add-on library</p>
+          <p className="text-xs text-muted-foreground">
+            Extras any service can offer — attach them per service in the editor.
+          </p>
+        </div>
+        {addOns.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {addOns.map((a) => (
+              <span
+                key={a.id}
+                className="flex items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2 text-sm"
+              >
+                {a.name}
+                <span className="tabular-nums text-bronze">+{money(a.price)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {a.category_id ? catById[a.category_id]?.name : "Global"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeAddOn.mutate(a.id)}
+                  className="text-muted-foreground hover:text-critical"
+                  aria-label="Remove add-on"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <form
+          className="grid gap-2 sm:grid-cols-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            saveAddOn.mutate(new FormData(e.currentTarget));
+            e.currentTarget.reset();
+          }}
+        >
+          <Input name="name" placeholder="Add-on name" required />
+          <Input name="price" type="number" step="0.01" placeholder="Price" />
+          <Input name="estimated_hours" type="number" step="0.25" placeholder="Hours" />
+          <select
+            name="category_id"
+            className="h-10 rounded-md border border-elevated bg-surface-2 px-3 text-sm"
+            defaultValue="global"
+          >
+            <option value="global">All categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <Button type="submit" variant="outline" disabled={saveAddOn.isPending}>
+            <Plus className="mr-1 h-4 w-4" /> Add
+          </Button>
+        </form>
+      </Panel>
+
       {/* New / edit service */}
       <Dialog
         open={newService || !!editing}
@@ -531,14 +766,31 @@ function ServicesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sv-dur">Bay time (minutes)</Label>
+                <Label htmlFor="sv-dur">Estimated hours</Label>
                 <Input
                   id="sv-dur"
-                  name="duration_minutes"
+                  name="estimated_hours"
                   type="number"
-                  defaultValue={String(editing?.duration_minutes ?? 120)}
+                  step="0.25"
+                  defaultValue={String(
+                    editing?.estimated_hours ?? (editing ? editing.duration_minutes / 60 : 2),
+                  )}
                 />
               </div>
+              <label className="flex items-center justify-between gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2 sm:col-span-2">
+                <span>
+                  <span className="block text-sm font-medium">Allow add-ons</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Lets advisors attach extras from the add-on library when quoting.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  name="supports_add_ons"
+                  defaultChecked={editing?.supports_add_ons ?? true}
+                  className="size-4 accent-bronze"
+                />
+              </label>
               <div className="space-y-2">
                 <Label htmlFor="sv-img">Photo URL</Label>
                 <Input
@@ -610,7 +862,101 @@ function ServicesPage() {
 
           {editing && (
             <div className="space-y-3 border-t border-elevated pt-4">
-              <p className="micro-label">Options, tiers &amp; add-ons</p>
+              <p className="micro-label">Vehicle-size tiers</p>
+              <div className="space-y-2">
+                {variantsFor(editing.id).length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    No tiers yet — add Small/Coupe, Midsize/Sedan and Large/SUV pricing.
+                  </p>
+                )}
+                {variantsFor(editing.id).map((v) => (
+                  <div
+                    key={v.id}
+                    className="flex items-center gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{v.tier_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {Number(v.estimated_hours)}h{v.description ? ` · ${v.description}` : ""}
+                      </p>
+                    </div>
+                    <span className="text-sm tabular-nums text-bronze">{money(v.price)}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeVariant.mutate(v.id)}
+                      className="text-muted-foreground hover:text-critical"
+                      aria-label="Remove tier"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <form
+                className="grid gap-2 rounded-xl border border-dashed border-elevated p-4 sm:grid-cols-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addVariant.mutate({ serviceId: editing.id, form: new FormData(e.currentTarget) });
+                  e.currentTarget.reset();
+                }}
+              >
+                <Input name="tier_name" placeholder="Large / SUV / Truck" required />
+                <Input name="price" type="number" step="0.01" placeholder="Price" />
+                <Input name="estimated_hours" type="number" step="0.25" placeholder="Hours" />
+                <Button type="submit" variant="outline" disabled={addVariant.isPending}>
+                  <Plus className="mr-1 h-4 w-4" /> Add tier
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {editing && editing.supports_add_ons && (
+            <div className="space-y-3 border-t border-elevated pt-4">
+              <p className="micro-label">Allowed add-ons</p>
+              {addOns.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Build your add-on library below the service grid first.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {addOns
+                    .filter(
+                      (a) =>
+                        a.is_global ||
+                        !a.category_id ||
+                        a.category_id === editing.category_id,
+                    )
+                    .map((a) => {
+                      const link = linksFor(editing.id).find((l) => l.add_on_id === a.id);
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() =>
+                            toggleLink.mutate({ serviceId: editing.id, addOnId: a.id, link })
+                          }
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-left text-sm transition-colors",
+                            link
+                              ? "border-bronze/60 bg-bronze/10 text-bronze"
+                              : "border-elevated bg-surface-2 hover:border-hairline",
+                          )}
+                        >
+                          {a.name}
+                          <span className="ml-2 text-xs tabular-nums text-muted-foreground">
+                            +{money(a.price)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {editing && (
+            <div className="space-y-3 border-t border-elevated pt-4">
+              <p className="micro-label">Options &amp; film tiers</p>
               <div className="space-y-2">
                 {optionsFor(editing.id).length === 0 && (
                   <p className="text-xs text-muted-foreground">
