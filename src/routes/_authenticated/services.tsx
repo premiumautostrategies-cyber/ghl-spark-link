@@ -521,6 +521,7 @@ function ServicesPage() {
         return a.name.localeCompare(b.name);
     }
   });
+  const visible = filmsOnly ? sorted.filter((s) => optionsFor(s.id).length > 0) : sorted;
   const singleCat = selCats.length === 1 ? selCats[0]! : null;
   const groups: { key: string; name: string; accent: string | null; items: Service[] }[] = singleCat
     ? [{ key: singleCat, name: catById[singleCat]?.name ?? "", accent: catById[singleCat]?.accent_color ?? null, items: sorted }]
@@ -535,7 +536,6 @@ function ServicesPage() {
   const uncategorized = visible.filter((s) => !s.category_id || !catById[s.category_id]);
   if (!singleCat && uncategorized.length > 0)
     groups.push({ key: "uncat", name: "Uncategorized", accent: null, items: uncategorized });
-  const visible = filmsOnly ? sorted.filter((s) => optionsFor(s.id).length > 0) : sorted;
 
   const VEHICLE_CLASSES = [
     "Sedan",
