@@ -137,6 +137,9 @@ function ServicesPage() {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
   const [selCats, setSelCats] = useState<string[]>([]);
+  const [vehClass, setVehClass] = useState("any");
+  const [showPills, setShowPills] = useState(false);
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"alpha" | "price_desc" | "price_asc" | "duration" | "popular">(
     "alpha",
