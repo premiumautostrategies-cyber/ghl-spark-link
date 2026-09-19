@@ -294,13 +294,14 @@ function IntegrationsPage() {
                 </p>
               )}
 
-              {connected && (
+              {(
                 <div className="space-y-2">
                   {def.settings.map((s) => (
                     <div key={s.key} className="flex items-center justify-between gap-3">
                       <span className="text-sm">{s.label}</span>
                       <Switch
-                        checked={conn?.settings?.[s.key] !== false}
+                        checked={connected ? conn?.settings?.[s.key] !== false : false}
+                        disabled={!connected}
                         onCheckedChange={(value) =>
                           setToggle.mutate({ provider: def.id, key: s.key, value })
                         }
@@ -310,9 +311,11 @@ function IntegrationsPage() {
                   {def.twoWay && (
                     <p className="pt-1 text-xs text-muted-foreground">Two-way: {def.twoWay}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Last sync {timeAgo(conn?.lastSyncAt)}
-                  </p>
+                  {connected && (
+                    <p className="text-xs text-muted-foreground">
+                      Last sync {timeAgo(conn?.lastSyncAt)}
+                    </p>
+                  )}
                 </div>
               )}
 
