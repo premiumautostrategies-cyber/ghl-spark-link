@@ -12,6 +12,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { MessageSquare, Phone, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
 import { EmptyState, PageHeader } from "@/components/page-header";
