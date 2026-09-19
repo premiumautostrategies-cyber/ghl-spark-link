@@ -516,14 +516,16 @@ function DashboardWidget({ widget, customizing, compact, onHide, onSize, childre
   const span = widget.size === "full" ? "xl:col-span-6" : widget.size === "wide" ? "xl:col-span-4" : "xl:col-span-2";
   return (
     <section ref={setDropRef} className={cn("min-w-0", span, isOver && "rounded-xl ring-2 ring-bronze/60")}>
-      <Panel ref={setDragRef as never} className={cn("h-full overflow-hidden", compact ? "min-h-[270px]" : "min-h-[320px]", customizing && "border-bronze/25")} style={transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 40 } : undefined}>
-        <div className="flex items-center gap-2 border-b border-elevated px-4 py-3">
-          {customizing && <button type="button" className="cursor-grab text-muted-foreground active:cursor-grabbing" aria-label={`Move ${DASHBOARD_WIDGETS[widget.id].name}`} {...listeners} {...attributes}><GripVertical className="size-4" /></button>}
-          <div className="min-w-0 flex-1"><h2 className="font-display text-sm font-semibold uppercase">{DASHBOARD_WIDGETS[widget.id].name}</h2><p className="truncate text-[11px] text-muted-foreground">{DASHBOARD_WIDGETS[widget.id].description}</p></div>
-          {customizing && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Widget options"><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuLabel>Widget size</DropdownMenuLabel><DropdownMenuItem onSelect={() => onSize("half")}><Minimize2 /> Half width</DropdownMenuItem><DropdownMenuItem onSelect={() => onSize("wide")}><LayoutDashboard /> Wide</DropdownMenuItem><DropdownMenuItem onSelect={() => onSize("full")}><Maximize2 /> Full width</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem onSelect={onHide} className="text-critical"><X /> Hide widget</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}
-        </div>
-        {children}
-      </Panel>
+      <div ref={setDragRef} className="h-full" style={transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 40 } : undefined}>
+        <Panel className={cn("h-full overflow-hidden", compact ? "min-h-[270px]" : "min-h-[320px]", customizing && "border-bronze/25")}>
+          <div className="flex items-center gap-2 border-b border-elevated px-4 py-3">
+            {customizing && <button type="button" className="cursor-grab text-muted-foreground active:cursor-grabbing" aria-label={`Move ${DASHBOARD_WIDGETS[widget.id].name}`} {...listeners} {...attributes}><GripVertical className="size-4" /></button>}
+            <div className="min-w-0 flex-1"><h2 className="font-display text-sm font-semibold uppercase">{DASHBOARD_WIDGETS[widget.id].name}</h2><p className="truncate text-[11px] text-muted-foreground">{DASHBOARD_WIDGETS[widget.id].description}</p></div>
+            {customizing && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Widget options"><MoreHorizontal /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuLabel>Widget size</DropdownMenuLabel><DropdownMenuItem onSelect={() => onSize("half")}><Minimize2 /> Half width</DropdownMenuItem><DropdownMenuItem onSelect={() => onSize("wide")}><LayoutDashboard /> Wide</DropdownMenuItem><DropdownMenuItem onSelect={() => onSize("full")}><Maximize2 /> Full width</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem onSelect={onHide} className="text-critical"><X /> Hide widget</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}
+          </div>
+          {children}
+        </Panel>
+      </div>
     </section>
   );
 }
