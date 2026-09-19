@@ -35,7 +35,7 @@ import {
   catalogImage,
 } from "@/lib/catalog";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/services")({
   head: () => ({
