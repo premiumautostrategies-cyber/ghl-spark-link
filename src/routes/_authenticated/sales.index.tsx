@@ -50,7 +50,9 @@ type Deal = {
   last_activity_at: string | null;
   notes: string | null;
   created_at: string;
-  customers: { name: string } | null;
+  service_tags: string[] | null;
+  customers: { name: string; phone: string | null; email: string | null } | null;
+  vehicles: { year: number | null; make: string | null; model: string | null } | null;
 };
 
 type FilterKey = "all" | "untouched" | "high" | "closing";
@@ -83,6 +85,7 @@ function SalesPage() {
   const { orgId, locId } = useOrg();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -91,7 +94,7 @@ function SalesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("deals")
-        .select("*, customers(name)")
+        .select("*, customers(name, phone, email), vehicles(year, make, model)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -155,16 +158,34 @@ function SalesPage() {
     : 0;
 
   const visible = useMemo(() => {
+    let list = deals;
     if (filter === "untouched")
-      return deals.filter(
+      list = list.filter(
         (d) =>
           !d.last_activity_at ||
           Date.now() - new Date(d.last_activity_at).getTime() > 3 * 86400000,
       );
-    if (filter === "high") return deals.filter((d) => Number(d.value) >= 2500);
-    if (filter === "closing") return deals.filter((d) => d.probability >= 60);
-    return deals;
-  }, [deals, filter]);
+    if (filter === "high") list = list.filter((d) => Number(d.value) >= 2500);
+    if (filter === "closing") list = list.filter((d) => d.probability >= 60);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((d) => {
+        const hay = [
+          d.title,
+          d.customers?.name,
+          d.source,
+          d.notes,
+          d.vehicles ? `${d.vehicles.year ?? ""} ${d.vehicles.make ?? ""} ${d.vehicles.model ?? ""}` : "",
+          ...(d.service_tags ?? []),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return list;
+  }, [deals, filter, search]);
 
   return (
     <div className="min-w-0 space-y-6">
