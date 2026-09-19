@@ -862,3 +862,116 @@ function NotesPanel({
     </Panel>
   );
 }
+
+const OPEN_HOUR = 8;
+const CLOSE_HOUR = 18;
+const BAY_LIST = BAYS;
+
+type DayJob = {
+  id: string;
+  title: string;
+  bay: string | null;
+  installer: string | null;
+  scheduled_start: string | null;
+  scheduled_end: string | null;
+};
+
+function DayAvailability({
+  date,
+  jobs,
+  currentJobId,
+  hours,
+  selected,
+  onPick,
+}: {
+  date: string;
+  jobs: DayJob[];
+  currentJobId: string | null;
+  hours: number;
+  selected: { bay: string; time: string };
+  onPick: (bay: string, time: string) => void;
+}) {
+  if (!date) {
+    return (
+      <p className="rounded-xl border border-dashed border-elevated p-4 text-center text-xs text-muted-foreground">
+        Pick a date to see which bays are open.
+      </p>
+    );
+  }
+
+  const slots = Array.from({ length: CLOSE_HOUR - OPEN_HOUR }, (_, i) => OPEN_HOUR + i);
+  const others = jobs.filter((j) => j.id !== currentJobId && j.scheduled_start);
+
+  const busy = (bay: string, hour: number) =>
+    others.find((j) => {
+      if ((j.bay ?? "Bay 1") !== bay) return false;
+      const s = new Date(j.scheduled_start as string);
+      const e = j.scheduled_end ? new Date(j.scheduled_end) : new Date(s.getTime() + 3600000);
+      const slotStart = new Date(s);
+      slotStart.setHours(hour, 0, 0, 0);
+      const slotEnd = new Date(slotStart.getTime() + 3600000);
+      return slotStart < e && slotEnd > s;
+    });
+
+  const selHour = Number(selected.time.slice(0, 2));
+  const span = Math.max(1, Math.round(hours));
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="micro-label">Bay availability</p>
+        <p className="text-[11px] text-muted-foreground">Tap an open slot to set the start time</p>
+      </div>
+      <div className="no-scrollbar overflow-x-auto rounded-xl border border-elevated">
+        <table className="w-full min-w-[520px] border-collapse text-[11px]">
+          <thead>
+            <tr>
+              <th className="w-24 px-2 py-1.5 text-left font-medium text-muted-foreground">Bay</th>
+              {slots.map((h) => (
+                <th key={h} className="px-0.5 py-1.5 font-medium text-muted-foreground">
+                  {h > 12 ? h - 12 : h}
+                  {h >= 12 ? "p" : "a"}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {BAY_LIST.map((bay) => (
+              <tr key={bay} className="border-t border-elevated">
+                <td className="px-2 py-1.5 text-muted-foreground">{bay}</td>
+                {slots.map((h) => {
+                  const taken = busy(bay, h);
+                  const picked =
+                    bay === selected.bay && h >= selHour && h < selHour + span;
+                  return (
+                    <td key={h} className="p-0.5">
+                      <button
+                        type="button"
+                        title={taken ? taken.title : `${bay} · ${h}:00`}
+                        disabled={!!taken}
+                        onClick={() => onPick(bay, `${String(h).padStart(2, "0")}:00`)}
+                        className={cn(
+                          "h-6 w-full rounded-[4px] transition-colors",
+                          taken
+                            ? "cursor-not-allowed bg-critical/25"
+                            : picked
+                              ? "bg-bronze"
+                              : "bg-elevated/60 hover:bg-elevated",
+                        )}
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex gap-3 text-[11px] text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-[3px] bg-bronze" /> This job</span>
+        <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-[3px] bg-critical/25" /> Booked</span>
+        <span className="flex items-center gap-1"><span className="h-2 w-3 rounded-[3px] bg-elevated/60" /> Open</span>
+      </div>
+    </div>
+  );
+}
