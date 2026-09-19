@@ -1068,7 +1068,7 @@ function ServicePicker({
         ))}
       </div>
 
-      <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {visible.map((s) => {
           const count = options.filter((o) => o.service_id === s.id).length;
           return (
@@ -1084,19 +1084,19 @@ function ServicePicker({
                       unit_price: Number(s.base_price),
                     })
               }
-              className="w-[180px] shrink-0 rounded-xl border border-elevated bg-surface-2 p-2.5 text-left transition-colors hover:border-bronze/50"
+              className="rounded-2xl border border-elevated bg-surface p-4 text-left transition-colors hover:border-bronze/50"
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-[13px] font-semibold leading-tight">{s.name}</p>
-                <Plus className="mt-0.5 h-3.5 w-3.5 shrink-0 text-bronze" />
+                <p className="text-sm font-semibold leading-tight">{s.name}</p>
+                <Plus className="mt-0.5 h-4 w-4 shrink-0 text-bronze" />
               </div>
-              <div className="mt-1.5 flex items-center justify-between gap-2">
-                <span className="text-[13px] font-semibold tabular-nums text-bronze">
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="text-base font-semibold tabular-nums text-bronze">
                   {money(s.base_price)}
                 </span>
-                <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-                  {count > 0 ? `${count} options` : `${(s.duration_minutes / 60).toFixed(1)}h`}
-                </span>
+                <Tag>
+                  {count > 0 ? `${count} options` : `${(s.duration_minutes / 60).toFixed(1)} h`}
+                </Tag>
               </div>
             </button>
           );

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { AccentTheme } from "@/components/accent-theme";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -88,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <AccentTheme />
       {/* Desktop sidebar */}
       <aside className="hidden w-[248px] flex-col border-r border-elevated bg-sidebar lg:flex">
         <div className="flex h-16 items-center px-5 hairline-b">

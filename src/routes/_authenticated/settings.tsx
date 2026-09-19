@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useState } from "react";
+import { ACCENT_PRESETS, DEFAULT_ACCENT, applyAccent } from "@/components/accent-theme";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -63,6 +65,30 @@ function SettingsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const savedAccent = (org as { accent_color?: string | null } | undefined)?.accent_color ?? null;
+  const [localAccent, setLocalAccent] = useState<string | null>(null);
+  const accent = localAccent ?? savedAccent ?? DEFAULT_ACCENT;
+
+  const setAccent = useMutation({
+    mutationFn: async (hex: string) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error } = await supabase
+        .from("organizations")
+        .update({ accent_color: hex })
+        .eq("id", orgId);
+      if (error) throw error;
+      return hex;
+    },
+    onSuccess: (hex) => {
+      setLocalAccent(hex);
+      applyAccent(hex);
+      toast.success("Brand colour updated");
+      qc.invalidateQueries({ queryKey: ["organization", orgId] });
+      qc.invalidateQueries({ queryKey: ["organization-accent", orgId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const loadDemo = useMutation({
     mutationFn: async () => {
       if (!orgId) throw new Error("No workspace selected");
@@ -99,6 +125,56 @@ function SettingsPage() {
         </form>
         <p className="mt-3 text-xs text-muted-foreground">Signed in as {user?.email}</p>
       </div>
+
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Brand colour</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Pick the highlight colour used across buttons, pricing and charts so the app matches your
+          company.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {ACCENT_PRESETS.map((p) => (
+            <button
+              key={p.hex}
+              type="button"
+              title={p.name}
+              onClick={() => setAccent.mutate(p.hex)}
+              className={`h-9 w-9 rounded-full border-2 transition-transform hover:scale-105 ${
+                accent.toLowerCase() === p.hex.toLowerCase()
+                  ? "border-foreground"
+                  : "border-transparent"
+              }`}
+              style={{ backgroundColor: p.hex }}
+            />
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap items-end gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="accent">Custom colour</Label>
+            <input
+              id="accent"
+              type="color"
+              value={accent}
+              onChange={(e) => {
+                setLocalAccent(e.target.value);
+                applyAccent(e.target.value);
+              }}
+              className="h-10 w-20 cursor-pointer rounded-lg border border-border bg-transparent p-1"
+            />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setAccent.mutate(accent)}
+            disabled={setAccent.isPending}
+          >
+            Save colour
+          </Button>
+          <Button variant="ghost" onClick={() => setAccent.mutate(DEFAULT_ACCENT)}>
+            Reset
+          </Button>
+        </div>
+      </div>
+
 
       <div className="rounded-xl border border-border bg-card p-5">
         <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Locations</h2>
