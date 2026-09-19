@@ -141,6 +141,41 @@ function DealDesk() {
   const balance = Math.max(total - collected, 0);
   const job = deal?.jobs ?? null;
 
+  /* ---------- booking form state ---------- */
+  const [schedDate, setSchedDate] = useState("");
+  const [schedTime, setSchedTime] = useState("09:00");
+  const [schedHours, setSchedHours] = useState("4");
+  const [schedBay, setSchedBay] = useState("Bay 1");
+
+  useEffect(() => {
+    if (!job?.scheduled_start) return;
+    const start = new Date(job.scheduled_start as string);
+    setSchedDate(start.toISOString().slice(0, 10));
+    setSchedTime(start.toTimeString().slice(0, 5));
+    if (job.bay) setSchedBay(job.bay as string);
+    if (job.scheduled_end) {
+      const hrs = (new Date(job.scheduled_end as string).getTime() - start.getTime()) / 3600000;
+      if (hrs > 0) setSchedHours(String(hrs));
+    }
+  }, [job?.scheduled_start, job?.scheduled_end, job?.bay]);
+
+  const { data: dayJobs = [] } = useQuery({
+    queryKey: ["bay-day", schedDate],
+    enabled: !!schedDate,
+    queryFn: async () => {
+      const from = new Date(`${schedDate}T00:00:00`).toISOString();
+      const to = new Date(`${schedDate}T23:59:59`).toISOString();
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id,title,bay,installer,scheduled_start,scheduled_end,status")
+        .gte("scheduled_start", from)
+        .lte("scheduled_start", to)
+        .is("deleted_at", null);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   /* ---------- quote ---------- */
 
   async function ensureEstimate() {
