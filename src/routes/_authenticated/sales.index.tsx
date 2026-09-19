@@ -305,7 +305,7 @@ function SalesPage() {
                       key={d.id}
                       deal={d}
                       dragging={dragging === d.id}
-                      onOpen={() => setSelectedId(d.id)}
+                      onOpen={() => navigate({ to: "/sales/$dealId", params: { dealId: d.id } })}
                     />
                   ))}
                 </StageColumn>
