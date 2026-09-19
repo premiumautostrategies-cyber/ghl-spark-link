@@ -493,11 +493,28 @@ function ServicesPage() {
 
   function openNew() {
     setDraftPanels([]);
+    setDraftTags([]);
+    setTagInput("");
+    setPricingMode("flat");
+    setDepositType("none");
     setNewService(true);
   }
   function openEdit(s: Service) {
     setDraftPanels(s.coverage_panels ?? []);
+    setDraftTags(s.tags ?? []);
+    setTagInput("");
+    setPricingMode(s.pricing_mode === "tiered" ? "tiered" : "flat");
+    setDepositType(
+      s.deposit_type === "percent" ? "percent" : s.deposit_type === "fixed" ? "fixed" : "none",
+    );
     setEditing(s);
+  }
+
+  function addTag(raw: string) {
+    const t = raw.trim();
+    if (!t) return;
+    setDraftTags((prev) => (prev.includes(t) ? prev : [...prev, t]));
+    setTagInput("");
   }
 
   return (
