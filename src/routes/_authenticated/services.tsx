@@ -801,7 +801,101 @@ function ServicesPage() {
 
           {editing && (
             <div className="space-y-3 border-t border-elevated pt-4">
-              <p className="micro-label">Options, tiers &amp; add-ons</p>
+              <p className="micro-label">Vehicle-size tiers</p>
+              <div className="space-y-2">
+                {variantsFor(editing.id).length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    No tiers yet — add Small/Coupe, Midsize/Sedan and Large/SUV pricing.
+                  </p>
+                )}
+                {variantsFor(editing.id).map((v) => (
+                  <div
+                    key={v.id}
+                    className="flex items-center gap-3 rounded-xl border border-elevated bg-surface-2 px-3 py-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{v.tier_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {Number(v.estimated_hours)}h{v.description ? ` · ${v.description}` : ""}
+                      </p>
+                    </div>
+                    <span className="text-sm tabular-nums text-bronze">{money(v.price)}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeVariant.mutate(v.id)}
+                      className="text-muted-foreground hover:text-critical"
+                      aria-label="Remove tier"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <form
+                className="grid gap-2 rounded-xl border border-dashed border-elevated p-4 sm:grid-cols-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addVariant.mutate({ serviceId: editing.id, form: new FormData(e.currentTarget) });
+                  e.currentTarget.reset();
+                }}
+              >
+                <Input name="tier_name" placeholder="Large / SUV / Truck" required />
+                <Input name="price" type="number" step="0.01" placeholder="Price" />
+                <Input name="estimated_hours" type="number" step="0.25" placeholder="Hours" />
+                <Button type="submit" variant="outline" disabled={addVariant.isPending}>
+                  <Plus className="mr-1 h-4 w-4" /> Add tier
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {editing && editing.supports_add_ons && (
+            <div className="space-y-3 border-t border-elevated pt-4">
+              <p className="micro-label">Allowed add-ons</p>
+              {addOns.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Build your add-on library below the service grid first.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {addOns
+                    .filter(
+                      (a) =>
+                        a.is_global ||
+                        !a.category_id ||
+                        a.category_id === editing.category_id,
+                    )
+                    .map((a) => {
+                      const link = linksFor(editing.id).find((l) => l.add_on_id === a.id);
+                      return (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() =>
+                            toggleLink.mutate({ serviceId: editing.id, addOnId: a.id, link })
+                          }
+                          className={cn(
+                            "rounded-xl border px-3 py-2 text-left text-sm transition-colors",
+                            link
+                              ? "border-bronze/60 bg-bronze/10 text-bronze"
+                              : "border-elevated bg-surface-2 hover:border-hairline",
+                          )}
+                        >
+                          {a.name}
+                          <span className="ml-2 text-xs tabular-nums text-muted-foreground">
+                            +{money(a.price)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {editing && (
+            <div className="space-y-3 border-t border-elevated pt-4">
+              <p className="micro-label">Options &amp; film tiers</p>
               <div className="space-y-2">
                 {optionsFor(editing.id).length === 0 && (
                   <p className="text-xs text-muted-foreground">
