@@ -125,6 +125,10 @@ function SalesPage() {
         notes: String(form.get("notes") || "") || null,
         expected_close: close || null,
         customer_id: customerId || null,
+        service_tags: String(form.get("service_tags") || "")
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
         organization_id: orgId,
         location_id: locId,
       });
@@ -263,6 +267,14 @@ function SalesPage() {
                     <Label htmlFor="owner_name">Owner</Label>
                     <Input id="owner_name" name="owner_name" placeholder="Advisor name" />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="service_tags">Service tags</Label>
+                  <Input
+                    id="service_tags"
+                    name="service_tags"
+                    placeholder="ppf, full front, ceramic — comma separated"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
