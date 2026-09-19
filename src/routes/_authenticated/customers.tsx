@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Car, Plus } from "lucide-react";
+import { useEmitEvent } from "@/lib/integrations/emit";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({
@@ -39,6 +40,7 @@ function CustomersPage() {
   const { organization, location } = useRouteContext({ from: "/_authenticated" });
   const orgId = organization?.id;
   const locId = location?.id ?? null;
+  const emitEvent = useEmitEvent();
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers"],
@@ -55,7 +57,7 @@ function CustomersPage() {
   const addCustomer = useMutation({
     mutationFn: async (form: FormData) => {
       if (!orgId) throw new Error("No workspace selected");
-      const { error } = await supabase.from("customers").insert({
+      const payload = {
         name: String(form.get("name")),
         email: String(form.get("email") || "") || null,
         phone: String(form.get("phone") || "") || null,
@@ -63,10 +65,28 @@ function CustomersPage() {
         notes: String(form.get("notes") || "") || null,
         organization_id: orgId,
         location_id: locId,
-      });
+      };
+      const { data, error } = await supabase
+        .from("customers")
+        .insert(payload)
+        .select("id")
+        .single();
       if (error) throw error;
+      return { id: data.id as string, ...payload };
     },
-    onSuccess: () => {
+    onSuccess: (created) => {
+      emitEvent({
+        event: "customer.created",
+        payload: {
+          customerId: created.id,
+          customerName: created.name,
+          customerEmail: created.email,
+          customerPhone: created.phone,
+        },
+        localType: "customer",
+        localId: created.id,
+        summary: `New customer ${created.name}`,
+      });
       toast.success("Customer added");
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["customers"] });

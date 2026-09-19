@@ -22,6 +22,7 @@ import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PanelCoverage } from "@/components/panel-coverage";
 import { OPTION_KIND_LABELS, catalogImage } from "@/lib/catalog";
+import { useEmitEvent } from "@/lib/integrations/emit";
 
 export const Route = createFileRoute("/_authenticated/sales/$dealId")({
   head: () => ({
@@ -102,6 +103,25 @@ function DealDesk() {
   });
 
   const customerId = deal?.customer_id ?? null;
+  const emitEvent = useEmitEvent();
+  const syncContext = () => {
+    const c = deal?.customers as
+      | { name?: string; email?: string | null; phone?: string | null }
+      | null
+      | undefined;
+    const v = deal?.vehicles as
+      | { year?: number | null; make?: string | null; model?: string | null }
+      | null
+      | undefined;
+    return {
+      customerId,
+      customerName: c?.name ?? null,
+      customerEmail: c?.email ?? null,
+      customerPhone: c?.phone ?? null,
+      vehicle: v ? [v.year, v.make, v.model].filter(Boolean).join(" ") : null,
+      title: deal?.title ?? null,
+    };
+  };
 
   const { data: services = [] } = useQuery({
     queryKey: ["services-catalog"],
@@ -357,6 +377,13 @@ function DealDesk() {
         .eq("id", dealId);
     },
     onSuccess: () => {
+      emitEvent({
+        event: "quote.sent",
+        payload: { ...syncContext(), total, lines: items.map((i) => ({ description: i.description, amount: Number(i.unit_price) * Number(i.quantity) })) },
+        localType: "estimate",
+        ...(deal?.estimate_id ? { localId: deal.estimate_id as string } : {}),
+        summary: `Quote for ${deal?.title ?? "deal"}`,
+      });
       toast.success("Proposal sent to the client hub");
       invalidate();
       qc.invalidateQueries({ queryKey: ["deal-documents", customerId] });
@@ -423,7 +450,25 @@ function DealDesk() {
       if (error) throw error;
       await supabase.from("deals").update({ job_id: data.id }).eq("id", dealId);
     },
-    onSuccess: () => {
+    onSuccess: (_r, form) => {
+      const date = String(form.get("date") || "");
+      const time = String(form.get("time") || "09:00");
+      const hours = Number(form.get("hours") || 4);
+      const start = date ? new Date(`${date}T${time}`) : new Date();
+      emitEvent({
+        event: job?.id ? "appointment.updated" : "appointment.booked",
+        payload: {
+          ...syncContext(),
+          start: start.toISOString(),
+          end: new Date(start.getTime() + hours * 3600000).toISOString(),
+          bay: String(form.get("bay") || "") || null,
+          installer: String(form.get("installer") || "") || null,
+          service: String(form.get("service_type") || "") || null,
+        },
+        localType: "job",
+        ...(job?.id ? { localId: job.id as string } : {}),
+        summary: `Booking for ${deal?.title ?? "deal"}`,
+      });
       toast.success("Bay time booked");
       invalidate();
       qc.invalidateQueries({ queryKey: ["jobs"] });
@@ -451,7 +496,18 @@ function DealDesk() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_r, form) => {
+      emitEvent({
+        event: "payment.received",
+        payload: {
+          ...syncContext(),
+          amount: Number(form.get("amount") || 0),
+          method: String(form.get("method") || "card"),
+          invoiceId: (deal?.estimate_id as string | null) ?? null,
+        },
+        localType: "payment",
+        summary: `Payment on ${deal?.title ?? "deal"}`,
+      });
       toast.success("Payment recorded");
       qc.invalidateQueries({ queryKey: ["deal-payments", customerId] });
       qc.invalidateQueries({ queryKey: ["payments"] });
