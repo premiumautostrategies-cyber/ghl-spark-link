@@ -136,7 +136,12 @@ type ServiceAddOnLink = {
 function ServicesPage() {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
-  const [activeCat, setActiveCat] = useState<string>("all");
+  const [selCats, setSelCats] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<"alpha" | "price_desc" | "price_asc" | "duration" | "popular">(
+    "alpha",
+  );
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [newService, setNewService] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
   const [draftPanels, setDraftPanels] = useState<string[]>([]);
