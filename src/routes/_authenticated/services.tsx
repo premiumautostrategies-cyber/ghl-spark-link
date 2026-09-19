@@ -140,6 +140,10 @@ function ServicesPage() {
   const [newService, setNewService] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
   const [draftPanels, setDraftPanels] = useState<string[]>([]);
+  const [draftTags, setDraftTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [pricingMode, setPricingMode] = useState<"flat" | "tiered">("flat");
+  const [depositType, setDepositType] = useState<"none" | "percent" | "fixed">("none");
 
   const invalidate = () => {
     for (const k of [
