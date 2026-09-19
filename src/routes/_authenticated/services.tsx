@@ -93,6 +93,36 @@ type Service = {
   coverage_panels: string[];
 };
 
+type Variant = {
+  id: string;
+  service_id: string;
+  tier_name: string;
+  description: string | null;
+  price: number | string;
+  estimated_hours: number | string;
+  sort_order: number;
+};
+
+type AddOn = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number | string;
+  estimated_hours: number | string;
+  category_id: string | null;
+  service_id: string | null;
+  is_global: boolean;
+  is_active: boolean;
+  swatch_color: string | null;
+};
+
+type ServiceAddOnLink = {
+  id: string;
+  service_id: string;
+  add_on_id: string;
+  is_recommended: boolean;
+};
+
 function ServicesPage() {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
