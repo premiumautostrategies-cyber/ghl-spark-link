@@ -294,7 +294,7 @@ function SalesPage() {
             if (over && deal && deal.stage !== over) moveStage.mutate({ id, stage: over });
           }}
         >
-          <div className="no-scrollbar -mx-1 flex w-full max-w-full gap-3 overflow-x-auto px-1 pb-3">
+          <div className="no-scrollbar -mx-1 flex w-full max-w-full items-start gap-3 overflow-x-auto px-1 pb-3">
             {DEAL_STAGES.map((stage) => {
               const list = visible.filter((d) => d.stage === stage);
               const total = list.reduce((t, d) => t + Number(d.value), 0);
