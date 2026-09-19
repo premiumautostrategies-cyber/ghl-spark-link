@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Car, Plus } from "lucide-react";
+import { Car, Link as LinkIcon, Plus } from "lucide-react";
 import { useEmitEvent } from "@/lib/integrations/emit";
 
 export const Route = createFileRoute("/_authenticated/customers")({
@@ -197,9 +197,24 @@ function CustomersPage() {
                   {[c.company, c.email, c.phone].filter(Boolean).join(" · ") || "No contact info"}
                 </p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => setVehicleFor(c.id)}>
-                <Plus className="size-3.5" /> Vehicle
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!c.portal_token}
+                  onClick={() => {
+                    void navigator.clipboard?.writeText(
+                      `${window.location.origin}/p/portal/${c.portal_token}`,
+                    );
+                    toast.success("Customer hub link copied");
+                  }}
+                >
+                  <LinkIcon className="size-3.5" /> Hub link
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setVehicleFor(c.id)}>
+                  <Plus className="size-3.5" /> Vehicle
+                </Button>
+              </div>
             </div>
             <div className="mt-4 space-y-2">
               {c.vehicles.length === 0 && (
