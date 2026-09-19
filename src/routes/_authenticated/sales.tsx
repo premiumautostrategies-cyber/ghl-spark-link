@@ -378,7 +378,15 @@ function StageColumn({
   );
 }
 
-function DealCard({ deal, dragging }: { deal: Deal; dragging: boolean }) {
+function DealCard({
+  deal,
+  dragging,
+  onOpen,
+}: {
+  deal: Deal;
+  dragging: boolean;
+  onOpen: () => void;
+}) {
   const { attributes, listeners, setNodeRef } = useDraggable({ id: deal.id });
   const age = deal.last_activity_at
     ? Math.round((Date.now() - new Date(deal.last_activity_at).getTime()) / 86400000)
@@ -388,6 +396,7 @@ function DealCard({ deal, dragging }: { deal: Deal; dragging: boolean }) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      onClick={onOpen}
       className={cn(
         "cursor-grab touch-none rounded-xl border border-elevated bg-surface-2 p-3 transition-colors hover:border-hairline active:cursor-grabbing",
         dragging && "opacity-40",
