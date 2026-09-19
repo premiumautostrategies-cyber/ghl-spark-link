@@ -23,6 +23,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { PanelCoverage } from "@/components/panel-coverage";
 import { OPTION_KIND_LABELS, catalogImage } from "@/lib/catalog";
 import { useEmitEvent } from "@/lib/integrations/emit";
+import { DealComms } from "@/components/deal-comms";
+import { DealProposal } from "@/components/deal-proposal";
 
 export const Route = createFileRoute("/_authenticated/sales/$dealId")({
   head: () => ({
@@ -583,6 +585,7 @@ function DealDesk() {
 
 
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-4">
         {/* Quote builder */}
         <Panel className="min-w-0">
           <SectionTitle
@@ -686,6 +689,20 @@ function DealDesk() {
             </div>
           </div>
         </Panel>
+
+        <DealProposal
+          dealId={dealId}
+          deal={deal}
+          quoteTotal={total}
+          quoteHours={Math.max(2, Math.round(total / 300))}
+        />
+
+        <DealComms
+          dealId={dealId}
+          customerId={customerId}
+          customerName={deal.customers?.name ?? null}
+        />
+        </div>
 
         <div className="min-w-0 space-y-4">
           {/* Scheduling */}
