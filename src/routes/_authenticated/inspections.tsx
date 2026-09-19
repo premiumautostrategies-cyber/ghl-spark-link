@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { dayDate } from "@/lib/format";
 import { toast } from "sonner";
+import { makeToken } from "@/lib/shop";
 
 export const Route = createFileRoute("/_authenticated/inspections")({
   head: () => ({
@@ -151,6 +152,8 @@ function InspectionsPage() {
       note: string;
       pos_x: number;
       pos_y: number;
+      media_urls: string[];
+      video_url: string | null;
     }) => {
       if (!orgId || !selected) throw new Error("Select an inspection first");
       const { error } = await supabase
@@ -183,6 +186,39 @@ function InspectionsPage() {
     },
     onSuccess: () => {
       toast.success("Customer acknowledgment recorded");
+      qc.invalidateQueries({ queryKey: ["inspections"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const sendWaiver = useMutation({
+    mutationFn: async (inspection: { id: string; waiver_token: string | null; customer_id: string | null }) => {
+      let token = inspection.waiver_token;
+      if (!token) {
+        token = makeToken();
+        const { error } = await supabase
+          .from("inspections")
+          .update({ waiver_token: token })
+          .eq("id", inspection.id);
+        if (error) throw error;
+      }
+      const link = `${window.location.origin}/p/waiver/${token}`;
+      if (orgId) {
+        await supabase.from("messages").insert({
+          organization_id: orgId,
+          location_id: locId,
+          customer_id: inspection.customer_id,
+          channel: "sms",
+          direction: "out",
+          is_automated: true,
+          body: `Here is the check-in report for your vehicle. Please review the pre-existing condition and sign before we start: ${link}`,
+        });
+      }
+      await navigator.clipboard?.writeText(link).catch(() => undefined);
+      return link;
+    },
+    onSuccess: () => {
+      toast.success("Waiver link texted and copied");
       qc.invalidateQueries({ queryKey: ["inspections"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -353,7 +389,21 @@ function InspectionsPage() {
                       {current.inspector ? ` · ${current.inspector}` : ""}
                     </p>
                   </div>
-                  {current.status === "signed" ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      sendWaiver.mutate({
+                        id: current.id,
+                        waiver_token: current.waiver_token,
+                        customer_id: current.customer_id,
+                      })
+                    }
+                    disabled={sendWaiver.isPending}
+                  >
+                    {current.waiver_token ? "Resend waiver link" : "Send waiver link"}
+                  </Button>
+                  {current.acknowledged_at || current.status === "signed" ? (
                     <Tag tone="revenue">Acknowledged by {current.acknowledged_by}</Tag>
                   ) : (
                     <Button
@@ -366,6 +416,7 @@ function InspectionsPage() {
                       Capture customer sign-off
                     </Button>
                   )}
+                  </div>
                 </div>
               </Panel>
 
@@ -454,6 +505,11 @@ function InspectionsPage() {
                             note: String(f.get("note") || ""),
                             pos_x: 0,
                             pos_y: 0,
+                            media_urls: String(f.get("photo_url") || "")
+                              .split(",")
+                              .map((u) => u.trim())
+                              .filter(Boolean),
+                            video_url: String(f.get("video_url") || "") || null,
                           });
                         }}
                       >
@@ -481,6 +537,10 @@ function InspectionsPage() {
                           </Select>
                         </div>
                         <Input name="note" placeholder="Rock chip cluster above badge" />
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <Input name="photo_url" placeholder="Photo link(s), comma separated" />
+                          <Input name="video_url" placeholder="Video clip link" />
+                        </div>
                         <div className="flex gap-2">
                           <Button type="submit" disabled={addDefect.isPending}>
                             Log mark
@@ -513,6 +573,12 @@ function InspectionsPage() {
                             </p>
                             {d.note && (
                               <p className="mt-0.5 text-xs text-muted-foreground">{d.note}</p>
+                            )}
+                            {((d.media_urls ?? []).length > 0 || d.video_url) && (
+                              <p className="mt-0.5 text-xs text-comms">
+                                {(d.media_urls ?? []).length} photo(s)
+                                {d.video_url ? " · video attached" : ""}
+                              </p>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
