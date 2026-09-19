@@ -446,7 +446,7 @@ function ServicesPage() {
     }: {
       serviceId: string;
       addOnId: string;
-      link?: ServiceAddOnLink;
+      link?: ServiceAddOnLink | undefined;
     }) => {
       if (!orgId) throw new Error("No workspace selected");
       if (link) {
