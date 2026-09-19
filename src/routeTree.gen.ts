@@ -25,6 +25,7 @@ import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/j
 import { Route as AuthenticatedKioskRouteImport } from './routes/_authenticated/kiosk'
 import { Route as AuthenticatedPackagesRouteImport } from './routes/_authenticated/packages'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedQcRouteImport } from './routes/_authenticated/qc'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -123,6 +124,11 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedQcRoute = AuthenticatedQcRouteImport.update({
+  id: '/qc',
+  path: '/qc',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/kiosk': typeof AuthenticatedKioskRoute
   '/packages': typeof AuthenticatedPackagesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/qc': typeof AuthenticatedQcRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/kiosk': typeof AuthenticatedKioskRoute
   '/packages': typeof AuthenticatedPackagesRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/qc': typeof AuthenticatedQcRoute
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_authenticated/kiosk': typeof AuthenticatedKioskRoute
   '/_authenticated/packages': typeof AuthenticatedPackagesRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/qc': typeof AuthenticatedQcRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/kiosk'
     | '/packages'
     | '/payments'
+    | '/qc'
     | '/schedule'
     | '/services'
     | '/settings'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/kiosk'
     | '/packages'
     | '/payments'
+    | '/qc'
     | '/schedule'
     | '/services'
     | '/settings'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/_authenticated/kiosk'
     | '/_authenticated/packages'
     | '/_authenticated/payments'
+    | '/_authenticated/qc'
     | '/_authenticated/schedule'
     | '/_authenticated/services'
     | '/_authenticated/settings'
@@ -514,6 +526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/qc': {
+      id: '/_authenticated/qc'
+      path: '/qc'
+      fullPath: '/qc'
+      preLoaderRoute: typeof AuthenticatedQcRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/schedule': {
       id: '/_authenticated/schedule'
       path: '/schedule'
@@ -629,6 +648,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedKioskRoute: typeof AuthenticatedKioskRoute
   AuthenticatedPackagesRoute: typeof AuthenticatedPackagesRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedQcRoute: typeof AuthenticatedQcRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -652,6 +672,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedKioskRoute: AuthenticatedKioskRoute,
   AuthenticatedPackagesRoute: AuthenticatedPackagesRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedQcRoute: AuthenticatedQcRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

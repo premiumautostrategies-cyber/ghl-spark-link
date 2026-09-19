@@ -173,7 +173,7 @@ function QcPage() {
   const checklistFor = (jobId: string) => checklists.find((c) => c.job_id === jobId) ?? null;
   const current = jobs.find((j) => j.id === selected) ?? null;
   const currentList = current ? checklistFor(current.id) : null;
-  const currentItems = (((currentList?.qc_items ?? []) as Item[]) ?? []).sort(
+  const currentItems = ([...((currentList?.qc_items ?? []) as Item[])]).sort(
     (a, b) => a.sort_order - b.sort_order,
   );
 
