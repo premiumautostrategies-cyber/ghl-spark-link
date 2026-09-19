@@ -92,6 +92,13 @@
       "when": 1789857625978,
       "tag": "0012_customer_portal_token",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1789857726479,
+      "tag": "0013_customer_portal_token_default",
+      "breakpoints": true
     }
   ]
 }
