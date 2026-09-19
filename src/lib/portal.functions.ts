@@ -272,7 +272,7 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
       { data: aftercare },
       { data: payments },
     ] = await Promise.all([
-      db.from("organizations").select("name,accent_color,phone,review_url").eq("id", customer.organization_id).maybeSingle(),
+      db.from("organizations").select("name,accent_color,review_url").eq("id", customer.organization_id).maybeSingle(),
       db.from("vehicles").select("id,year,make,model,color,plate").eq("customer_id", customer.id),
       db
         .from("deals")
@@ -308,7 +308,7 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
 
     return {
       shopName: org?.name ?? "Our shop",
-      shopPhone: org?.phone ?? null,
+      shopPhone: null as string | null,
       reviewUrl: org?.review_url ?? null,
       accent: org?.accent_color ?? null,
       customer: { name: customer.name, email: customer.email, phone: customer.phone },
