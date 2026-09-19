@@ -35,35 +35,30 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
   {
     group: "Sales",
     items: [
-      { to: "/command-center", label: "Command Center", icon: Command },
       { to: "/sales", label: "Pipeline", icon: Briefcase },
       { to: "/customers", label: "Customers", icon: Users },
       { to: "/vehicles", label: "Vehicles", icon: Car },
-      { to: "/services", label: "Service Menu", icon: Layers },
       { to: "/packages", label: "Packages", icon: Sparkles },
+      { to: "/services", label: "Service Menu", icon: Layers },
+      { to: "/payments", label: "Payments", icon: CreditCard },
+    ],
+  },
+  {
+    group: "Installation",
+    items: [
+      { to: "/schedule", label: "Bays", icon: CalendarRange },
+      { to: "/jobs", label: "Production", icon: Wrench },
+      { to: "/inspections", label: "Inspections", icon: ScanLine },
+      { to: "/team", label: "Team", icon: Gauge },
     ],
   },
   {
     group: "Operations",
     items: [
-      { to: "/schedule", label: "Bays", icon: CalendarRange },
-      { to: "/jobs", label: "Production", icon: Wrench },
-      { to: "/inspections", label: "Inspections", icon: ScanLine },
+      { to: "/command-center", label: "Command Center", icon: Command },
       { to: "/documents", label: "Documents", icon: FileText },
-    ],
-  },
-  {
-    group: "Shop",
-    items: [
       { to: "/inventory", label: "Stock", icon: Package },
-      { to: "/payments", label: "Payments", icon: CreditCard },
-      { to: "/team", label: "Team", icon: Gauge },
       { to: "/analytics", label: "Reports", icon: BarChart3 },
-    ],
-  },
-  {
-    group: "Setup",
-    items: [
       { to: "/automations", label: "Automations", icon: Bot },
       { to: "/integrations", label: "Integrations", icon: Plug },
       { to: "/settings", label: "Settings", icon: Settings },
