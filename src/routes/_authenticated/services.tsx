@@ -529,10 +529,10 @@ function ServicesPage() {
           key: c.id,
           name: c.name,
           accent: c.accent_color,
-          items: sorted.filter((s) => s.category_id === c.id),
+          items: visible.filter((s) => s.category_id === c.id),
         }))
         .filter((g) => g.items.length > 0);
-  const uncategorized = sorted.filter((s) => !s.category_id || !catById[s.category_id]);
+  const uncategorized = visible.filter((s) => !s.category_id || !catById[s.category_id]);
   if (!singleCat && uncategorized.length > 0)
     groups.push({ key: "uncat", name: "Uncategorized", accent: null, items: uncategorized });
   const visible = filmsOnly ? sorted.filter((s) => optionsFor(s.id).length > 0) : sorted;
