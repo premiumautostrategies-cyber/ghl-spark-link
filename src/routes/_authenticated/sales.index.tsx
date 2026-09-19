@@ -294,7 +294,7 @@ function SalesPage() {
             if (over && deal && deal.stage !== over) moveStage.mutate({ id, stage: over });
           }}
         >
-          <div className="no-scrollbar -mx-1 flex w-full max-w-full gap-4 overflow-x-auto px-1 pb-4">
+          <div className="no-scrollbar -mx-1 flex w-full max-w-full items-start gap-3 overflow-x-auto px-1 pb-3">
             {DEAL_STAGES.map((stage) => {
               const list = visible.filter((d) => d.stage === stage);
               const total = list.reduce((t, d) => t + Number(d.value), 0);
@@ -314,8 +314,8 @@ function SalesPage() {
           </div>
           <DragOverlay>
             {dragging ? (
-              <div className="w-[248px] rotate-2 rounded-xl border border-bronze/50 bg-surface-2 p-3 shadow-lux">
-                <p className="text-sm font-semibold">
+              <div className="w-[200px] rotate-2 rounded-lg border border-bronze/50 bg-surface-2 p-2 shadow-lux">
+                <p className="text-xs font-semibold leading-tight">
                   {deals.find((d) => d.id === dragging)?.title}
                 </p>
               </div>
@@ -352,19 +352,19 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-[280px] shrink-0 flex-col rounded-2xl border bg-surface transition-colors",
+        "flex w-[208px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
         isOver ? "border-bronze/60 bg-surface-2" : "border-elevated",
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-elevated px-4 py-3">
+      <div className="flex items-center justify-between gap-2 border-b border-elevated px-2.5 py-1.5">
         <Tag tone={STAGE_TONE[stage] ?? "muted"}>{label(stage)}</Tag>
-        <span className="text-xs tabular-nums text-muted-foreground">
+        <span className="text-[11px] tabular-nums text-muted-foreground">
           {count} · {money(total)}
         </span>
       </div>
-      <div className="flex min-h-[140px] flex-col gap-2 p-3">
+      <div className="flex min-h-[72px] flex-col gap-1.5 p-2">
         {count === 0 ? (
-          <p className="py-8 text-center text-xs text-muted-foreground">Drop a deal here</p>
+          <p className="py-5 text-center text-[11px] text-muted-foreground">Drop a deal here</p>
         ) : (
           children
         )}
@@ -393,24 +393,29 @@ function DealCard({
       {...attributes}
       onClick={onOpen}
       className={cn(
-        "cursor-grab touch-none rounded-xl border border-elevated bg-surface-2 p-3 transition-colors hover:border-hairline active:cursor-grabbing",
+        "cursor-grab touch-none rounded-lg border border-elevated bg-surface-2 p-2 transition-colors hover:border-hairline active:cursor-grabbing",
         dragging && "opacity-40",
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-semibold leading-tight">{deal.title}</p>
-        <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-bronze">
+        <p className="text-xs font-semibold leading-tight">{deal.title}</p>
+        <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-bronze">
           {money(deal.value)}
         </span>
       </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        {deal.customers?.name ?? "No customer"} · {deal.source || "Direct"}
+      <p className="mt-1 truncate text-[11px] text-muted-foreground">
+        {deal.customers?.name ?? "No customer"}
+        {deal.source ? ` · ${deal.source}` : ""}
       </p>
-      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-        <Tag tone="muted">{deal.probability}%</Tag>
-        {deal.expected_close && <Tag tone="muted">Close {dayDate(deal.expected_close)}</Tag>}
-        {age !== null && age > 3 && <Tag tone="critical">{age}d untouched</Tag>}
-        {deal.owner_name && <Tag tone="bronze">{deal.owner_name}</Tag>}
+      <div className="mt-1.5 flex flex-wrap items-center gap-1">
+        {age !== null && age > 3 ? (
+          <Tag tone="critical" className="text-[10px]">{age}d</Tag>
+        ) : (
+          <Tag tone="muted" className="text-[10px]">{deal.probability}%</Tag>
+        )}
+        {deal.expected_close && (
+          <Tag tone="muted" className="text-[10px]">{dayDate(deal.expected_close)}</Tag>
+        )}
       </div>
     </div>
   );
