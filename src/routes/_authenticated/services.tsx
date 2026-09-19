@@ -936,7 +936,7 @@ function ServicesPage() {
                 <Label>Category</Label>
                 <Select
                   name="category_id"
-                  defaultValue={editing?.category_id ?? (activeCat !== "all" ? activeCat : "")}
+                  defaultValue={editing?.category_id ?? singleCat ?? ""}
                 >
                   <SelectTrigger><SelectValue placeholder="Choose category" /></SelectTrigger>
                   <SelectContent>
