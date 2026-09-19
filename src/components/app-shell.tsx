@@ -97,9 +97,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="no-scrollbar flex-1 overflow-y-auto px-3 py-4">
-          {(activeGroup ?? NAV_GROUPS[0]!).items.map((item) => (
-            <nav key={item.to} className="mb-1">
+          <p className="px-3 micro-label">{(activeGroup ?? NAV_GROUPS[0]!).group}</p>
+          <nav className="mt-2 space-y-0.5">
+            {(activeGroup ?? NAV_GROUPS[0]!).items.map((item) => (
               <Link
+                key={item.to}
                 to={item.to as never}
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
@@ -117,9 +119,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <item.icon className={cn("size-4", isActive(item.to) && "text-bronze")} />
                 {item.label}
               </Link>
-            </nav>
-          ))}
-          <p className="mt-6 px-3 micro-label">{(activeGroup ?? NAV_GROUPS[0]!).group}</p>
+            ))}
+          </nav>
         </div>
 
         <div className="mt-auto border-t border-sidebar-border p-4">
