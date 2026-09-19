@@ -23,12 +23,12 @@ import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authent
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
-import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedVehiclesRouteImport } from './routes/_authenticated/vehicles'
+import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 
@@ -105,11 +105,6 @@ const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
-  id: '/sales',
-  path: '/sales',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
   id: '/schedule',
   path: '/schedule',
@@ -135,11 +130,16 @@ const AuthenticatedVehiclesRoute = AuthenticatedVehiclesRouteImport.update({
   path: '/vehicles',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
+  id: '/sales/',
+  path: '/sales/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSalesDealIdRoute =
   AuthenticatedSalesDealIdRouteImport.update({
-    id: '/$dealId',
-    path: '/$dealId',
-    getParentRoute: () => AuthenticatedSalesRoute,
+    id: '/sales/$dealId',
+    path: '/sales/$dealId',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const OauthHubspotReturnRoute = OauthHubspotReturnRouteImport.update({
   id: '/oauth/hubspot/return',
@@ -161,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
-  '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -169,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/vehicles': typeof AuthenticatedVehiclesRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
+  '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -184,7 +184,6 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
-  '/sales': typeof AuthenticatedSalesRouteWithChildren
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -192,6 +191,7 @@ export interface FileRoutesByTo {
   '/vehicles': typeof AuthenticatedVehiclesRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
+  '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -209,7 +209,6 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
-  '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -217,6 +216,7 @@ export interface FileRoutesById {
   '/_authenticated/vehicles': typeof AuthenticatedVehiclesRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
+  '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -234,7 +234,6 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/jobs'
     | '/payments'
-    | '/sales'
     | '/schedule'
     | '/services'
     | '/settings'
@@ -242,6 +241,7 @@ export interface FileRouteTypes {
     | '/vehicles'
     | '/sales/$dealId'
     | '/oauth/hubspot/return'
+    | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -257,7 +257,6 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/jobs'
     | '/payments'
-    | '/sales'
     | '/schedule'
     | '/services'
     | '/settings'
@@ -265,6 +264,7 @@ export interface FileRouteTypes {
     | '/vehicles'
     | '/sales/$dealId'
     | '/oauth/hubspot/return'
+    | '/sales'
   id:
     | '__root__'
     | '/'
@@ -281,7 +281,6 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/jobs'
     | '/_authenticated/payments'
-    | '/_authenticated/sales'
     | '/_authenticated/schedule'
     | '/_authenticated/services'
     | '/_authenticated/settings'
@@ -289,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated/vehicles'
     | '/_authenticated/sales/$dealId'
     | '/oauth/hubspot/return'
+    | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -398,13 +398,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/sales': {
-      id: '/_authenticated/sales'
-      path: '/sales'
-      fullPath: '/sales'
-      preLoaderRoute: typeof AuthenticatedSalesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/schedule': {
       id: '/_authenticated/schedule'
       path: '/schedule'
@@ -440,12 +433,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVehiclesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sales/': {
+      id: '/_authenticated/sales/'
+      path: '/sales'
+      fullPath: '/sales/'
+      preLoaderRoute: typeof AuthenticatedSalesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/$dealId': {
       id: '/_authenticated/sales/$dealId'
-      path: '/$dealId'
+      path: '/sales/$dealId'
       fullPath: '/sales/$dealId'
       preLoaderRoute: typeof AuthenticatedSalesDealIdRouteImport
-      parentRoute: typeof AuthenticatedSalesRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/oauth/hubspot/return': {
       id: '/oauth/hubspot/return'
@@ -456,17 +456,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface AuthenticatedSalesRouteChildren {
-  AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
-}
-
-const AuthenticatedSalesRouteChildren: AuthenticatedSalesRouteChildren = {
-  AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
-}
-
-const AuthenticatedSalesRouteWithChildren =
-  AuthenticatedSalesRoute._addFileChildren(AuthenticatedSalesRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
@@ -480,12 +469,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
-  AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedVehiclesRoute: typeof AuthenticatedVehiclesRoute
+  AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
+  AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -500,12 +490,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
-  AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedVehiclesRoute: AuthenticatedVehiclesRoute,
+  AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
+  AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

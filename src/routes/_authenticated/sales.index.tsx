@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
@@ -62,7 +62,7 @@ const FILTERS = [
   { value: "closing" as const, label: "Closing" },
 ];
 
-export const Route = createFileRoute("/_authenticated/sales")({
+export const Route = createFileRoute("/_authenticated/sales/")({
   head: () => ({
     meta: [
       { title: "Sales Pipeline — Systemize" },
@@ -79,11 +79,11 @@ export const Route = createFileRoute("/_authenticated/sales")({
 
 function SalesPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { orgId, locId } = useOrg();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [dragging, setDragging] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const { data: deals = [] } = useQuery({
