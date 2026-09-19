@@ -87,8 +87,8 @@ function DocumentsPage() {
         const { error } = await supabase
           .from("documents")
           .update({
-            name: doc.name,
-            doc_type: doc.doc_type,
+            name: doc.name ?? "Untitled",
+            doc_type: doc.doc_type ?? "warranty",
             body: doc.body ?? null,
             status: doc.status ?? "published",
             updated_at: new Date().toISOString(),
@@ -366,7 +366,7 @@ function DocumentsPage() {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
               save.mutate({
-                id: editing?.id,
+                ...(editing?.id ? { id: editing.id } : {}),
                 name: String(f.get("name")),
                 doc_type: String(f.get("doc_type")),
                 status: String(f.get("status")),
