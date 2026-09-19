@@ -294,7 +294,7 @@ function SalesPage() {
             if (over && deal && deal.stage !== over) moveStage.mutate({ id, stage: over });
           }}
         >
-          <div className="no-scrollbar -mx-1 flex w-full max-w-full gap-4 overflow-x-auto px-1 pb-4">
+          <div className="no-scrollbar -mx-1 flex w-full max-w-full gap-3 overflow-x-auto px-1 pb-3">
             {DEAL_STAGES.map((stage) => {
               const list = visible.filter((d) => d.stage === stage);
               const total = list.reduce((t, d) => t + Number(d.value), 0);
@@ -314,8 +314,8 @@ function SalesPage() {
           </div>
           <DragOverlay>
             {dragging ? (
-              <div className="w-[248px] rotate-2 rounded-xl border border-bronze/50 bg-surface-2 p-3 shadow-lux">
-                <p className="text-sm font-semibold">
+              <div className="w-[200px] rotate-2 rounded-lg border border-bronze/50 bg-surface-2 p-2 shadow-lux">
+                <p className="text-xs font-semibold leading-tight">
                   {deals.find((d) => d.id === dragging)?.title}
                 </p>
               </div>
@@ -352,19 +352,19 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-[280px] shrink-0 flex-col rounded-2xl border bg-surface transition-colors",
+        "flex w-[224px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
         isOver ? "border-bronze/60 bg-surface-2" : "border-elevated",
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-elevated px-4 py-3">
-        <Tag tone={STAGE_TONE[stage] ?? "muted"}>{label(stage)}</Tag>
-        <span className="text-xs tabular-nums text-muted-foreground">
+      <div className="flex items-center justify-between gap-2 border-b border-elevated px-3 py-2">
+        <Tag tone={STAGE_TONE[stage] ?? "muted"} className="text-[10px]">{label(stage)}</Tag>
+        <span className="text-[11px] tabular-nums text-muted-foreground">
           {count} · {money(total)}
         </span>
       </div>
-      <div className="flex min-h-[140px] flex-col gap-2 p-3">
+      <div className="flex min-h-[100px] flex-col gap-1.5 p-2">
         {count === 0 ? (
-          <p className="py-8 text-center text-xs text-muted-foreground">Drop a deal here</p>
+          <p className="py-6 text-center text-[11px] text-muted-foreground">Drop a deal here</p>
         ) : (
           children
         )}
