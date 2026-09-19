@@ -700,7 +700,11 @@ function ServicesPage() {
                 className="flex items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2 text-sm"
               >
                 {a.name}
-                <span className="tabular-nums text-bronze">+{money(a.price)}</span>
+                <span className="tabular-nums text-bronze">
+                  {a.pricing_mode === "hourly"
+                    ? `${money(a.hourly_rate)}/hr × ${Number(a.estimated_hours) || 1}h`
+                    : `+${money(a.price)}`}
+                </span>
                 <span className="text-xs text-muted-foreground">
                   {a.category_id ? catById[a.category_id]?.name : "Global"}
                 </span>
