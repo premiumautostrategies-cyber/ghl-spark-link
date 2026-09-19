@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authenticated/command-center'
@@ -66,6 +67,11 @@ const DemoRoute = DemoRouteImport.update({
 const PlatformRoute = PlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkflowRoute = WorkflowRouteImport.update({
+  id: '/workflow',
+  path: '/workflow',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
   '/platform': typeof PlatformRoute
+  '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
   '/platform': typeof PlatformRoute
+  '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/automations': typeof AuthenticatedAutomationsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
@@ -296,6 +304,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
   '/platform': typeof PlatformRoute
+  '/workflow': typeof WorkflowRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/command-center': typeof AuthenticatedCommandCenterRoute
@@ -333,6 +342,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/demo'
     | '/platform'
+    | '/workflow'
     | '/analytics'
     | '/automations'
     | '/command-center'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/demo'
     | '/platform'
+    | '/workflow'
     | '/analytics'
     | '/automations'
     | '/command-center'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/demo'
     | '/platform'
+    | '/workflow'
     | '/_authenticated/analytics'
     | '/_authenticated/automations'
     | '/_authenticated/command-center'
@@ -441,6 +453,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DemoRoute: typeof DemoRoute
   PlatformRoute: typeof PlatformRoute
+  WorkflowRoute: typeof WorkflowRoute
   ApiPublicSyncDrainRoute: typeof ApiPublicSyncDrainRoute
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
   OauthHubspotReturnRoute: typeof OauthHubspotReturnRoute
@@ -485,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/platform'
       fullPath: '/platform'
       preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workflow': {
+      id: '/workflow'
+      path: '/workflow'
+      fullPath: '/workflow'
+      preLoaderRoute: typeof WorkflowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/analytics': {
@@ -752,6 +772,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DemoRoute: DemoRoute,
   PlatformRoute: PlatformRoute,
+  WorkflowRoute: WorkflowRoute,
   ApiPublicSyncDrainRoute: ApiPublicSyncDrainRoute,
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
   OauthHubspotReturnRoute: OauthHubspotReturnRoute,
