@@ -1139,7 +1139,9 @@ function ServicesPage() {
                         >
                           {a.name}
                           <span className="ml-2 text-xs tabular-nums text-muted-foreground">
-                            +{money(a.price)}
+                            {a.pricing_mode === "hourly"
+                              ? `${money(a.hourly_rate)}/hr`
+                              : `+${money(a.price)}`}
                           </span>
                         </button>
                       );
