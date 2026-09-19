@@ -88,6 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <AccentTheme />
       {/* Desktop sidebar */}
       <aside className="hidden w-[248px] flex-col border-r border-elevated bg-sidebar lg:flex">
         <div className="flex h-16 items-center px-5 hairline-b">
