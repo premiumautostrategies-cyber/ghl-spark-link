@@ -117,6 +117,8 @@ type AddOn = {
   description: string | null;
   price: number | string;
   estimated_hours: number | string;
+  pricing_mode: string;
+  hourly_rate: number | string;
   category_id: string | null;
   service_id: string | null;
   is_global: boolean;
