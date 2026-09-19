@@ -309,6 +309,53 @@ export type Database = {
           },
         ]
       }
+      dashboard_preferences: {
+        Row: {
+          average_ticket_target: number
+          created_at: string
+          daily_revenue_target: number
+          id: string
+          monthly_revenue_target: number
+          organization_id: string
+          preset: string
+          updated_at: string
+          user_id: string
+          widget_layout: Json
+        }
+        Insert: {
+          average_ticket_target?: number
+          created_at?: string
+          daily_revenue_target?: number
+          id?: string
+          monthly_revenue_target?: number
+          organization_id: string
+          preset?: string
+          updated_at?: string
+          user_id: string
+          widget_layout?: Json
+        }
+        Update: {
+          average_ticket_target?: number
+          created_at?: string
+          daily_revenue_target?: number
+          id?: string
+          monthly_revenue_target?: number
+          organization_id?: string
+          preset?: string
+          updated_at?: string
+          user_id?: string
+          widget_layout?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deals: {
         Row: {
           created_at: string
@@ -320,6 +367,7 @@ export type Database = {
           job_id: string | null
           last_activity_at: string | null
           location_id: string | null
+          loss_reason: string | null
           notes: string | null
           organization_id: string | null
           owner_name: string | null
@@ -341,6 +389,7 @@ export type Database = {
           job_id?: string | null
           last_activity_at?: string | null
           location_id?: string | null
+          loss_reason?: string | null
           notes?: string | null
           organization_id?: string | null
           owner_name?: string | null
@@ -362,6 +411,7 @@ export type Database = {
           job_id?: string | null
           last_activity_at?: string | null
           location_id?: string | null
+          loss_reason?: string | null
           notes?: string | null
           organization_id?: string | null
           owner_name?: string | null
