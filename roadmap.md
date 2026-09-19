@@ -38,3 +38,5 @@
 - [x] Drag-and-drop sales pipeline board
 - [x] Bay x hour schedule board with conflict detection
 - [x] Vehicle inspections with panel damage map and customer sign-off
+
+- [x] Integrations hub: QuickBooks / Google Calendar / Gmail / Outlook / HubSpot / GHL cards, per-event toggles, sync queue with retries, activity log, scheduled drain worker (demo mode — provider sign-in apps not provisioned)

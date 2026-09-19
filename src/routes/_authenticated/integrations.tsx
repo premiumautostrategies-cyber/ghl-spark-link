@@ -288,7 +288,9 @@ function IntegrationsPage() {
 
               {!configured && (
                 <p className="rounded-md border border-border bg-background p-2 text-xs text-muted-foreground">
-                  {def.name} setup for this app is not finished yet, so connecting is unavailable.
+                  Demo workspace: {def.name} sign-in is not switched on yet. The sync rules,
+                  toggles and activity log below are live — turn the account on when you're ready
+                  to go live.
                 </p>
               )}
 
