@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getWarrantyByToken } from "@/lib/portal.functions";
-import { shortDate } from "@/lib/format";
+import { dayDate } from "@/lib/format";
 import { BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/p/warranty/$token")({
@@ -51,8 +51,8 @@ function WarrantyPage() {
           <Field label="Vehicle" value={data.vehicle ?? "—"} />
           <Field label="Product" value={w.product ?? "—"} />
           <Field label="Installer" value={w.installer ?? "—"} />
-          <Field label="Installed" value={shortDate(w.issued_at)} />
-          <Field label="Covered through" value={w.expires_at ? shortDate(w.expires_at) : "Lifetime"} />
+          <Field label="Installed" value={dayDate(w.issued_at)} />
+          <Field label="Covered through" value={w.expires_at ? dayDate(w.expires_at) : "Lifetime"} />
           <Field label="Film lot numbers" value={w.roll_lots.length ? w.roll_lots.join(", ") : "—"} />
           <Field label="Status" value={w.status === "active" ? "Active" : w.status} />
         </dl>
