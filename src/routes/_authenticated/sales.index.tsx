@@ -417,15 +417,22 @@ function DealCard({
   deal,
   dragging,
   onOpen,
+  onTag,
 }: {
   deal: Deal;
   dragging: boolean;
   onOpen: () => void;
+  onTag: (tag: string) => void;
 }) {
   const { attributes, listeners, setNodeRef } = useDraggable({ id: deal.id });
   const age = deal.last_activity_at
     ? Math.round((Date.now() - new Date(deal.last_activity_at).getTime()) / 86400000)
     : null;
+  const isNewLead = deal.stage === "new_lead";
+  const vehicle = deal.vehicles
+    ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ")
+    : null;
+  const phone = deal.customers?.phone ?? null;
   return (
     <div
       ref={setNodeRef}
@@ -433,28 +440,79 @@ function DealCard({
       {...attributes}
       onClick={onOpen}
       className={cn(
-        "cursor-grab touch-none rounded-lg border border-elevated bg-surface-2 p-2 transition-colors hover:border-hairline active:cursor-grabbing",
+        "cursor-grab touch-none rounded-xl border border-elevated bg-surface-2 p-3 transition-colors hover:border-hairline active:cursor-grabbing",
         dragging && "opacity-40",
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold leading-tight">{deal.title}</p>
-        <span className="whitespace-nowrap text-xs font-semibold tabular-nums text-bronze">
-          {money(deal.value)}
-        </span>
+        <p className="text-sm font-semibold leading-snug">{deal.title}</p>
+        {!isNewLead && (
+          <span className="whitespace-nowrap text-sm font-semibold tabular-nums text-bronze">
+            {money(deal.value)}
+          </span>
+        )}
       </div>
-      <p className="mt-1 truncate text-[11px] text-muted-foreground">
+
+      <p className="mt-1.5 text-xs text-muted-foreground">
         {deal.customers?.name ?? "No customer"}
         {deal.source ? ` · ${deal.source}` : ""}
       </p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-1">
-        {age !== null && age > 3 ? (
-          <Tag tone="critical" className="text-[10px]">{age}d</Tag>
-        ) : (
-          <Tag tone="muted" className="text-[10px]">{deal.probability}%</Tag>
-        )}
-        {deal.expected_close && (
-          <Tag tone="muted" className="text-[10px]">{dayDate(deal.expected_close)}</Tag>
+
+      {vehicle && (
+        <p className="mt-1 text-xs font-medium text-foreground/90">{vehicle}</p>
+      )}
+
+      {(deal.service_tags ?? []).length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {(deal.service_tags ?? []).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTag(t);
+              }}
+              className="rounded-full border border-elevated bg-surface px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-bronze/60 hover:text-bronze"
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-2.5 flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1">
+          {age !== null && age > 3 ? (
+            <Tag tone="critical" className="text-[10px]">{age}d</Tag>
+          ) : (
+            !isNewLead && <Tag tone="muted" className="text-[10px]">{deal.probability}%</Tag>
+          )}
+          {deal.expected_close && (
+            <Tag tone="muted" className="text-[10px]">{dayDate(deal.expected_close)}</Tag>
+          )}
+        </div>
+        {phone && (
+          <div className="flex shrink-0 items-center gap-1">
+            <a
+              href={`tel:${phone}`}
+              aria-label={`Call ${deal.customers?.name ?? "customer"}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="grid h-7 w-7 place-items-center rounded-full border border-elevated text-muted-foreground transition-colors hover:border-bronze/60 hover:text-bronze"
+            >
+              <Phone className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href={`sms:${phone}`}
+              aria-label={`Text ${deal.customers?.name ?? "customer"}`}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className="grid h-7 w-7 place-items-center rounded-full border border-elevated text-muted-foreground transition-colors hover:border-bronze/60 hover:text-bronze"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+            </a>
+          </div>
         )}
       </div>
     </div>
