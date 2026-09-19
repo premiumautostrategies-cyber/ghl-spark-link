@@ -189,9 +189,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Mobile nav */}
+        {/* Mobile lower toolbar */}
         <nav className="flex gap-1 overflow-x-auto border-b border-border bg-sidebar px-2 py-2 lg:hidden">
-          {NAV.map((item) => (
+          {(activeGroup ?? NAV_GROUPS[0]!).items.map((item) => (
             <Link
               key={item.to}
               to={item.to as never}
