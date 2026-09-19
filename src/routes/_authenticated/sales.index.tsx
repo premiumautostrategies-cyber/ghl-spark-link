@@ -352,19 +352,19 @@ function StageColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex w-[224px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
+        "flex w-[208px] shrink-0 flex-col rounded-xl border bg-surface transition-colors",
         isOver ? "border-bronze/60 bg-surface-2" : "border-elevated",
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-elevated px-3 py-2">
-        <Tag tone={STAGE_TONE[stage] ?? "muted"} className="text-[10px]">{label(stage)}</Tag>
+      <div className="flex items-center justify-between gap-2 border-b border-elevated px-2.5 py-1.5">
+        <Tag tone={STAGE_TONE[stage] ?? "muted"}>{label(stage)}</Tag>
         <span className="text-[11px] tabular-nums text-muted-foreground">
           {count} · {money(total)}
         </span>
       </div>
-      <div className="flex min-h-[100px] flex-col gap-1.5 p-2">
+      <div className="flex min-h-[72px] flex-col gap-1.5 p-2">
         {count === 0 ? (
-          <p className="py-6 text-center text-[11px] text-muted-foreground">Drop a deal here</p>
+          <p className="py-5 text-center text-[11px] text-muted-foreground">Drop a deal here</p>
         ) : (
           children
         )}
