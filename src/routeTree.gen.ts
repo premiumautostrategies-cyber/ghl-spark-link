@@ -43,6 +43,7 @@ import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/connector/return'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
 import { Route as OauthQuickbooksReturnRouteImport } from './routes/oauth/quickbooks/return'
+import { Route as PPortalTokenRouteImport } from './routes/p/portal.$token'
 import { Route as PProposalTokenRouteImport } from './routes/p/proposal.$token'
 import { Route as PWaiverTokenRouteImport } from './routes/p/waiver.$token'
 import { Route as PWarrantyTokenRouteImport } from './routes/p/warranty.$token'
@@ -221,6 +222,11 @@ const OauthQuickbooksReturnRoute = OauthQuickbooksReturnRouteImport.update({
   path: '/oauth/quickbooks/return',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PPortalTokenRoute = PPortalTokenRouteImport.update({
+  id: '/p/portal/$token',
+  path: '/p/portal/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PProposalTokenRoute = PProposalTokenRouteImport.update({
   id: '/p/proposal/$token',
   path: '/p/proposal/$token',
@@ -270,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
+  '/p/portal/$token': typeof PPortalTokenRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
@@ -308,6 +315,7 @@ export interface FileRoutesByTo {
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
+  '/p/portal/$token': typeof PPortalTokenRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
   '/oauth/quickbooks/return': typeof OauthQuickbooksReturnRoute
+  '/p/portal/$token': typeof PPortalTokenRoute
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
+    | '/p/portal/$token'
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
+    | '/p/portal/$token'
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
     | '/oauth/quickbooks/return'
+    | '/p/portal/$token'
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
@@ -484,6 +496,7 @@ export interface RootRouteChildren {
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
   OauthHubspotReturnRoute: typeof OauthHubspotReturnRoute
   OauthQuickbooksReturnRoute: typeof OauthQuickbooksReturnRoute
+  PPortalTokenRoute: typeof PPortalTokenRoute
   PProposalTokenRoute: typeof PProposalTokenRoute
   PWaiverTokenRoute: typeof PWaiverTokenRoute
   PWarrantyTokenRoute: typeof PWarrantyTokenRoute
@@ -729,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthQuickbooksReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/portal/$token': {
+      id: '/p/portal/$token'
+      path: '/p/portal/$token'
+      fullPath: '/p/portal/$token'
+      preLoaderRoute: typeof PPortalTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/proposal/$token': {
       id: '/p/proposal/$token'
       path: '/p/proposal/$token'
@@ -819,6 +839,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
   OauthHubspotReturnRoute: OauthHubspotReturnRoute,
   OauthQuickbooksReturnRoute: OauthQuickbooksReturnRoute,
+  PPortalTokenRoute: PPortalTokenRoute,
   PProposalTokenRoute: PProposalTokenRoute,
   PWaiverTokenRoute: PWaiverTokenRoute,
   PWarrantyTokenRoute: PWarrantyTokenRoute,

@@ -380,6 +380,7 @@ export type Database = {
           organization_id: string | null
           owner_id: string
           phone: string | null
+          portal_token: string | null
           updated_at: string
           updated_by: string | null
         }
@@ -398,6 +399,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string
           phone?: string | null
+          portal_token?: string | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -416,6 +418,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string
           phone?: string | null
+          portal_token?: string | null
           updated_at?: string
           updated_by?: string | null
         }

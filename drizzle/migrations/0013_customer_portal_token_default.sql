@@ -1,0 +1,1 @@
+ALTER TABLE public.customers ALTER COLUMN portal_token SET DEFAULT encode(gen_random_bytes(12), 'hex');
