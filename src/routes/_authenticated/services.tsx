@@ -647,6 +647,67 @@ function ServicesPage() {
         </div>
       )}
 
+      {/* Add-on library */}
+      <Panel className="space-y-3 p-4">
+        <div>
+          <p className="micro-label">Add-on library</p>
+          <p className="text-xs text-muted-foreground">
+            Extras any service can offer — attach them per service in the editor.
+          </p>
+        </div>
+        {addOns.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {addOns.map((a) => (
+              <span
+                key={a.id}
+                className="flex items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2 text-sm"
+              >
+                {a.name}
+                <span className="tabular-nums text-bronze">+{money(a.price)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {a.category_id ? catById[a.category_id]?.name : "Global"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeAddOn.mutate(a.id)}
+                  className="text-muted-foreground hover:text-critical"
+                  aria-label="Remove add-on"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <form
+          className="grid gap-2 sm:grid-cols-5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            saveAddOn.mutate(new FormData(e.currentTarget));
+            e.currentTarget.reset();
+          }}
+        >
+          <Input name="name" placeholder="Add-on name" required />
+          <Input name="price" type="number" step="0.01" placeholder="Price" />
+          <Input name="estimated_hours" type="number" step="0.25" placeholder="Hours" />
+          <select
+            name="category_id"
+            className="h-10 rounded-md border border-elevated bg-surface-2 px-3 text-sm"
+            defaultValue="global"
+          >
+            <option value="global">All categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <Button type="submit" variant="outline" disabled={saveAddOn.isPending}>
+            <Plus className="mr-1 h-4 w-4" /> Add
+          </Button>
+        </form>
+      </Panel>
+
       {/* New / edit service */}
       <Dialog
         open={newService || !!editing}
