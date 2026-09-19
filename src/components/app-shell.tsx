@@ -21,6 +21,7 @@ import {
   Package,
   Plug,
   Search,
+  Sparkles,
   Settings,
   Users,
   ScanLine,
@@ -38,6 +39,7 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { to: "/customers", label: "Customers", icon: Users },
       { to: "/vehicles", label: "Vehicles", icon: Car },
       { to: "/services", label: "Service Menu", icon: Layers },
+      { to: "/packages", label: "Packages", icon: Sparkles },
     ],
   },
   {
