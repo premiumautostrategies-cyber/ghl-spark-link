@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/shop";
 import { ALL_PANELS, STARTER_CATEGORIES } from "@/lib/catalog";
 
 function daysFromNow(days: number, hour = 9) {
@@ -299,6 +300,49 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     const defRes = await supabase.from("inspection_defects").insert(defectRows);
     if (defRes.error) throw defRes.error;
   }
+
+  // --- Shop floor: bays, certifications, templates, film rolls -------------
+  await supabase.from("bays").insert(
+    [
+      { name: "Bay 1 — PPF", discipline: "ppf", daily_hours_cap: 9, required_certification: "ppf", sort_order: 0 },
+      { name: "Bay 2 — Tint", discipline: "tint", daily_hours_cap: 9, required_certification: "tint", sort_order: 1 },
+      { name: "Bay 3 — Wrap / Detail", discipline: "wrap", daily_hours_cap: 9, required_certification: "wrap", sort_order: 2 },
+      { name: "Prep bay", discipline: "flex", daily_hours_cap: 9, required_certification: null, sort_order: 3 },
+    ].map((b) => ({ ...b, ...org })),
+  );
+
+  await supabase.from("message_templates").insert(
+    DEFAULT_MESSAGE_TEMPLATES.map((t, i) => ({
+      organization_id: orgId,
+      name: t.name,
+      channel: t.channel,
+      category: t.category,
+      body: t.body,
+      sort_order: i,
+    })),
+  );
+
+  const teamRes = await supabase.from("team_members").select("id,full_name,specialties");
+  const certRows = (teamRes.data ?? []).flatMap((t) =>
+    (t.specialties ?? [])
+      .filter((sp: string) => ["ppf", "tint", "wrap", "ceramic", "paint_correction"].includes(sp))
+      .map((sp: string) => ({
+        organization_id: orgId,
+        team_member_id: t.id,
+        certification: sp === "paint_correction" ? "paint_correction" : sp,
+        level: t.full_name === "Marcus Webb" || t.full_name === "Dani Ortiz" ? "lead" : "certified",
+      })),
+  );
+  if (certRows.length) await supabase.from("tech_certifications").insert(certRows);
+
+  await supabase.from("inventory_rolls").insert(
+    [
+      { roll_code: "XPL-2291", brand: "XPEL", product_line: "Ultimate Plus 10", material_type: "ppf", width_inches: 60, original_feet: 100, remaining_feet: 68, lot_number: "LOT-44821", batch_id: "B-2291", cost_per_foot: 11.4, vendor: "XPEL", shelf: "A1" },
+      { roll_code: "XPL-2307", brand: "XPEL", product_line: "Stealth", material_type: "ppf", width_inches: 60, original_feet: 100, remaining_feet: 22, lot_number: "LOT-44902", cost_per_foot: 12.2, vendor: "XPEL", shelf: "A2" },
+      { roll_code: "STK-1188", brand: "SunTek", product_line: "Ceramic CIR 35", material_type: "tint", width_inches: 40, original_feet: 100, remaining_feet: 74, lot_number: "LOT-90211", cost_per_foot: 4.2, vendor: "SunTek", shelf: "B1" },
+      { roll_code: "3M-4402", brand: "3M", product_line: "2080 Satin Black", material_type: "wrap", width_inches: 60, original_feet: 75, remaining_feet: 18, lot_number: "LOT-77310", cost_per_foot: 9.1, vendor: "3M", shelf: "C3" },
+    ].map((r) => ({ ...r, ...org })),
+  );
 
   return { customers: customerRows.length, jobs: jobRows.length, deals: deals.length };
 }
