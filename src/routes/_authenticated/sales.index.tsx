@@ -417,3 +417,23 @@ function DealCard({
   );
 }
 
+
+function Stat({
+  label: statLabel,
+  value,
+  hint,
+  className,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  className?: string;
+}) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{statLabel}</span>
+      <span className={cn("text-sm font-semibold tabular-nums", className)}>{value}</span>
+      {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
+    </div>
+  );
+}
