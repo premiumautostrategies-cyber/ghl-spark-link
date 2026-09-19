@@ -503,7 +503,7 @@ function DealDesk() {
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Pipeline
         </Link>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="micro-label">Sales desk</p>
             <h1 className="display-title mt-1 text-3xl">{deal.title}</h1>
@@ -526,15 +526,15 @@ function DealDesk() {
       </div>
 
 
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         {/* Quote builder */}
         <Panel className="min-w-0">
           <SectionTitle
             title="Quote builder"
-            hint="Pick services from the menu or add a custom line."
+            hint="Tap a service to add it to the quote — ones with options open first."
             right={<Tag tone={estimate?.status === "sent" ? "comms" : "muted"}>{label(estimate?.status ?? "draft")}</Tag>}
           />
-          <div className="border-t border-elevated p-5">
+          <div className="border-t border-elevated p-4">
             <ServicePicker
               services={services}
               categories={catalogCategories}
@@ -542,7 +542,7 @@ function DealDesk() {
               onAdd={(line) => addLine.mutate(line)}
             />
 
-            <div className="mt-5 space-y-2">
+            <div className="mt-3 space-y-1.5">
               {items.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-elevated p-6 text-center text-xs text-muted-foreground">
                   Nothing on this quote yet.
@@ -576,7 +576,7 @@ function DealDesk() {
             </div>
 
             <form
-              className="mt-4 flex flex-wrap items-end gap-2"
+              className="mt-3 flex flex-wrap items-end gap-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 const f = new FormData(e.currentTarget);
@@ -607,7 +607,7 @@ function DealDesk() {
               </Button>
             </form>
 
-            <div className="mt-5 space-y-1.5 border-t border-elevated pt-4 text-sm">
+            <div className="mt-4 space-y-1.5 border-t border-elevated pt-3 text-sm">
               <Row label="Subtotal" value={money(subtotal)} />
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -620,7 +620,7 @@ function DealDesk() {
               <Row label="Suggested deposit (30%)" value={money(total * 0.3)} />
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button onClick={() => sendProposal.mutate()} disabled={sendProposal.isPending}>
                 Send proposal to client hub
               </Button>
@@ -631,7 +631,7 @@ function DealDesk() {
           </div>
         </Panel>
 
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-4">
           {/* Scheduling */}
           <Panel>
             <SectionTitle
@@ -640,7 +640,7 @@ function DealDesk() {
               right={job ? <Tag tone="rig">{label(job.status)}</Tag> : undefined}
             />
             <form
-              className="grid gap-3 border-t border-elevated p-5 sm:grid-cols-2"
+              className="grid gap-2.5 border-t border-elevated p-4 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 schedule.mutate(new FormData(e.currentTarget));
@@ -738,7 +738,7 @@ function DealDesk() {
               hint={`${money(collected)} collected of ${money(total)}`}
             />
             <form
-              className="grid gap-3 border-t border-elevated p-5 sm:grid-cols-2"
+              className="grid gap-2.5 border-t border-elevated p-4 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
                 takePayment.mutate(new FormData(e.currentTarget));
@@ -786,7 +786,7 @@ function DealDesk() {
               </Button>
             </form>
             {payments.length > 0 && (
-              <div className="space-y-1.5 border-t border-elevated p-5 pt-4">
+              <div className="space-y-1.5 border-t border-elevated p-4 pt-3">
                 {payments.slice(0, 4).map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-2 text-sm">
                     <span className="text-muted-foreground">
@@ -802,7 +802,7 @@ function DealDesk() {
           {/* Client hub documents */}
           <Panel>
             <SectionTitle title="Client hub" hint="Everything the customer can see and sign." />
-            <div className="border-t border-elevated p-5">
+            <div className="border-t border-elevated p-4">
               <div className="flex flex-wrap gap-1.5">
                 {DOC_TYPES.filter((d) => d !== "invoice" && d !== "photo_set").map((d) => (
                   <Button
@@ -816,7 +816,7 @@ function DealDesk() {
                   </Button>
                 ))}
               </div>
-              <div className="mt-4 space-y-1.5">
+              <div className="mt-3 space-y-1.5">
                 {documents.length === 0 ? (
                   <p className="text-xs text-muted-foreground">Nothing shared yet.</p>
                 ) : (
@@ -895,9 +895,9 @@ function NotesPanel({
   return (
     <Panel>
       <SectionTitle title="Conversation notes" />
-      <div className="space-y-3 border-t border-elevated p-5">
+      <div className="space-y-2.5 border-t border-elevated p-4">
         <Textarea
-          rows={4}
+          rows={3}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="What the customer wants, objections, next step…"
