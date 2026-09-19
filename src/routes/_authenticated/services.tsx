@@ -601,43 +601,72 @@ function ServicesPage() {
       )}
 
       {categories.length > 0 && (
-        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
-          <CatPill
-            name="All services"
-            count={services.length}
-            active={activeCat === "all"}
-            onClick={() => setActiveCat("all")}
-          />
-          {categories.map((c) => (
-            <CatPill
-              key={c.id}
-              name={c.name}
-              accent={c.accent_color}
-              count={services.filter((s) => s.category_id === c.id).length}
-              active={activeCat === c.id}
-              onClick={() => setActiveCat(c.id)}
+        <Panel className="space-y-3 p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search name, description or tag…"
+              className="h-9 w-full max-w-xs"
             />
-          ))}
-        </div>
+            <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+              <SelectTrigger className="h-9 w-[190px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alpha">Alphabetical</SelectItem>
+                <SelectItem value="price_desc">Price: high to low</SelectItem>
+                <SelectItem value="price_asc">Price: low to high</SelectItem>
+                <SelectItem value="duration">Duration</SelectItem>
+                <SelectItem value="popular">Popularity</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {filtered.length} of {services.length} services
+            </span>
+          </div>
+          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+            <CatPill
+              name="All services"
+              count={services.length}
+              active={selCats.length === 0}
+              onClick={() => setSelCats([])}
+            />
+            {categories.map((c) => (
+              <CatPill
+                key={c.id}
+                name={c.name}
+                accent={c.accent_color}
+                count={services.filter((s) => s.category_id === c.id).length}
+                active={selCats.includes(c.id)}
+                onClick={() =>
+                  setSelCats((prev) =>
+                    prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id],
+                  )
+                }
+              />
+            ))}
+          </div>
+        </Panel>
       )}
 
-      {activeCat !== "all" && catById[activeCat] && (
+      {singleCat && catById[singleCat] && (
         <Panel className="flex flex-wrap items-center justify-between gap-3 p-5">
           <div>
-            <p className="font-display text-xl">{catById[activeCat]!.name}</p>
+            <p className="font-display text-xl">{catById[singleCat]!.name}</p>
             <p className="text-xs text-muted-foreground">
-              {catById[activeCat]!.description || "No description"}
+              {catById[singleCat]!.description || "No description"}
             </p>
           </div>
           <div className="flex gap-2">
             <CategoryDialog
               categories={categories}
-              category={catById[activeCat]}
-              onSave={(form) => saveCategory.mutate({ id: activeCat, form })}
+              category={catById[singleCat]!}
+              onSave={(form) => saveCategory.mutate({ id: singleCat, form })}
             />
             <Button
               variant="outline"
-              onClick={() => archiveCategory.mutate(activeCat)}
+              onClick={() => archiveCategory.mutate(singleCat)}
               disabled={archiveCategory.isPending}
             >
               Archive
@@ -648,12 +677,44 @@ function ServicesPage() {
 
       {visible.length === 0 ? (
         <EmptyState
-          title="No services in this category"
-          body="Add a package, film tier or one-off service — each with its own photo and coverage map."
+          title="No services match"
+          body="Adjust the search or category filters — or add a new service."
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visible.map((s) => {
+        <div className="space-y-8">
+          {groups.map((g) => {
+            const isCollapsed = !!collapsed[g.key];
+            return (
+              <section key={g.key} className="space-y-3">
+                {groups.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setCollapsed((p) => ({ ...p, [g.key]: !p[g.key] }))}
+                    className="flex w-full items-center gap-2 text-left"
+                  >
+                    {g.accent && (
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: g.accent }}
+                      />
+                    )}
+                    <p className="font-display text-lg">
+                      {g.name}{" "}
+                      <span className="text-sm text-muted-foreground">
+                        ({g.items.length} {g.items.length === 1 ? "service" : "services"})
+                      </span>
+                    </p>
+                    <ChevronDown
+                      className={cn(
+                        "ml-auto h-4 w-4 text-muted-foreground transition-transform",
+                        isCollapsed && "-rotate-90",
+                      )}
+                    />
+                  </button>
+                )}
+                {!isCollapsed && (
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {g.items.map((s) => {
             const cat = s.category_id ? catById[s.category_id] : undefined;
             const opts = optionsFor(s.id);
             return (
