@@ -633,6 +633,39 @@ function ServicesPage() {
                       {money(s.base_price)}
                     </span>
                   </div>
+                  {((s.tags?.length ?? 0) > 0 ||
+                    !s.is_public ||
+                    s.deposit_type !== "none" ||
+                    s.pricing_mode === "tiered") && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {(s.tags ?? []).map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-full border border-bronze/50 bg-bronze/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-bronze"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                      {s.pricing_mode === "tiered" && (
+                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                          Size pricing
+                        </span>
+                      )}
+                      {s.deposit_type !== "none" && (
+                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                          Deposit{" "}
+                          {s.deposit_type === "percent"
+                            ? `${Number(s.deposit_value)}%`
+                            : money(s.deposit_value)}
+                        </span>
+                      )}
+                      {!s.is_public && (
+                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                          Internal only
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <p className="line-clamp-2 text-xs text-muted-foreground">
                     {s.customer_description || s.description || "No description yet."}
                   </p>
