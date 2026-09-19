@@ -74,8 +74,14 @@ function ProposalPage() {
   };
 
   async function submit(payDeposit: boolean) {
-    if (!tierId) return toast.error("Choose a package first");
-    if (!name.trim()) return toast.error("Type your name to sign");
+    if (!tierId) {
+      toast.error("Choose a package first");
+      return;
+    }
+    if (!name.trim()) {
+      toast.error("Type your name to sign");
+      return;
+    }
     setBusy(true);
     try {
       await signProposal({
