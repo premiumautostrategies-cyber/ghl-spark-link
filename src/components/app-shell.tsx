@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { AccentTheme } from "@/components/accent-theme";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
