@@ -223,6 +223,12 @@ function ServicesPage() {
   });
 
   const optionsFor = (serviceId: string) => options.filter((o) => o.service_id === serviceId);
+  const variantsFor = (serviceId: string) => variants.filter((v) => v.service_id === serviceId);
+  const linksFor = (serviceId: string) => addOnLinks.filter((l) => l.service_id === serviceId);
+  const addOnById = useMemo(
+    () => Object.fromEntries(addOns.map((a) => [a.id, a])) as Record<string, AddOn>,
+    [addOns],
+  );
   const catById = useMemo(
     () => Object.fromEntries(categories.map((c) => [c.id, c])) as Record<string, Category>,
     [categories],
