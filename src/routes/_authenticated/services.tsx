@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,7 +35,7 @@ import {
   catalogImage,
 } from "@/lib/catalog";
 import { toast } from "sonner";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Clock, Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/services")({
   head: () => ({
@@ -137,6 +137,10 @@ function ServicesPage() {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
   const [selCats, setSelCats] = useState<string[]>([]);
+  const [vehClass, setVehClass] = useState("any");
+  const [showPills, setShowPills] = useState(false);
+  const [filmsOnly, setFilmsOnly] = useState(false);
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"alpha" | "price_desc" | "price_asc" | "duration" | "popular">(
     "alpha",
@@ -517,6 +521,7 @@ function ServicesPage() {
         return a.name.localeCompare(b.name);
     }
   });
+  const visible = filmsOnly ? sorted.filter((s) => optionsFor(s.id).length > 0) : sorted;
   const singleCat = selCats.length === 1 ? selCats[0]! : null;
   const groups: { key: string; name: string; accent: string | null; items: Service[] }[] = singleCat
     ? [{ key: singleCat, name: catById[singleCat]?.name ?? "", accent: catById[singleCat]?.accent_color ?? null, items: sorted }]
@@ -525,13 +530,46 @@ function ServicesPage() {
           key: c.id,
           name: c.name,
           accent: c.accent_color,
-          items: sorted.filter((s) => s.category_id === c.id),
+          items: visible.filter((s) => s.category_id === c.id),
         }))
         .filter((g) => g.items.length > 0);
-  const uncategorized = sorted.filter((s) => !s.category_id || !catById[s.category_id]);
+  const uncategorized = visible.filter((s) => !s.category_id || !catById[s.category_id]);
   if (!singleCat && uncategorized.length > 0)
     groups.push({ key: "uncat", name: "Uncategorized", accent: null, items: uncategorized });
-  const visible = sorted;
+
+  const VEHICLE_CLASSES = [
+    "Sedan",
+    "Compact",
+    "Coupe",
+    "SUV",
+    "Full-Size SUV",
+    "Truck",
+    "Sports Car",
+    "Exotic",
+  ];
+  const classTierRe = (cls: string) => {
+    if (["Compact", "Coupe", "Sports Car"].includes(cls)) return /small|coupe|compact/i;
+    if (cls === "Sedan") return /midsize|sedan/i;
+    if (["SUV", "Full-Size SUV", "Truck"].includes(cls)) return /large|suv|truck|oversized/i;
+    return /exotic|large|oversized/i;
+  };
+  const priceFor = (s: Service) => {
+    if (vehClass !== "any") {
+      const re = classTierRe(vehClass);
+      const v = variantsFor(s.id).find((v) => re.test(v.tier_name));
+      if (v) return Number(v.price);
+    }
+    return Number(s.base_price);
+  };
+  const fmtDuration = (mins: number) => {
+    if (mins < 60) return `${mins} min`;
+    if (mins < 8 * 60) {
+      const h = Math.round(mins / 60);
+      return `${h} hr${h === 1 ? "" : "s"}`;
+    }
+    const d = Math.round(mins / (8 * 60));
+    return `${d} day${d === 1 ? "" : "s"}`;
+  };
   const active = services.filter((s) => s.is_active);
   const avg = active.length
     ? active.reduce((t, s) => t + Number(s.base_price), 0) / active.length
@@ -566,23 +604,54 @@ function ServicesPage() {
   return (
     <div className="min-w-0 space-y-6">
       <PageHeader
-        title="Service Library"
-        subtitle="Categories, packages, film tiers and the panels each one covers."
+        title="Services & Film Catalog"
+        subtitle="Manage services, pricing, and film listings"
         action={
           <div className="flex gap-2">
             <CategoryDialog
               categories={categories}
               onSave={(form) => saveCategory.mutate({ form })}
             />
-            <Button onClick={openNew}>New service</Button>
+            <Button onClick={openNew}>
+              <Plus className="mr-1.5 h-4 w-4" /> Add Service
+            </Button>
           </div>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Kpi label="Categories" value={String(categories.length)} />
-        <Kpi label="Active services" value={String(active.length)} tone="rig" />
-        <Kpi label="Average ticket" value={money(avg)} tone="revenue" />
+      {/* Sub-navigation */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setFilmsOnly(false)}
+          className={cn(
+            "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
+            !filmsOnly
+              ? "border-bronze bg-bronze/15 text-bronze"
+              : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Services
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/packages" })}
+          className="rounded-full border border-hairline/60 bg-surface-2 px-4 py-1.5 text-xs uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Vehicle Packages
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilmsOnly(true)}
+          className={cn(
+            "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
+            filmsOnly
+              ? "border-bronze bg-bronze/15 text-bronze"
+              : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
+          )}
+        >
+          Film Listings
+        </button>
       </div>
 
       {categories.length === 0 && (
@@ -603,12 +672,49 @@ function ServicesPage() {
       {categories.length > 0 && (
         <Panel className="space-y-3 p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search name, description or tag…"
-              className="h-9 w-full max-w-xs"
-            />
+            <div className="relative w-full max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search services..."
+                className="h-9 w-full pl-9"
+              />
+            </div>
+            <Select value={vehClass} onValueChange={setVehClass}>
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">All vehicle classes</SelectItem>
+                {VEHICLE_CLASSES.map((v) => (
+                  <SelectItem key={v} value={v}>{v}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant={showPills ? "default" : "outline"}
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => setShowPills((v) => !v)}
+              title="Toggle category filters"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+            <Select
+              value={selCats.length === 1 ? selCats[0]! : "all"}
+              onValueChange={(v) => setSelCats(v === "all" ? [] : [v])}
+            >
+              <SelectTrigger className="h-9 w-[190px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
               <SelectTrigger className="h-9 w-[190px]">
                 <SelectValue />
@@ -625,6 +731,7 @@ function ServicesPage() {
               {filtered.length} of {services.length} services
             </span>
           </div>
+          {showPills && (
           <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             <CatPill
               name="All services"
@@ -647,6 +754,7 @@ function ServicesPage() {
               />
             ))}
           </div>
+          )}
         </Panel>
       )}
 
@@ -700,7 +808,7 @@ function ServicesPage() {
                     )}
                     <p className="font-display text-lg">
                       {g.name}{" "}
-                      <span className="text-sm text-muted-foreground">
+                      <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-xs text-muted-foreground tabular-nums">
                         ({g.items.length} {g.items.length === 1 ? "service" : "services"})
                       </span>
                     </p>
@@ -715,108 +823,49 @@ function ServicesPage() {
                 {!isCollapsed && (
                   <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                     {g.items.map((s) => {
-            const cat = s.category_id ? catById[s.category_id] : undefined;
-            const opts = optionsFor(s.id);
             return (
-              <Panel key={s.id} className="self-start overflow-hidden">
-                <button type="button" className="block w-full text-left" onClick={() => openEdit(s)}>
-                  <img
-                    src={catalogImage(s.image_url, cat?.slug ?? s.category, cat?.image_url)}
-                    alt={s.name}
-                    loading="lazy"
-                    className="h-36 w-full object-cover"
-                  />
-                </button>
-                <div className="space-y-3 p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">{s.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {cat?.name ?? label(s.category)} · {Math.round(s.duration_minutes / 60)}h · per{" "}
-                        {s.unit}
-                      </p>
-                    </div>
-                    <span className="whitespace-nowrap font-display text-lg tabular-nums text-bronze">
-                      {money(s.base_price)}
-                    </span>
-                  </div>
-                  {((s.tags?.length ?? 0) > 0 ||
-                    !s.is_public ||
-                    s.deposit_type !== "none" ||
-                    s.pricing_mode === "tiered") && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {(s.tags ?? []).map((t) => (
-                        <span
-                          key={t}
-                          className="rounded-full border border-bronze/50 bg-bronze/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-bronze"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                      {s.pricing_mode === "tiered" && (
-                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                          Size pricing
-                        </span>
-                      )}
-                      {s.deposit_type !== "none" && (
-                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                          Deposit{" "}
-                          {s.deposit_type === "percent"
-                            ? `${Number(s.deposit_value)}%`
-                            : money(s.deposit_value)}
-                        </span>
-                      )}
-                      {!s.is_public && (
-                        <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                          Internal only
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <p className="line-clamp-2 text-xs text-muted-foreground">
-                    {s.customer_description || s.description || "No description yet."}
-                  </p>
-                  {(s.coverage_panels?.length ?? 0) > 0 && (
-                    <div className="flex items-center gap-3 rounded-xl border border-elevated bg-surface-2 p-3">
-                      <PanelCoverage panels={s.coverage_panels} compact accent={cat?.accent_color} />
-                      <p className="text-[11px] text-muted-foreground">
-                        {s.coverage_panels.length} panels covered
-                      </p>
-                    </div>
-                  )}
-                  {opts.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {opts.slice(0, 5).map((o) => (
-                        <span
-                          key={o.id}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground"
-                        >
-                          {o.swatch_color && (
-                            <span
-                              className="h-2 w-2 rounded-full"
-                              style={{ backgroundColor: o.swatch_color }}
-                            />
-                          )}
-                          {o.name}
-                        </span>
-                      ))}
-                      {opts.length > 5 && <Tag tone="muted">+{opts.length - 5}</Tag>}
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between gap-2 border-t border-elevated pt-3">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(s)}>
-                      Edit &amp; options
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                        {s.is_active ? "Live" : "Hidden"}
+              <Panel
+                key={s.id}
+                className="flex cursor-pointer flex-col gap-3 self-start p-5 transition-colors hover:border-bronze/40"
+                onClick={() => openEdit(s)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="min-w-0 truncate font-semibold">{s.name}</p>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {s.pricing_mode === "tiered" && (
+                      <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                        Size varies
                       </span>
+                    )}
+                    {s.pricing_mode !== "tiered" && (s.tags ?? [])[0] && (
+                      <span className="rounded-full border border-bronze/50 bg-bronze/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-bronze">
+                        {(s.tags ?? [])[0]}
+                      </span>
+                    )}
+                    <span onClick={(e) => e.stopPropagation()}>
                       <Switch
                         checked={s.is_active}
                         onCheckedChange={(v) => toggleActive.mutate({ id: s.id, is_active: v })}
                       />
-                    </div>
+                    </span>
                   </div>
+                </div>
+                <p className="line-clamp-2 min-h-8 text-xs text-muted-foreground">
+                  {s.customer_description || s.description || "No description yet."}
+                </p>
+                <div className="mt-auto flex items-center justify-between gap-2 border-t border-elevated pt-3">
+                  <span className="font-display text-lg font-bold tabular-nums text-bronze">
+                    {money(priceFor(s))}
+                    {s.pricing_mode === "tiered" && vehClass === "any" && (
+                      <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.1em] text-muted-foreground">
+                        from
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    {fmtDuration(s.duration_minutes)}
+                  </span>
                 </div>
               </Panel>
                     );
