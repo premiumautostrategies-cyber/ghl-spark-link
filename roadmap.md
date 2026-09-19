@@ -40,3 +40,14 @@
 - [x] Vehicle inspections with panel damage map and customer sign-off
 
 - [x] Integrations hub: QuickBooks / Google Calendar / Gmail / Outlook / HubSpot / GHL cards, per-event toggles, sync queue with retries, activity log, scheduled drain worker (demo mode — provider sign-in apps not provisioned)
+
+## Shop floor overhaul (8 steps)
+- [x] 1. Deal comms thread + speed-to-lead auto text
+- [x] 2. Interactive Good/Better/Best proposal, e-signature, deposit gate
+- [x] 3. Smart bay scheduler (caps, certifications, roll soft-reserve)
+- [x] 4. DVI panel map with photo/video pins + customer waiver link
+- [x] 5. Shop floor kiosk with phase timers
+- [x] 6. Roll-level film stock, waste logging, vendor POs
+- [x] 7. QC gate with edge temp + key release lock
+- [x] 8. Warranty certificates + day 3/14/15 aftercare cadence
+- [ ] Automated sending of queued aftercare texts (needs a live SMS provider; "Send now" works today)
