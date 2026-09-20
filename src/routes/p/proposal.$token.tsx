@@ -6,16 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { money } from "@/lib/format";
-import { Check, ShieldCheck } from "lucide-react";
+import { Check, Maximize2, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
+import { CoverageVisual } from "@/components/coverage-visual";
+import { resolveBodyStyle } from "@/lib/vehicle-library";
+import { BODY_LABELS, type BodyStyle } from "@/lib/vehicle-art";
+import { coverageItemLabels, coverageLabel, type CoverageKind } from "@/lib/coverage-presets";
 
 export const Route = createFileRoute("/p/proposal/$token")({
   head: () => ({
     meta: [
       { title: "Your proposal — Systemize" },
-      { name: "description", content: "Choose your package, add options, sign and pay your deposit online." },
+      { name: "description", content: "See exactly what each package covers on your vehicle, then sign and pay your deposit online." },
       { property: "og:title", content: "Your vehicle protection proposal" },
-      { property: "og:description", content: "Choose your package, add options, sign and pay your deposit online." },
+      { property: "og:description", content: "See exactly what each package covers on your vehicle, then sign and pay your deposit online." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -29,16 +33,23 @@ export const Route = createFileRoute("/p/proposal/$token")({
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background px-4 py-10">
-      <div className="mx-auto w-full max-w-3xl">{children}</div>
+      <div className="mx-auto w-full max-w-4xl">{children}</div>
     </div>
   );
 }
+
+type Covered = { coverage_kind?: string | null; coverage_keys?: string[] | null };
+
+const kindOf = (r: Covered): CoverageKind =>
+  r.coverage_kind === "tint" ? "tint" : r.coverage_kind === "none" ? "none" : "panels";
+const keysOf = (r: Covered) => r.coverage_keys ?? [];
 
 function ProposalPage() {
   const data = Route.useLoaderData();
   const [tierId, setTierId] = useState<string | null>(data?.proposal.selected_tier_id ?? null);
   const [addonIds, setAddonIds] = useState<string[]>(data?.proposal.selected_addon_ids ?? []);
   const [name, setName] = useState(data?.proposal.signature_name ?? data?.customerName ?? "");
+  const [zoom, setZoom] = useState<{ title: string; kind: CoverageKind; keys: string[] } | null>(null);
   const [done, setDone] = useState(
     data?.proposal.status === "signed" || data?.proposal.status === "paid",
   );
@@ -47,6 +58,12 @@ function ProposalPage() {
   const tiers = data?.tiers ?? [];
   const addons = data?.addons ?? [];
   const depositPercent = Number(data?.proposal.deposit_percent ?? 30);
+  const accent = data?.accent ?? "#c99a5b";
+  const body: BodyStyle = resolveBodyStyle(
+    data?.vehicleParts?.make,
+    data?.vehicleParts?.model,
+    data?.vehicleParts?.year ? Number(data.vehicleParts.year) : null,
+  );
 
   const totals = useMemo(() => {
     const tier = tiers.find((t) => t.id === tierId);
@@ -103,6 +120,7 @@ function ProposalPage() {
         <h1 className="display-title mt-2 text-3xl">{data.proposal.title}</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
           {[data.customerName, data.vehicle].filter(Boolean).join(" · ") || "Prepared for you"}
+          {` · shown on a ${BODY_LABELS[body].toLowerCase()} layout`}
         </p>
       </header>
 
@@ -119,21 +137,18 @@ function ProposalPage() {
       ) : (
         <div className="space-y-5">
           <section>
-            <p className="micro-label mb-2">Choose your package</p>
+            <p className="micro-label mb-2">Choose your package — tap a diagram to see it full size</p>
             <div className="grid gap-3 sm:grid-cols-3">
               {tiers.map((t) => {
                 const active = t.id === tierId;
+                const kind = kindOf(t as Covered);
+                const keys = keysOf(t as Covered);
                 return (
-                  <button
+                  <div
                     key={t.id}
-                    type="button"
-                    onClick={() => {
-                      setTierId(t.id);
-                      persist(t.id, addonIds);
-                    }}
                     className={cn(
-                      "rounded-2xl border p-4 text-left transition-colors",
-                      active ? "border-bronze bg-bronze/10" : "border-elevated bg-surface hover:border-bronze/40",
+                      "flex flex-col rounded-2xl border p-4 text-left transition-colors",
+                      active ? "border-bronze bg-bronze/10" : "border-elevated bg-surface",
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -144,7 +159,31 @@ function ProposalPage() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-2 font-display text-2xl text-bronze">{money(t.price)}</p>
+
+                    {kind !== "none" && keys.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setZoom({ title: t.name, kind, keys })}
+                        className="group relative mt-3 rounded-xl border border-hairline/60 bg-surface-2/60 p-2"
+                        aria-label={`Enlarge ${t.name} coverage`}
+                      >
+                        <CoverageVisual
+                          kind={kind === "tint" ? "tint" : "panels"}
+                          body={body}
+                          covered={keys}
+                          accent={accent}
+                          className={kind === "tint" ? "max-h-28" : "max-h-40"}
+                        />
+                        <span className="absolute right-2 top-2 rounded-md bg-background/70 p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+                          <Maximize2 className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="mt-1 block text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                          {coverageLabel(kind, keys)}
+                        </span>
+                      </button>
+                    )}
+
+                    <p className="mt-3 font-display text-2xl text-bronze">{money(t.price)}</p>
                     {t.description && (
                       <p className="mt-1.5 text-xs text-muted-foreground">{t.description}</p>
                     )}
@@ -155,7 +194,18 @@ function ProposalPage() {
                         </li>
                       ))}
                     </ul>
-                  </button>
+                    <Button
+                      className="mt-4"
+                      variant={active ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setTierId(t.id);
+                        persist(t.id, addonIds);
+                      }}
+                    >
+                      {active ? "Selected" : "Choose this"}
+                    </Button>
+                  </div>
                 );
               })}
             </div>
@@ -167,6 +217,8 @@ function ProposalPage() {
               <div className="space-y-2">
                 {addons.map((a) => {
                   const active = addonIds.includes(a.id);
+                  const kind = kindOf(a as Covered);
+                  const keys = keysOf(a as Covered);
                   return (
                     <button
                       key={a.id}
@@ -185,6 +237,16 @@ function ProposalPage() {
                       >
                         {active && <Check className="h-3.5 w-3.5" />}
                       </span>
+                      {kind !== "none" && keys.length > 0 && (
+                        <span className="hidden w-20 shrink-0 sm:block">
+                          <CoverageVisual
+                            kind={kind === "tint" ? "tint" : "panels"}
+                            body={body}
+                            covered={keys}
+                            accent={accent}
+                          />
+                        </span>
+                      )}
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium">{a.name}</span>
                         {a.description && (
@@ -225,6 +287,49 @@ function ProposalPage() {
               Card processing runs in demo mode on this workspace — approving records the deposit against your job.
             </p>
           </section>
+        </div>
+      )}
+
+      {zoom && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 p-4"
+          onClick={() => setZoom(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-elevated bg-surface p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-display text-xl">{zoom.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {coverageLabel(zoom.kind, zoom.keys)} · {data.vehicle ?? BODY_LABELS[body]}
+                </p>
+              </div>
+              <button type="button" onClick={() => setZoom(null)} aria-label="Close">
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="mt-4">
+              <CoverageVisual
+                kind={zoom.kind === "tint" ? "tint" : "panels"}
+                body={body}
+                covered={zoom.keys}
+                accent={accent}
+                className={zoom.kind === "tint" ? "max-h-64" : "max-h-[26rem]"}
+              />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {coverageItemLabels(zoom.kind, zoom.keys).map((l) => (
+                <span
+                  key={l}
+                  className="rounded-full border border-bronze/40 bg-bronze/10 px-2.5 py-0.5 text-[11px] text-bronze"
+                >
+                  {l}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </Shell>
