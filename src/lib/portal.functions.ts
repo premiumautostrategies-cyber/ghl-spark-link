@@ -63,6 +63,14 @@ export const getProposalByToken = createServerFn({ method: "GET" })
       vehicle: vehicle
         ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ")
         : null,
+      vehicleParts: vehicle
+        ? {
+            year: vehicle.year ?? null,
+            make: vehicle.make ?? null,
+            model: vehicle.model ?? null,
+            color: vehicle.color ?? null,
+          }
+        : null,
     };
   });
 

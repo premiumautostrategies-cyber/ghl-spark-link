@@ -10,6 +10,12 @@ import { toast } from "sonner";
 import { money, label as fmtLabel } from "@/lib/format";
 import { makeToken } from "@/lib/shop";
 import { Copy, Trash2 } from "lucide-react";
+import { CoverageVisual } from "@/components/coverage-visual";
+import { resolveBodyStyle } from "@/lib/vehicle-library";
+import { PPF_PRESETS, TINT_PRESETS, type CoverageKind } from "@/lib/coverage-presets";
+import { useQuery as useRQ } from "@tanstack/react-query";
+
+type Coverage = { coverage_kind?: string | null; coverage_keys?: string[] | null };
 
 type Tier = {
   id: string;
@@ -22,7 +28,7 @@ type Tier = {
   film_feet: number | string;
   is_recommended: boolean;
   sort_order: number;
-};
+} & Coverage;
 
 type Addon = {
   id: string;
@@ -32,13 +38,44 @@ type Addon = {
   labor_hours: number | string;
   film_feet: number | string;
   sort_order: number;
-};
+} & Coverage;
+
+const COVERAGE_OPTIONS: { value: string; label: string; kind: CoverageKind; keys: string[] }[] = [
+  { value: "none", label: "No diagram", kind: "none", keys: [] },
+  ...PPF_PRESETS.map((p) => ({
+    value: `panels:${p.name}`,
+    label: `Film — ${p.name}`,
+    kind: "panels" as const,
+    keys: p.panels,
+  })),
+  ...TINT_PRESETS.map((p) => ({
+    value: `tint:${p.name}`,
+    label: `Tint — ${p.name}`,
+    kind: "tint" as const,
+    keys: p.windows,
+  })),
+];
+
+function coverageValue(row: Coverage) {
+  const keys = row.coverage_keys ?? [];
+  const kind = row.coverage_kind === "tint" ? "tint" : row.coverage_kind === "none" ? "none" : "panels";
+  if (kind === "none" || keys.length === 0) return "none";
+  const hit = COVERAGE_OPTIONS.find(
+    (o) => o.kind === kind && o.keys.length === keys.length && o.keys.every((k) => keys.includes(k)),
+  );
+  return hit?.value ?? "none";
+}
+
+const presetPanels = (name: string) => PPF_PRESETS.find((p) => p.name === name)?.panels ?? [];
+const presetWindows = (name: string) => TINT_PRESETS.find((p) => p.name === name)?.windows ?? [];
 
 const DEFAULT_ADDONS = [
-  { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0 },
-  { name: "Glass coating", description: "Windshield and side glass", price: 250, labor_hours: 2, film_feet: 0 },
-  { name: "Wheel face protection", description: "Coating on all four faces", price: 300, labor_hours: 2, film_feet: 0 },
-  { name: "Windshield defense film", description: "Impact-resistant clear film", price: 795, labor_hours: 2.5, film_feet: 6 },
+  { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Glass coating", description: "Windshield and side glass", price: 250, labor_hours: 2, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Wheel face protection", description: "Coating on all four faces", price: 300, labor_hours: 2, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Two front windows tinted", description: "Match the rears already on the car", price: 180, labor_hours: 1, film_feet: 0, coverage_kind: "tint", coverage_keys: presetWindows("Two front windows") },
+  { name: "Full vehicle tint", description: "Ceramic IR film on all side and rear glass", price: 595, labor_hours: 3, film_feet: 0, coverage_kind: "tint", coverage_keys: presetWindows("Full vehicle") },
+  { name: "Windshield defense film", description: "Impact-resistant clear film", price: 795, labor_hours: 2.5, film_feet: 6, coverage_kind: "none", coverage_keys: [] as string[] },
 ];
 
 export function DealProposal({
@@ -60,6 +97,21 @@ export function DealProposal({
   const qc = useQueryClient();
   const { orgId, locId, organization } = useOrg();
   const [copied, setCopied] = useState(false);
+
+  const { data: vehicle } = useRQ({
+    queryKey: ["proposal-vehicle", deal.vehicle_id],
+    enabled: !!deal.vehicle_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("vehicles")
+        .select("year,make,model")
+        .eq("id", deal.vehicle_id!)
+        .maybeSingle();
+      return data;
+    },
+  });
+  const body = resolveBodyStyle(vehicle?.make, vehicle?.model, vehicle?.year ?? null);
+
 
   const { data: proposal } = useQuery({
     queryKey: ["deal-proposal", dealId],
@@ -109,6 +161,8 @@ export function DealProposal({
           film_feet: Math.round(hours * 3),
           sort_order: 0,
           is_recommended: false,
+          coverage_kind: "panels",
+          coverage_keys: presetPanels("Full front"),
         },
         {
           tier: "better",
@@ -120,6 +174,8 @@ export function DealProposal({
           film_feet: Math.round(hours * 4),
           sort_order: 1,
           is_recommended: true,
+          coverage_kind: "panels",
+          coverage_keys: presetPanels("Track pack"),
         },
         {
           tier: "best",
@@ -131,6 +187,8 @@ export function DealProposal({
           film_feet: Math.round(hours * 6),
           sort_order: 2,
           is_recommended: false,
+          coverage_kind: "panels",
+          coverage_keys: presetPanels("Full body"),
         },
       ].map((t) => ({ ...t, organization_id: orgId, proposal_id: created.id }));
 
@@ -298,6 +356,12 @@ export function DealProposal({
                 <NumField label="h" value={t.labor_hours} onCommit={(v) => patchTier.mutate({ id: t.id, patch: { labor_hours: v } })} />
                 <NumField label="ft" value={t.film_feet} onCommit={(v) => patchTier.mutate({ id: t.id, patch: { film_feet: v } })} />
               </div>
+              <CoveragePicker
+                body={body}
+                accent={organization?.accent_color ?? null}
+                row={t}
+                onChange={(patch) => patchTier.mutate({ id: t.id, patch })}
+              />
               <ul className="mt-2 space-y-0.5">
                 {t.includes.map((inc) => (
                   <li key={inc} className="text-[11px] text-muted-foreground">• {inc}</li>
@@ -311,8 +375,17 @@ export function DealProposal({
           <p className="micro-label mb-2">Live add-ons</p>
           <div className="space-y-1.5">
             {addons.map((a) => (
-              <div key={a.id} className="flex items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
+              <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
                 <span className="min-w-0 flex-1 truncate text-sm">{a.name}</span>
+                <span className="w-44">
+                  <CoveragePicker
+                    body={body}
+                    accent={organization?.accent_color ?? null}
+                    row={a}
+                    compact
+                    onChange={(patch) => patchAddon.mutate({ id: a.id, patch })}
+                  />
+                </span>
                 <NumField label="$" value={a.price} onCommit={(v) => patchAddon.mutate({ id: a.id, patch: { price: v } })} />
                 <NumField label="h" value={a.labor_hours} onCommit={(v) => patchAddon.mutate({ id: a.id, patch: { labor_hours: v } })} />
                 <NumField label="ft" value={a.film_feet} onCommit={(v) => patchAddon.mutate({ id: a.id, patch: { film_feet: v } })} />
@@ -406,5 +479,53 @@ function NumField({
         onBlur={(e) => Number(e.target.value) !== Number(value) && onCommit(Number(e.target.value || 0))}
       />
     </span>
+  );
+}
+
+/** Picks what the customer will SEE for this tier — a film coverage map or a
+ *  tint layout, drawn on their own vehicle's body style. */
+function CoveragePicker({
+  body,
+  accent,
+  row,
+  onChange,
+  compact,
+}: {
+  body: ReturnType<typeof resolveBodyStyle>;
+  accent: string | null;
+  row: Coverage;
+  onChange: (patch: { coverage_kind: string; coverage_keys: string[] }) => void;
+  compact?: boolean;
+}) {
+  const value = coverageValue(row);
+  const opt = COVERAGE_OPTIONS.find((o) => o.value === value) ?? COVERAGE_OPTIONS[0]!;
+  return (
+    <div className={compact ? "flex items-center gap-2" : "mt-2 space-y-1.5"}>
+      <select
+        value={value}
+        onChange={(e) => {
+          const next = COVERAGE_OPTIONS.find((o) => o.value === e.target.value)!;
+          onChange({ coverage_kind: next.kind, coverage_keys: next.keys });
+        }}
+        className="h-7 w-full rounded-lg border border-elevated bg-surface px-2 text-[11px] text-foreground"
+      >
+        {COVERAGE_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {opt.kind !== "none" && (
+        <div className={compact ? "w-16" : "rounded-lg border border-hairline/50 bg-surface p-1.5"}>
+          <CoverageVisual
+            kind={opt.kind === "tint" ? "tint" : "panels"}
+            body={body}
+            covered={opt.keys}
+            accent={accent}
+            className={compact ? "" : opt.kind === "tint" ? "max-h-20" : "max-h-32"}
+          />
+        </div>
+      )}
+    </div>
   );
 }

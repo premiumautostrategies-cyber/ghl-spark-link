@@ -2080,6 +2080,8 @@ export type Database = {
       }
       proposal_addons: {
         Row: {
+          coverage_keys: string[]
+          coverage_kind: string
           description: string | null
           film_feet: number
           id: string
@@ -2092,6 +2094,8 @@ export type Database = {
           sort_order: number
         }
         Insert: {
+          coverage_keys?: string[]
+          coverage_kind?: string
           description?: string | null
           film_feet?: number
           id?: string
@@ -2104,6 +2108,8 @@ export type Database = {
           sort_order?: number
         }
         Update: {
+          coverage_keys?: string[]
+          coverage_kind?: string
           description?: string | null
           film_feet?: number
           id?: string
@@ -2134,6 +2140,8 @@ export type Database = {
       }
       proposal_tiers: {
         Row: {
+          coverage_keys: string[]
+          coverage_kind: string
           description: string | null
           film_feet: number
           id: string
@@ -2148,6 +2156,8 @@ export type Database = {
           tier: string
         }
         Insert: {
+          coverage_keys?: string[]
+          coverage_kind?: string
           description?: string | null
           film_feet?: number
           id?: string
@@ -2162,6 +2172,8 @@ export type Database = {
           tier?: string
         }
         Update: {
+          coverage_keys?: string[]
+          coverage_kind?: string
           description?: string | null
           film_feet?: number
           id?: string

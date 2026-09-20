@@ -1,10 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronDown, Clock, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
-import { PageHeader } from "@/components/page-header";
 import { Panel, Tag } from "@/components/os-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,31 +30,10 @@ import {
 } from "@/lib/packages-data";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/packages")({
-  head: () => ({
-    meta: [
-      { title: "Services & Packages — Systemize" },
-      {
-        name: "description",
-        content:
-          "Protection, wrap, coating, tint and detailing packages with vehicle-class pricing and coverage specs.",
-      },
-      { property: "og:title", content: "Services & Packages — Systemize" },
-      {
-        property: "og:description",
-        content:
-          "Protection, wrap, coating, tint and detailing packages with vehicle-class pricing and coverage specs.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: PackagesPage,
-});
 
 type CatFilter = PackageCategorySlug | "all";
 
-function PackagesPage() {
+export function PackageBrowser() {
   const [cat, setCat] = useState<CatFilter>("all");
   const [vclass, setVclass] = useState<VehicleClass>(VEHICLE_CLASSES[0]!);
   const [term, setTerm] = useState("");
@@ -89,29 +66,28 @@ function PackagesPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <PageHeader
-        title="Services & Packages"
-        subtitle="Every package we sell, priced for the vehicle in front of you."
-        action={
-          <div className="flex rounded-full border border-elevated bg-surface p-1">
-            {(["grid", "table"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setView(v)}
-                className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors",
-                  view === v
-                    ? "bg-bronze text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {v === "grid" ? "Grid" : "Compare"}
-              </button>
-            ))}
-          </div>
-        }
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Every package we sell, priced for the vehicle in front of you.
+        </p>
+        <div className="flex rounded-full border border-elevated bg-surface p-1">
+          {(["grid", "table"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setView(v)}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors",
+                view === v
+                  ? "bg-bronze text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {v === "grid" ? "Grid" : "Compare"}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Category tabs */}
       <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">

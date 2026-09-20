@@ -6,6 +6,7 @@ import { useOrg } from "@/lib/use-org";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { Kpi, Panel, SectionTitle, Tag } from "@/components/os-ui";
 import { PanelCoverage } from "@/components/panel-coverage";
+import { PackageBrowser } from "@/components/package-browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -140,7 +141,7 @@ function ServicesPage() {
   const [vehClass, setVehClass] = useState("any");
   const [showPills, setShowPills] = useState(false);
   const [filmsOnly, setFilmsOnly] = useState(false);
-  const navigate = useNavigate();
+  const [showPackages, setShowPackages] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"alpha" | "price_desc" | "price_asc" | "duration" | "popular">(
     "alpha",
@@ -621,38 +622,39 @@ function ServicesPage() {
 
       {/* Sub-navigation */}
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setFilmsOnly(false)}
-          className={cn(
-            "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
-            !filmsOnly
-              ? "border-bronze bg-bronze/15 text-bronze"
-              : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
-          )}
-        >
-          Services
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/packages" })}
-          className="rounded-full border border-hairline/60 bg-surface-2 px-4 py-1.5 text-xs uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Vehicle Packages
-        </button>
-        <button
-          type="button"
-          onClick={() => setFilmsOnly(true)}
-          className={cn(
-            "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
-            filmsOnly
-              ? "border-bronze bg-bronze/15 text-bronze"
-              : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
-          )}
-        >
-          Film Listings
-        </button>
+        {(
+          [
+            { key: "services", label: "Services" },
+            { key: "packages", label: "Vehicle Packages" },
+            { key: "films", label: "Film Listings" },
+          ] as const
+        ).map((t) => {
+          const active =
+            t.key === "packages" ? showPackages : !showPackages && filmsOnly === (t.key === "films");
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => {
+                setShowPackages(t.key === "packages");
+                if (t.key !== "packages") setFilmsOnly(t.key === "films");
+              }}
+              className={cn(
+                "rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-colors",
+                active
+                  ? "border-bronze bg-bronze/15 text-bronze"
+                  : "border-hairline/60 bg-surface-2 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
+
+      {showPackages && <PackageBrowser />}
+      <div className={cn("space-y-6", showPackages && "hidden")}>
+
 
       {categories.length === 0 && (
         <Panel className="flex flex-wrap items-center justify-between gap-4 p-5">
@@ -951,6 +953,8 @@ function ServicesPage() {
           </Button>
         </form>
       </Panel>
+
+      </div>
 
       {/* New / edit service */}
       <Dialog
