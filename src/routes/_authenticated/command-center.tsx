@@ -18,6 +18,8 @@ import {
   Minimize2,
   MoreHorizontal,
   Plus,
+  Receipt,
+  Banknote,
   Settings2,
   Sparkles,
   UserPlus,
@@ -26,6 +28,9 @@ import {
 } from "lucide-react";
 import {
   Area,
+  Bar,
+  BarChart,
+  Legend,
   AreaChart,
   CartesianGrid,
   Cell,
@@ -74,11 +79,20 @@ import {
   DASHBOARD_WIDGETS,
   isDashboardLayout,
   layoutForPreset,
+  withNewWidgets,
   type DashboardPreset,
   type DashboardWidgetId,
   type DashboardWidgetLayout,
   type WidgetSize,
 } from "@/lib/dashboard";
+import {
+  EXPENSE_CATEGORIES,
+  RECURRENCES,
+  expenseCategoryLabel,
+  monthKey,
+  monthLabel,
+  type ExpenseRow,
+} from "@/lib/finance";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/command-center")({
@@ -95,7 +109,7 @@ export const Route = createFileRoute("/_authenticated/command-center")({
   component: CommandCenter,
 });
 
-type QuickAction = "lead" | "job" | "appointment" | "payment" | null;
+type QuickAction = "lead" | "job" | "appointment" | "payment" | "expense" | null;
 
 function startOfMonth(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -133,6 +147,7 @@ function CommandCenter() {
   const quarterStart = startOfQuarter(now);
   const historyStart = new Date(now);
   historyStart.setDate(historyStart.getDate() - 60);
+  const financeStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
   const { data: preference } = useQuery({
     queryKey: ["dashboard-preference", orgId, user.id],
@@ -153,23 +168,28 @@ function CommandCenter() {
     if (!preference) return;
     const nextPreset = preference.preset === "compact" ? "compact" : "executive";
     setPreset(nextPreset);
-    setLayout(isDashboardLayout(preference.widget_layout) ? preference.widget_layout : layoutForPreset(nextPreset));
+    setLayout(
+      isDashboardLayout(preference.widget_layout)
+        ? withNewWidgets(preference.widget_layout, nextPreset)
+        : layoutForPreset(nextPreset),
+    );
   }, [preference]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["command-center", orgId],
     enabled: Boolean(orgId),
     queryFn: async () => {
-      const [jobs, deals, payments, estimates, members, inventory, customers] = await Promise.all([
+      const [jobs, deals, payments, estimates, members, inventory, customers, expenses] = await Promise.all([
         supabase.from("jobs").select("*, customers(name), vehicles(year,make,model)").gte("created_at", historyStart.toISOString()).order("scheduled_start", { ascending: true, nullsFirst: false }),
         supabase.from("deals").select("*").gte("created_at", historyStart.toISOString()).order("created_at", { ascending: false }),
-        supabase.from("payments").select("*").gte("created_at", quarterStart.toISOString()).order("created_at"),
+        supabase.from("payments").select("*").gte("created_at", financeStart.toISOString()).order("created_at"),
         supabase.from("estimates").select("id,status,title,created_at"),
         supabase.from("team_members").select("*").eq("is_active", true).order("full_name"),
         supabase.from("inventory_items").select("id,name,quantity_on_hand,reorder_point"),
         supabase.from("customers").select("id,name").order("name"),
+        supabase.from("expenses").select("*").gte("expense_date", financeStart.toISOString().slice(0, 10)).order("expense_date", { ascending: false }),
       ]);
-      const error = [jobs, deals, payments, estimates, members, inventory, customers].find((result) => result.error)?.error;
+      const error = [jobs, deals, payments, estimates, members, inventory, customers, expenses].find((result) => result.error)?.error;
       if (error) throw error;
       return {
         jobs: jobs.data,
@@ -179,6 +199,7 @@ function CommandCenter() {
         members: members.data,
         inventory: inventory.data,
         customers: customers.data,
+        expenses: expenses.data,
       };
     },
   });
@@ -252,6 +273,37 @@ function CommandCenter() {
   const completedJobs = jobs.filter((job) => ["completed", "invoiced"].includes(job.status));
   const averageTicket = completedJobs.length ? completedJobs.reduce((sum, job) => sum + Number(job.price), 0) / completedJobs.length : 0;
 
+  // --- Money out ----------------------------------------------------------
+  const expenses = (data?.expenses ?? []) as ExpenseRow[];
+  const spent = expenses.filter((expense) => expense.status !== "due");
+  const billsDue = expenses.filter((expense) => expense.status === "due").sort((a, b) => String(a.due_date ?? a.expense_date).localeCompare(String(b.due_date ?? b.expense_date)));
+  const monthExpenses = spent.filter((expense) => new Date(`${expense.expense_date}T12:00:00`) >= monthStart);
+  const moneyOutMTD = monthExpenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
+  const billsDueTotal = billsDue.reduce((sum, expense) => sum + Number(expense.amount), 0);
+  const netProfit = mtdRevenue - moneyOutMTD;
+  const margin = mtdRevenue > 0 ? Math.round((netProfit / mtdRevenue) * 100) : 0;
+
+  const pnlSeries = useMemo(() => {
+    const months: { key: string; label: string; in: number; out: number; profit: number }[] = [];
+    for (let index = 5; index >= 0; index -= 1) {
+      const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+      const key = monthKey(date);
+      const income = paid.filter((payment) => monthKey(new Date(payment.paid_at as string)) === key).reduce((sum, payment) => sum + Number(payment.amount), 0);
+      const outgoing = spent.filter((expense) => expense.expense_date.slice(0, 7) === key).reduce((sum, expense) => sum + Number(expense.amount), 0);
+      months.push({ key, label: monthLabel(key), in: Math.round(income), out: Math.round(outgoing), profit: Math.round(income - outgoing) });
+    }
+    return months;
+  }, [paid, spent, now.getTime()]);
+
+  const expenseBreakdown = Object.entries(
+    monthExpenses.reduce<Record<string, number>>((acc, expense) => {
+      acc[expense.category] = (acc[expense.category] ?? 0) + Number(expense.amount);
+      return acc;
+    }, {}),
+  )
+    .map(([key, value]) => ({ name: expenseCategoryLabel(key), value }))
+    .sort((a, b) => b.value - a.value);
+
   const revenueSeries = useMemo(() => {
     const start = revenueRange === "month" ? monthStart : quarterStart;
     const points: { label: string; actual: number; target: number }[] = [];
@@ -271,6 +323,9 @@ function CommandCenter() {
   }, [paid, revenueRange, monthStart.getTime(), quarterStart.getTime(), now.getTime(), monthlyTarget, daysInMonth]);
 
   const kpis = [
+    { label: "Money in (MTD)", value: money(mtdRevenue), note: `${money(projectedRevenue)} projected month end`, progress: mtdRevenue / Math.max(monthlyTarget, 1) * 100, to: "/payments", values: pnlSeries.map((point) => point.in), tone: "revenue" },
+    { label: "Money out (MTD)", value: money(moneyOutMTD), note: `${money(billsDueTotal)} in bills still due`, progress: moneyOutMTD / Math.max(mtdRevenue, 1) * 100, to: "/analytics", values: pnlSeries.map((point) => point.out), tone: "critical" },
+    { label: "Net profit (MTD)", value: money(netProfit), note: `${margin}% margin after costs`, progress: Math.max(margin, 0), to: "/analytics", values: pnlSeries.map((point) => Math.max(point.profit, 0)), tone: netProfit >= 0 ? "revenue" : "critical" },
     { label: "Today / goal", value: money(todayRevenue), note: `${Math.round(todayRevenue / Math.max(dailyTarget, 1) * 100)}% of ${money(dailyTarget)}`, progress: todayRevenue / Math.max(dailyTarget, 1) * 100, to: "/payments", values: revenueSeries.slice(-7).map((point) => point.actual), tone: "bronze" },
     { label: "MTD revenue", value: money(mtdRevenue), note: `${money(projectedRevenue)} projected`, progress: mtdRevenue / Math.max(monthlyTarget, 1) * 100, to: "/analytics", values: revenueSeries.slice(-7).map((point) => point.actual), tone: "revenue" },
     { label: "Active pipeline", value: money(pipelineValue), note: `${money(weightedPipeline)} weighted`, progress: weightedPipeline / Math.max(pipelineValue, 1) * 100, to: "/sales", values: activeDeals.slice(0, 7).reverse().map((deal) => Number(deal.value)), tone: "rig" },
@@ -288,6 +343,23 @@ function CommandCenter() {
       } else if (quickAction === "payment") {
         const status = String(form.get("status") || "paid");
         const { error } = await supabase.from("payments").insert({ amount: Number(form.get("amount") || 0), kind: String(form.get("kind") || "payment"), method: String(form.get("method") || "card"), status, paid_at: status === "paid" ? new Date().toISOString() : null, customer_id: String(form.get("customer_id") || "") || null, organization_id: orgId, location_id: locId });
+        if (error) throw error;
+      } else if (quickAction === "expense") {
+        const status = String(form.get("expense_status") || "paid");
+        const date = String(form.get("expense_date") || "") || new Date().toISOString().slice(0, 10);
+        const { error } = await supabase.from("expenses").insert({
+          amount: Number(form.get("amount") || 0),
+          category: String(form.get("category") || "other"),
+          vendor: String(form.get("vendor") || "") || null,
+          description: String(form.get("description") || "") || null,
+          recurrence: String(form.get("recurrence") || "one_off"),
+          method: String(form.get("expense_method") || "") || null,
+          status,
+          expense_date: date,
+          due_date: status === "due" ? date : null,
+          organization_id: orgId,
+          location_id: locId,
+        });
         if (error) throw error;
       } else {
         const start = String(form.get("scheduled_start") || "");
@@ -362,7 +434,22 @@ function CommandCenter() {
     return { ...member, assigned: owned.filter((deal) => !["won", "lost"].includes(deal.stage)).length, closeRate, value, efficiency };
   }).sort((a, b) => b.value - a.value);
 
+  const markExpensePaid = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("expenses").update({ status: "paid", expense_date: new Date().toISOString().slice(0, 10) }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Bill marked paid");
+      qc.invalidateQueries({ queryKey: ["command-center"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const widgetContent: Record<DashboardWidgetId, ReactNode> = {
+    pnl: <PnlWidget data={pnlSeries} netProfit={netProfit} margin={margin} />,
+    expenses: <ExpensesWidget data={expenseBreakdown} total={moneyOutMTD} recent={spent.slice(0, 4)} onAdd={() => setQuickAction("expense")} />,
+    obligations: <ObligationsWidget bills={billsDue.slice(0, 5)} invoices={outstandingPayments.slice(0, 5)} onBillPaid={(id) => markExpensePaid.mutate(id)} onInvoicePaid={(id) => markPaymentPaid.mutate(id)} />,
     revenue: <RevenueWidget data={revenueSeries} range={revenueRange} onRange={setRevenueRange} projected={projectedRevenue} target={monthlyTarget} />,
     funnel: <FunnelWidget data={funnel} />,
     bays: <BaysWidget bays={bays} jobs={todayJobs} now={now} />,
@@ -378,7 +465,7 @@ function CommandCenter() {
         <div>
           <p className="micro-label">{organization?.name ?? "Systemize"} · Live operations</p>
           <h1 className="display-title mt-1 text-3xl font-semibold">Command Center</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Revenue, capacity, pipeline, and today's priorities in one view.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Money in, money out, capacity and today's priorities in one view.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-lg border border-elevated bg-surface p-1">
@@ -468,24 +555,34 @@ function QuickAddMenu({ onChoose }: { onChoose: (action: Exclude<QuickAction, nu
         <DropdownMenuItem onSelect={() => onChoose("lead")}><UserPlus /> New lead</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onChoose("job")}><Wrench /> New work order</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onChoose("appointment")}><CalendarPlus /> Schedule appointment</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onChoose("payment")}><CircleDollarSign /> Log payment</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onChoose("payment")}><CircleDollarSign /> Log payment (money in)</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onChoose("expense")}><Receipt /> Log expense (money out)</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
 function QuickAddDialog({ action, onOpenChange, customers, pending, onSubmit }: { action: QuickAction; onOpenChange: (open: boolean) => void; customers: { id: string; name: string }[]; pending: boolean; onSubmit: (form: FormData) => void }) {
-  const titles = { lead: "New lead", job: "New work order", appointment: "Schedule appointment", payment: "Log payment" };
+  const titles = { lead: "New lead", job: "New work order", appointment: "Schedule appointment", payment: "Log payment", expense: "Log expense" };
   return (
     <Dialog open={Boolean(action)} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>{action ? titles[action] : "Quick add"}</DialogTitle></DialogHeader>
         {action && <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); onSubmit(new FormData(event.currentTarget)); }}>
-          {action !== "payment" && <div className="space-y-2"><Label htmlFor="quick-title">{action === "lead" ? "Opportunity" : "Work"}</Label><Input id="quick-title" name="title" placeholder={action === "lead" ? "Full front PPF — Porsche 911" : "Full vehicle tint"} required /></div>}
-          <div className="space-y-2"><Label>Customer</Label><Select name="customer_id"><SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger><SelectContent>{customers.map((customer) => <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>)}</SelectContent></Select></div>
+          {action !== "payment" && action !== "expense" && <div className="space-y-2"><Label htmlFor="quick-title">{action === "lead" ? "Opportunity" : "Work"}</Label><Input id="quick-title" name="title" placeholder={action === "lead" ? "Full front PPF — Porsche 911" : "Full vehicle tint"} required /></div>}
+          {action !== "expense" && <div className="space-y-2"><Label>Customer</Label><Select name="customer_id"><SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger><SelectContent>{customers.map((customer) => <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>)}</SelectContent></Select></div>}
           {action === "lead" && <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="quick-value">Potential value</Label><Input id="quick-value" name="value" type="number" min="0" step="0.01" /></div><div className="space-y-2"><Label htmlFor="quick-source">Source</Label><Input id="quick-source" name="source" placeholder="Walk-in" /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="quick-owner">Salesperson</Label><Input id="quick-owner" name="owner_name" /></div></div>}
           {(action === "job" || action === "appointment") && <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="quick-date">Start</Label><Input id="quick-date" name="scheduled_start" type="datetime-local" required={action === "appointment"} /></div><div className="space-y-2"><Label htmlFor="quick-price">Value</Label><Input id="quick-price" name="price" type="number" min="0" step="0.01" /></div><div className="space-y-2"><Label htmlFor="quick-bay">Bay</Label><Input id="quick-bay" name="bay" placeholder="Bay 2" /></div><div className="space-y-2"><Label htmlFor="quick-installer">Installer</Label><Input id="quick-installer" name="installer" /></div><input type="hidden" name="service_type" value="other" /></div>}
           {action === "payment" && <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="quick-amount">Amount</Label><Input id="quick-amount" name="amount" type="number" min="0" step="0.01" required /></div><div className="space-y-2"><Label>Type</Label><Select name="kind" defaultValue="deposit"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="deposit">Deposit</SelectItem><SelectItem value="payment">Payment</SelectItem></SelectContent></Select></div><input type="hidden" name="status" value="paid" /><input type="hidden" name="method" value="card" /></div>}
+          {action === "expense" && <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2"><Label htmlFor="expense-amount">Amount</Label><Input id="expense-amount" name="amount" type="number" min="0" step="0.01" required /></div>
+            <div className="space-y-2"><Label>Category</Label><Select name="category" defaultValue="materials"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{EXPENSE_CATEGORIES.map((category) => <SelectItem key={category.key} value={category.key}>{category.label}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-2"><Label htmlFor="expense-vendor">Paid to</Label><Input id="expense-vendor" name="vendor" placeholder="XPEL, landlord, insurer…" /></div>
+            <div className="space-y-2"><Label htmlFor="expense-date">Date</Label><Input id="expense-date" name="expense_date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></div>
+            <div className="space-y-2"><Label>Status</Label><Select name="expense_status" defaultValue="paid"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="paid">Paid</SelectItem><SelectItem value="due">Bill due</SelectItem></SelectContent></Select></div>
+            <div className="space-y-2"><Label>Repeats</Label><Select name="recurrence" defaultValue="one_off"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{RECURRENCES.map((option) => <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-2 sm:col-span-2"><Label htmlFor="expense-note">What it was for</Label><Input id="expense-note" name="description" placeholder="Monthly building rent" /></div>
+          </div>}
           <Button type="submit" className="w-full" disabled={pending}>{pending ? "Saving…" : "Save"}</Button>
         </form>}
       </DialogContent>
@@ -562,4 +659,99 @@ function LostWidget({ data }: { data: { name: string; value: number }[] }) {
   const colors = ["var(--critical)", "var(--urgent)", "var(--comms)", "var(--muted-foreground)"];
   const total = data.reduce((sum, item) => sum + item.value, 0);
   return <div className="grid min-w-0 items-center gap-2 p-4 sm:grid-cols-[140px_minmax(0,1fr)]"><div className="relative h-[150px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data.length ? data : [{ name: "No losses", value: 1 }]} dataKey="value" innerRadius={46} outerRadius={64} paddingAngle={3} stroke="none">{(data.length ? data : [{ name: "No losses", value: 1 }]).map((item, index) => <Cell key={item.name} fill={data.length ? colors[index % colors.length] : "var(--elevated)"} />)}</Pie></PieChart></ResponsiveContainer><div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"><span className="text-base font-semibold">{money(total)}</span><span className="micro-label">lost</span></div></div><div className="min-w-0 space-y-2">{data.map((item, index) => <Link key={item.name} to="/sales" className="flex min-w-0 items-center justify-between gap-2 text-xs"><span className="flex min-w-0 items-center gap-2"><span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} /><span className="truncate">{item.name}</span></span><span className="shrink-0 font-semibold tabular-nums">{money(item.value)}</span></Link>)}{data.length === 0 && <p className="text-xs text-muted-foreground">No lost opportunities in this period.</p>}</div></div>;
+}
+function PnlWidget({ data, netProfit, margin }: { data: { key: string; label: string; in: number; out: number; profit: number }[]; netProfit: number; margin: number }) {
+  return (
+    <div className="p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm">
+          <span className={cn("font-semibold", netProfit >= 0 ? "text-revenue" : "text-critical")}>{money(netProfit)}</span> net this month · {margin}% margin
+        </p>
+        <span className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-revenue" /> money in</span>
+          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-critical" /> money out</span>
+        </span>
+      </div>
+      <div className="h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} barGap={4}>
+            <CartesianGrid stroke="var(--elevated)" vertical={false} />
+            <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
+            <YAxis tickFormatter={(value) => `$${Math.round(Number(value) / 1000)}k`} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} width={40} />
+            <Tooltip cursor={{ fill: "var(--elevated)", opacity: 0.4 }} contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--elevated)", borderRadius: 8 }} formatter={(value, name) => [money(Number(value)), name === "in" ? "Money in" : name === "out" ? "Money out" : "Net"]} />
+            <Bar dataKey="in" fill="var(--revenue)" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="out" fill="var(--critical)" radius={[3, 3, 0, 0]} />
+            <Line type="monotone" dataKey="profit" stroke="var(--bronze)" strokeWidth={2} dot={false} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function ExpensesWidget({ data, total, recent, onAdd }: { data: { name: string; value: number }[]; total: number; recent: ExpenseRow[]; onAdd: () => void }) {
+  const colors = ["var(--critical)", "var(--urgent)", "var(--bronze)", "var(--comms)", "var(--rig)", "var(--muted-foreground)"];
+  return (
+    <div className="space-y-3 p-4">
+      <div className="grid min-w-0 items-center gap-2 sm:grid-cols-[140px_minmax(0,1fr)]">
+        <div className="relative h-[140px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data.length ? data : [{ name: "No spend", value: 1 }]} dataKey="value" innerRadius={44} outerRadius={62} paddingAngle={3} stroke="none">
+                {(data.length ? data : [{ name: "No spend", value: 1 }]).map((item, index) => <Cell key={item.name} fill={data.length ? colors[index % colors.length] : "var(--elevated)"} />)}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-base font-semibold">{money(total)}</span>
+            <span className="micro-label">this month</span>
+          </div>
+        </div>
+        <div className="min-w-0 space-y-1.5">
+          {data.slice(0, 6).map((item, index) => (
+            <div key={item.name} className="flex min-w-0 items-center justify-between gap-2 text-xs">
+              <span className="flex min-w-0 items-center gap-2"><span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} /><span className="truncate">{item.name}</span></span>
+              <span className="shrink-0 font-semibold tabular-nums">{money(item.value)}</span>
+            </div>
+          ))}
+          {data.length === 0 && <p className="text-xs text-muted-foreground">Nothing logged this month. Add rent, insurance, film and payroll to see true profit.</p>}
+        </div>
+      </div>
+      <div className="space-y-1 border-t border-elevated pt-3">
+        {recent.map((expense) => (
+          <div key={expense.id} className="flex items-center justify-between gap-2 text-[11px]">
+            <span className="truncate text-muted-foreground">{expense.vendor || expenseCategoryLabel(expense.category)} · {expense.description || expenseCategoryLabel(expense.category)}</span>
+            <span className="shrink-0 tabular-nums">{money(expense.amount)}</span>
+          </div>
+        ))}
+      </div>
+      <Button size="sm" variant="outline" className="w-full" onClick={onAdd}><Banknote /> Log an expense</Button>
+    </div>
+  );
+}
+
+function ObligationsWidget({ bills, invoices, onBillPaid, onInvoicePaid }: { bills: ExpenseRow[]; invoices: { id: string; amount: number | string; reference: string | null; kind: string }[]; onBillPaid: (id: string) => void; onInvoicePaid: (id: string) => void }) {
+  const owed = invoices.reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+  const owing = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+  return (
+    <div className="divide-y divide-elevated">
+      <div className="grid grid-cols-2 divide-x divide-elevated">
+        <div className="p-4"><p className="micro-label">Owed to the shop</p><p className="font-display text-xl font-semibold text-revenue tabular-nums">{money(owed)}</p></div>
+        <div className="p-4"><p className="micro-label">Bills due</p><p className="font-display text-xl font-semibold text-critical tabular-nums">{money(owing)}</p></div>
+      </div>
+      {invoices.map((invoice) => (
+        <div key={invoice.id} className="flex items-center gap-3 px-4 py-2.5">
+          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{money(invoice.amount)} · {invoice.kind}</p><p className="truncate text-[11px] text-muted-foreground">{invoice.reference || "Unpaid customer balance"}</p></div>
+          <Button size="sm" variant="outline" onClick={() => onInvoicePaid(invoice.id)}>Mark paid</Button>
+        </div>
+      ))}
+      {bills.map((bill) => (
+        <div key={bill.id} className="flex items-center gap-3 px-4 py-2.5">
+          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-critical">{money(bill.amount)} · {bill.vendor || expenseCategoryLabel(bill.category)}</p><p className="truncate text-[11px] text-muted-foreground">{expenseCategoryLabel(bill.category)} · due {bill.due_date ?? bill.expense_date}</p></div>
+          <Button size="sm" variant="outline" onClick={() => onBillPaid(bill.id)}>Pay</Button>
+        </div>
+      ))}
+      {invoices.length === 0 && bills.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">Nothing owed either way.</p>}
+    </div>
+  );
 }

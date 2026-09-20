@@ -619,6 +619,7 @@ export type Database = {
           organization_id: string | null
           signed_at: string | null
           signer_name: string | null
+          source_url: string | null
           status: string
           updated_at: string
           vehicle_id: string | null
@@ -637,6 +638,7 @@ export type Database = {
           organization_id?: string | null
           signed_at?: string | null
           signer_name?: string | null
+          source_url?: string | null
           status?: string
           updated_at?: string
           vehicle_id?: string | null
@@ -655,6 +657,7 @@ export type Database = {
           organization_id?: string | null
           signed_at?: string | null
           signer_name?: string | null
+          source_url?: string | null
           status?: string
           updated_at?: string
           vehicle_id?: string | null
@@ -846,6 +849,85 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          expense_date: string
+          id: string
+          job_id: string | null
+          location_id: string | null
+          method: string | null
+          notes: string | null
+          organization_id: string
+          recurrence: string
+          status: string
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          expense_date?: string
+          id?: string
+          job_id?: string | null
+          location_id?: string | null
+          method?: string | null
+          notes?: string | null
+          organization_id: string
+          recurrence?: string
+          status?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          expense_date?: string
+          id?: string
+          job_id?: string | null
+          location_id?: string | null
+          method?: string | null
+          notes?: string | null
+          organization_id?: string
+          recurrence?: string
+          status?: string
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
