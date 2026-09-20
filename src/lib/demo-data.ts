@@ -293,23 +293,23 @@ export async function seedDemoData(orgId: string, locId: string | null) {
 
   // --- Money out: overhead, materials, payroll ----------------------------
   const monthly = [
-    { category: "rent", vendor: "Northgate Industrial LLC", description: "Shop lease — 6,200 sq ft", amount: 6400, recurrence: "monthly", method: "ach", day: 1 },
-    { category: "utilities", vendor: "Duke Energy", description: "Power and heat", amount: 742, recurrence: "monthly", method: "ach", day: 6 },
-    { category: "utilities", vendor: "City Water & Waste", description: "Water, sewer and waste pickup", amount: 214, recurrence: "monthly", method: "ach", day: 6 },
-    { category: "insurance", vendor: "Garagekeepers Mutual", description: "Garage liability and vehicle coverage", amount: 985, recurrence: "monthly", method: "ach", day: 4 },
-    { category: "insurance", vendor: "StateComp", description: "Workers compensation", amount: 410, recurrence: "monthly", method: "ach", day: 4 },
-    { category: "payroll", vendor: "Shop payroll", description: "Installers, advisor and detailer", amount: 21600, recurrence: "monthly", method: "ach", day: 15 },
+    { category: "rent", vendor: "Northgate Industrial LLC", description: "Shop lease — 6,200 sq ft", amount: 2900, recurrence: "monthly", method: "ach", day: 1 },
+    { category: "utilities", vendor: "Duke Energy", description: "Power and heat", amount: 330, recurrence: "monthly", method: "ach", day: 6 },
+    { category: "utilities", vendor: "City Water & Waste", description: "Water, sewer and waste pickup", amount: 95, recurrence: "monthly", method: "ach", day: 6 },
+    { category: "insurance", vendor: "Garagekeepers Mutual", description: "Garage liability and vehicle coverage", amount: 440, recurrence: "monthly", method: "ach", day: 4 },
+    { category: "insurance", vendor: "StateComp", description: "Workers compensation", amount: 185, recurrence: "monthly", method: "ach", day: 4 },
+    { category: "payroll", vendor: "Shop payroll", description: "Installers, advisor and detailer", amount: 9700, recurrence: "monthly", method: "ach", day: 15 },
     { category: "software", vendor: "Systemize", description: "Shop operating system", amount: 249, recurrence: "monthly", method: "card", day: 2 },
     { category: "software", vendor: "Plotter software + cut files", description: "Pattern subscription", amount: 189, recurrence: "monthly", method: "card", day: 2 },
-    { category: "marketing", vendor: "Meta Ads", description: "Local lead campaigns", amount: 850, recurrence: "monthly", method: "card", day: 8 },
-    { category: "marketing", vendor: "Google Ads", description: "Search — tint and PPF", amount: 1100, recurrence: "monthly", method: "card", day: 8 },
-    { category: "loan", vendor: "First Carolina Bank", description: "Equipment loan — plotter and lift", amount: 968, recurrence: "monthly", method: "ach", day: 12 },
-    { category: "fees", vendor: "Card processing", description: "Merchant fees on collected payments", amount: 615, recurrence: "monthly", method: "card", day: 28 },
-    { category: "vehicle", vendor: "Fuel and shop truck", description: "Pickups, deliveries and supply runs", amount: 320, recurrence: "monthly", method: "card", day: 20 },
-    { category: "maintenance", vendor: "Clean Air HVAC", description: "Filter changes and booth service", amount: 265, recurrence: "monthly", method: "card", day: 18 },
+    { category: "marketing", vendor: "Meta Ads", description: "Local lead campaigns", amount: 380, recurrence: "monthly", method: "card", day: 8 },
+    { category: "marketing", vendor: "Google Ads", description: "Search — tint and PPF", amount: 490, recurrence: "monthly", method: "card", day: 8 },
+    { category: "loan", vendor: "First Carolina Bank", description: "Equipment loan — plotter and lift", amount: 435, recurrence: "monthly", method: "ach", day: 12 },
+    { category: "fees", vendor: "Card processing", description: "Merchant fees on collected payments", amount: 275, recurrence: "monthly", method: "card", day: 28 },
+    { category: "vehicle", vendor: "Fuel and shop truck", description: "Pickups, deliveries and supply runs", amount: 145, recurrence: "monthly", method: "card", day: 20 },
+    { category: "maintenance", vendor: "Clean Air HVAC", description: "Filter changes and booth service", amount: 120, recurrence: "monthly", method: "card", day: 18 },
   ];
   const materialBuys = [
-    { category: "materials", vendor: "XPEL", description: "Ultimate Plus 60\" rolls", amount: 4600 },
+    { category: "materials", vendor: "XPEL", description: "Ultimate Plus 60\" rolls", amount: 2100 },
     { category: "materials", vendor: "SunTek", description: "Ceramic CIR tint rolls", amount: 1680 },
     { category: "materials", vendor: "Metro Wrap Supply", description: "3M 2080 cast vinyl + knifeless tape", amount: 2140 },
     { category: "materials", vendor: "Detail Depot", description: "Coatings, chemicals and towels", amount: 780 },
@@ -356,7 +356,7 @@ export async function seedDemoData(orgId: string, locId: string | null) {
         category: "taxes",
         vendor: "NC Dept of Revenue",
         description: "Quarterly sales tax remittance",
-        amount: 3850,
+        amount: 1700,
         recurrence: "yearly",
         method: "ach",
         status: back === 0 ? "due" : "paid",
@@ -368,6 +368,27 @@ export async function seedDemoData(orgId: string, locId: string | null) {
   }
   const expRes = await supabase.from("expenses").insert(expenseRows);
   if (expRes.error) throw expRes.error;
+
+  // Past months of collected work so the profit chart has history.
+  const historyRows: Record<string, unknown>[] = [];
+  for (let back = 5; back >= 1; back -= 1) {
+    const base = new Date();
+    const monthDate = new Date(base.getFullYear(), base.getMonth() - back, 1);
+    for (let slot = 1; slot <= 10; slot += 1) {
+      historyRows.push({
+        amount: Math.round(900 + Math.random() * 3800),
+        kind: "payment",
+        method: "card",
+        status: "paid",
+        reference: `hist-${monthDate.getFullYear()}${String(monthDate.getMonth() + 1).padStart(2, "0")}-${slot}`,
+        paid_at: new Date(monthDate.getFullYear(), monthDate.getMonth(), slot * 2, 15).toISOString(),
+        customer_id: customerRows[slot % customerRows.length]?.id ?? null,
+        ...org,
+      });
+    }
+  }
+  const histRes = await supabase.from("payments").insert(historyRows as never);
+  if (histRes.error) throw histRes.error;
 
   // --- Documents ----------------------------------------------------------
   const docs = [
