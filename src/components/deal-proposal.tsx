@@ -10,6 +10,12 @@ import { toast } from "sonner";
 import { money, label as fmtLabel } from "@/lib/format";
 import { makeToken } from "@/lib/shop";
 import { Copy, Trash2 } from "lucide-react";
+import { CoverageVisual } from "@/components/coverage-visual";
+import { resolveBodyStyle } from "@/lib/vehicle-library";
+import { PPF_PRESETS, TINT_PRESETS, type CoverageKind } from "@/lib/coverage-presets";
+import { useQuery as useRQ } from "@tanstack/react-query";
+
+type Coverage = { coverage_kind?: string | null; coverage_keys?: string[] | null };
 
 type Tier = {
   id: string;
@@ -22,7 +28,7 @@ type Tier = {
   film_feet: number | string;
   is_recommended: boolean;
   sort_order: number;
-};
+} & Coverage;
 
 type Addon = {
   id: string;
@@ -32,7 +38,33 @@ type Addon = {
   labor_hours: number | string;
   film_feet: number | string;
   sort_order: number;
-};
+} & Coverage;
+
+const COVERAGE_OPTIONS: { value: string; label: string; kind: CoverageKind; keys: string[] }[] = [
+  { value: "none", label: "No diagram", kind: "none", keys: [] },
+  ...PPF_PRESETS.map((p) => ({
+    value: `panels:${p.name}`,
+    label: `Film — ${p.name}`,
+    kind: "panels" as const,
+    keys: p.panels,
+  })),
+  ...TINT_PRESETS.map((p) => ({
+    value: `tint:${p.name}`,
+    label: `Tint — ${p.name}`,
+    kind: "tint" as const,
+    keys: p.windows,
+  })),
+];
+
+function coverageValue(row: Coverage) {
+  const keys = row.coverage_keys ?? [];
+  const kind = row.coverage_kind === "tint" ? "tint" : row.coverage_kind === "none" ? "none" : "panels";
+  if (kind === "none" || keys.length === 0) return "none";
+  const hit = COVERAGE_OPTIONS.find(
+    (o) => o.kind === kind && o.keys.length === keys.length && o.keys.every((k) => keys.includes(k)),
+  );
+  return hit?.value ?? "none";
+}
 
 const DEFAULT_ADDONS = [
   { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0 },
