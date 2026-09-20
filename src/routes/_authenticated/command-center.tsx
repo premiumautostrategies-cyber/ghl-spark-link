@@ -555,24 +555,34 @@ function QuickAddMenu({ onChoose }: { onChoose: (action: Exclude<QuickAction, nu
         <DropdownMenuItem onSelect={() => onChoose("lead")}><UserPlus /> New lead</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onChoose("job")}><Wrench /> New work order</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => onChoose("appointment")}><CalendarPlus /> Schedule appointment</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onChoose("payment")}><CircleDollarSign /> Log payment</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onChoose("payment")}><CircleDollarSign /> Log payment (money in)</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onChoose("expense")}><Receipt /> Log expense (money out)</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
 function QuickAddDialog({ action, onOpenChange, customers, pending, onSubmit }: { action: QuickAction; onOpenChange: (open: boolean) => void; customers: { id: string; name: string }[]; pending: boolean; onSubmit: (form: FormData) => void }) {
-  const titles = { lead: "New lead", job: "New work order", appointment: "Schedule appointment", payment: "Log payment" };
+  const titles = { lead: "New lead", job: "New work order", appointment: "Schedule appointment", payment: "Log payment", expense: "Log expense" };
   return (
     <Dialog open={Boolean(action)} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader><DialogTitle>{action ? titles[action] : "Quick add"}</DialogTitle></DialogHeader>
         {action && <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); onSubmit(new FormData(event.currentTarget)); }}>
-          {action !== "payment" && <div className="space-y-2"><Label htmlFor="quick-title">{action === "lead" ? "Opportunity" : "Work"}</Label><Input id="quick-title" name="title" placeholder={action === "lead" ? "Full front PPF — Porsche 911" : "Full vehicle tint"} required /></div>}
-          <div className="space-y-2"><Label>Customer</Label><Select name="customer_id"><SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger><SelectContent>{customers.map((customer) => <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>)}</SelectContent></Select></div>
+          {action !== "payment" && action !== "expense" && <div className="space-y-2"><Label htmlFor="quick-title">{action === "lead" ? "Opportunity" : "Work"}</Label><Input id="quick-title" name="title" placeholder={action === "lead" ? "Full front PPF — Porsche 911" : "Full vehicle tint"} required /></div>}
+          {action !== "expense" && <div className="space-y-2"><Label>Customer</Label><Select name="customer_id"><SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger><SelectContent>{customers.map((customer) => <SelectItem key={customer.id} value={customer.id}>{customer.name}</SelectItem>)}</SelectContent></Select></div>}
           {action === "lead" && <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="quick-value">Potential value</Label><Input id="quick-value" name="value" type="number" min="0" step="0.01" /></div><div className="space-y-2"><Label htmlFor="quick-source">Source</Label><Input id="quick-source" name="source" placeholder="Walk-in" /></div><div className="space-y-2 sm:col-span-2"><Label htmlFor="quick-owner">Salesperson</Label><Input id="quick-owner" name="owner_name" /></div></div>}
           {(action === "job" || action === "appointment") && <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="quick-date">Start</Label><Input id="quick-date" name="scheduled_start" type="datetime-local" required={action === "appointment"} /></div><div className="space-y-2"><Label htmlFor="quick-price">Value</Label><Input id="quick-price" name="price" type="number" min="0" step="0.01" /></div><div className="space-y-2"><Label htmlFor="quick-bay">Bay</Label><Input id="quick-bay" name="bay" placeholder="Bay 2" /></div><div className="space-y-2"><Label htmlFor="quick-installer">Installer</Label><Input id="quick-installer" name="installer" /></div><input type="hidden" name="service_type" value="other" /></div>}
           {action === "payment" && <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="quick-amount">Amount</Label><Input id="quick-amount" name="amount" type="number" min="0" step="0.01" required /></div><div className="space-y-2"><Label>Type</Label><Select name="kind" defaultValue="deposit"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="deposit">Deposit</SelectItem><SelectItem value="payment">Payment</SelectItem></SelectContent></Select></div><input type="hidden" name="status" value="paid" /><input type="hidden" name="method" value="card" /></div>}
+          {action === "expense" && <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2"><Label htmlFor="expense-amount">Amount</Label><Input id="expense-amount" name="amount" type="number" min="0" step="0.01" required /></div>
+            <div className="space-y-2"><Label>Category</Label><Select name="category" defaultValue="materials"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{EXPENSE_CATEGORIES.map((category) => <SelectItem key={category.key} value={category.key}>{category.label}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-2"><Label htmlFor="expense-vendor">Paid to</Label><Input id="expense-vendor" name="vendor" placeholder="XPEL, landlord, insurer…" /></div>
+            <div className="space-y-2"><Label htmlFor="expense-date">Date</Label><Input id="expense-date" name="expense_date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></div>
+            <div className="space-y-2"><Label>Status</Label><Select name="expense_status" defaultValue="paid"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="paid">Paid</SelectItem><SelectItem value="due">Bill due</SelectItem></SelectContent></Select></div>
+            <div className="space-y-2"><Label>Repeats</Label><Select name="recurrence" defaultValue="one_off"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{RECURRENCES.map((option) => <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-2 sm:col-span-2"><Label htmlFor="expense-note">What it was for</Label><Input id="expense-note" name="description" placeholder="Monthly building rent" /></div>
+          </div>}
           <Button type="submit" className="w-full" disabled={pending}>{pending ? "Saving…" : "Save"}</Button>
         </form>}
       </DialogContent>
