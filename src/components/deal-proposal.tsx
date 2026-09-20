@@ -66,11 +66,16 @@ function coverageValue(row: Coverage) {
   return hit?.value ?? "none";
 }
 
+const presetPanels = (name: string) => PPF_PRESETS.find((p) => p.name === name)?.panels ?? [];
+const presetWindows = (name: string) => TINT_PRESETS.find((p) => p.name === name)?.windows ?? [];
+
 const DEFAULT_ADDONS = [
-  { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0 },
-  { name: "Glass coating", description: "Windshield and side glass", price: 250, labor_hours: 2, film_feet: 0 },
-  { name: "Wheel face protection", description: "Coating on all four faces", price: 300, labor_hours: 2, film_feet: 0 },
-  { name: "Windshield defense film", description: "Impact-resistant clear film", price: 795, labor_hours: 2.5, film_feet: 6 },
+  { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Glass coating", description: "Windshield and side glass", price: 250, labor_hours: 2, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Wheel face protection", description: "Coating on all four faces", price: 300, labor_hours: 2, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Two front windows tinted", description: "Match the rears already on the car", price: 180, labor_hours: 1, film_feet: 0, coverage_kind: "tint", coverage_keys: presetWindows("Two front windows") },
+  { name: "Full vehicle tint", description: "Ceramic IR film on all side and rear glass", price: 595, labor_hours: 3, film_feet: 0, coverage_kind: "tint", coverage_keys: presetWindows("Full vehicle") },
+  { name: "Windshield defense film", description: "Impact-resistant clear film", price: 795, labor_hours: 2.5, film_feet: 6, coverage_kind: "none", coverage_keys: [] as string[] },
 ];
 
 export function DealProposal({
