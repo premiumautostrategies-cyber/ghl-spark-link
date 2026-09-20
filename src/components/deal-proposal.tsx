@@ -93,6 +93,21 @@ export function DealProposal({
   const { orgId, locId, organization } = useOrg();
   const [copied, setCopied] = useState(false);
 
+  const { data: vehicle } = useRQ({
+    queryKey: ["proposal-vehicle", deal.vehicle_id],
+    enabled: !!deal.vehicle_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("vehicles")
+        .select("year,make,model")
+        .eq("id", deal.vehicle_id!)
+        .maybeSingle();
+      return data;
+    },
+  });
+  const body = resolveBodyStyle(vehicle?.make, vehicle?.model, vehicle?.year ?? null);
+
+
   const { data: proposal } = useQuery({
     queryKey: ["deal-proposal", dealId],
     queryFn: async () => {
