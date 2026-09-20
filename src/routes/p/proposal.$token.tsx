@@ -137,8 +137,12 @@ function ProposalPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               {tiers.map((t) => {
                 const active = t.id === tierId;
-                const kind = kindOf(t as Covered);
-                const keys = keysOf(t as Covered);
+                const { kind, keys } = resolveCoverage(
+                  t as Covered,
+                  t.name,
+                  t.description,
+                  (t.includes ?? []).join(" "),
+                );
                 return (
                   <div
                     key={t.id}
@@ -213,8 +217,7 @@ function ProposalPage() {
               <div className="space-y-2">
                 {addons.map((a) => {
                   const active = addonIds.includes(a.id);
-                  const kind = kindOf(a as Covered);
-                  const keys = keysOf(a as Covered);
+                  const { kind, keys } = resolveCoverage(a as Covered, a.name, a.description);
                   return (
                     <button
                       key={a.id}
