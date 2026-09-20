@@ -42,18 +42,21 @@ type TopSpec = {
   deckEnd: number;
   doors: 2 | 4;
   width: number; // half-width of the body at the widest point
+  noseW: number; // half-width at the front bumper
+  tailW: number; // half-width at the rear bumper
 };
 
 const TOP: Record<BodyStyle, TopSpec> = {
-  sedan: { hoodEnd: 124, wsEnd: 164, roofEnd: 300, rgEnd: 340, deckEnd: 400, doors: 4, width: 82 },
-  coupe: { hoodEnd: 134, wsEnd: 176, roofEnd: 284, rgEnd: 322, deckEnd: 398, doors: 2, width: 84 },
-  convertible: { hoodEnd: 136, wsEnd: 178, roofEnd: 282, rgEnd: 318, deckEnd: 398, doors: 2, width: 84 },
-  suv: { hoodEnd: 108, wsEnd: 146, roofEnd: 326, rgEnd: 352, deckEnd: 372, doors: 4, width: 86 },
-  wagon: { hoodEnd: 114, wsEnd: 152, roofEnd: 318, rgEnd: 348, deckEnd: 374, doors: 4, width: 84 },
-  hatch: { hoodEnd: 110, wsEnd: 150, roofEnd: 300, rgEnd: 332, deckEnd: 362, doors: 4, width: 80 },
-  truck: { hoodEnd: 116, wsEnd: 152, roofEnd: 248, rgEnd: 268, deckEnd: 402, doors: 4, width: 88 },
-  van: { hoodEnd: 88, wsEnd: 124, roofEnd: 332, rgEnd: 352, deckEnd: 370, doors: 4, width: 86 },
+  sedan: { hoodEnd: 124, wsEnd: 164, roofEnd: 300, rgEnd: 340, deckEnd: 400, doors: 4, width: 80, noseW: 62, tailW: 66 },
+  coupe: { hoodEnd: 142, wsEnd: 184, roofEnd: 280, rgEnd: 318, deckEnd: 398, doors: 2, width: 88, noseW: 64, tailW: 78 },
+  convertible: { hoodEnd: 144, wsEnd: 184, roofEnd: 278, rgEnd: 312, deckEnd: 396, doors: 2, width: 86, noseW: 62, tailW: 74 },
+  suv: { hoodEnd: 104, wsEnd: 144, roofEnd: 330, rgEnd: 354, deckEnd: 374, doors: 4, width: 86, noseW: 76, tailW: 82 },
+  wagon: { hoodEnd: 114, wsEnd: 152, roofEnd: 320, rgEnd: 350, deckEnd: 376, doors: 4, width: 82, noseW: 66, tailW: 76 },
+  hatch: { hoodEnd: 110, wsEnd: 150, roofEnd: 300, rgEnd: 332, deckEnd: 362, doors: 4, width: 78, noseW: 62, tailW: 70 },
+  truck: { hoodEnd: 118, wsEnd: 154, roofEnd: 244, rgEnd: 264, deckEnd: 404, doors: 4, width: 90, noseW: 84, tailW: 88 },
+  van: { hoodEnd: 86, wsEnd: 122, roofEnd: 336, rgEnd: 354, deckEnd: 372, doors: 4, width: 86, noseW: 76, tailW: 84 },
 };
+
 
 export type Shape =
   | { kind: "rect"; x: number; y: number; w: number; h: number; r?: number }
