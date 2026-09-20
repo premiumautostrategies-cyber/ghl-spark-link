@@ -42,18 +42,21 @@ type TopSpec = {
   deckEnd: number;
   doors: 2 | 4;
   width: number; // half-width of the body at the widest point
+  noseW: number; // half-width at the front bumper
+  tailW: number; // half-width at the rear bumper
 };
 
 const TOP: Record<BodyStyle, TopSpec> = {
-  sedan: { hoodEnd: 124, wsEnd: 164, roofEnd: 300, rgEnd: 340, deckEnd: 400, doors: 4, width: 82 },
-  coupe: { hoodEnd: 134, wsEnd: 176, roofEnd: 284, rgEnd: 322, deckEnd: 398, doors: 2, width: 84 },
-  convertible: { hoodEnd: 136, wsEnd: 178, roofEnd: 282, rgEnd: 318, deckEnd: 398, doors: 2, width: 84 },
-  suv: { hoodEnd: 108, wsEnd: 146, roofEnd: 326, rgEnd: 352, deckEnd: 372, doors: 4, width: 86 },
-  wagon: { hoodEnd: 114, wsEnd: 152, roofEnd: 318, rgEnd: 348, deckEnd: 374, doors: 4, width: 84 },
-  hatch: { hoodEnd: 110, wsEnd: 150, roofEnd: 300, rgEnd: 332, deckEnd: 362, doors: 4, width: 80 },
-  truck: { hoodEnd: 116, wsEnd: 152, roofEnd: 248, rgEnd: 268, deckEnd: 402, doors: 4, width: 88 },
-  van: { hoodEnd: 88, wsEnd: 124, roofEnd: 332, rgEnd: 352, deckEnd: 370, doors: 4, width: 86 },
+  sedan: { hoodEnd: 124, wsEnd: 164, roofEnd: 300, rgEnd: 340, deckEnd: 400, doors: 4, width: 80, noseW: 62, tailW: 66 },
+  coupe: { hoodEnd: 142, wsEnd: 184, roofEnd: 280, rgEnd: 318, deckEnd: 398, doors: 2, width: 88, noseW: 64, tailW: 78 },
+  convertible: { hoodEnd: 144, wsEnd: 184, roofEnd: 278, rgEnd: 312, deckEnd: 396, doors: 2, width: 86, noseW: 62, tailW: 74 },
+  suv: { hoodEnd: 104, wsEnd: 144, roofEnd: 330, rgEnd: 354, deckEnd: 374, doors: 4, width: 86, noseW: 76, tailW: 82 },
+  wagon: { hoodEnd: 114, wsEnd: 152, roofEnd: 320, rgEnd: 350, deckEnd: 376, doors: 4, width: 82, noseW: 66, tailW: 76 },
+  hatch: { hoodEnd: 110, wsEnd: 150, roofEnd: 300, rgEnd: 332, deckEnd: 362, doors: 4, width: 78, noseW: 62, tailW: 70 },
+  truck: { hoodEnd: 118, wsEnd: 154, roofEnd: 244, rgEnd: 264, deckEnd: 404, doors: 4, width: 90, noseW: 84, tailW: 88 },
+  van: { hoodEnd: 86, wsEnd: 122, roofEnd: 336, rgEnd: 354, deckEnd: 372, doors: 4, width: 86, noseW: 76, tailW: 84 },
 };
+
 
 export type Shape =
   | { kind: "rect"; x: number; y: number; w: number; h: number; r?: number }
@@ -87,7 +90,7 @@ export function topPanels(body: BodyStyle): Record<string, Shape[]> {
   const mirrorY = s.wsEnd - 18;
 
   return {
-    front_bumper: [rect(L, 10, halfW * 2, 34, 12)],
+    front_bumper: [rect(cx - s.noseW, 10, s.noseW * 2, 34, 14)],
     hood: [rect(cabL - 6, 48, cabW + 12, s.hoodEnd - 52, 8)],
     fender_l: [rect(L, 50, sideW, s.hoodEnd - 54, 8)],
     fender_r: [rect(R - sideW, 50, sideW, s.hoodEnd - 54, 8)],
@@ -111,7 +114,7 @@ export function topPanels(body: BodyStyle): Record<string, Shape[]> {
     quarter_l: [rect(L, s.roofEnd, sideW, s.deckEnd - s.roofEnd - 4, 6)],
     quarter_r: [rect(R - sideW, s.roofEnd, sideW, s.deckEnd - s.roofEnd - 4, 6)],
     trunk: [rect(cabL - 4, s.rgEnd, cabW + 8, s.deckEnd - s.rgEnd - 3, 7)],
-    rear_bumper: [rect(L, s.deckEnd, halfW * 2, 28, 12)],
+    rear_bumper: [rect(cx - s.tailW, s.deckEnd, s.tailW * 2, 28, 12)],
   };
 }
 
@@ -155,10 +158,26 @@ export function topWindows(body: BodyStyle): Record<string, Shape[]> {
 export function topOutline(body: BodyStyle) {
   const s = TOP[body];
   const cx = 100;
-  const L = cx - s.width - 3;
-  const R = cx + s.width + 3;
-  return `M ${L + 22} 6 L ${R - 22} 6 Q ${R} 6 ${R} 34 L ${R} ${s.deckEnd + 4} Q ${R} ${s.deckEnd + 32} ${R - 22} ${s.deckEnd + 32} L ${L + 22} ${s.deckEnd + 32} Q ${L} ${s.deckEnd + 32} ${L} ${s.deckEnd + 4} L ${L} 34 Q ${L} 6 ${L + 22} 6 Z`;
+  const w = s.width + 3;
+  const nose = s.noseW + 2;
+  const tail = s.tailW + 2;
+  const flare = s.hoodEnd * 0.55; // where the body reaches full width
+  const hips = s.deckEnd - 24;
+  const tailY = s.deckEnd + 30;
+  return [
+    `M ${cx - nose} 8`,
+    `Q ${cx - w} 18 ${cx - w} ${flare}`,
+    `L ${cx - w} ${hips}`,
+    `Q ${cx - w} ${tailY} ${cx - tail} ${tailY}`,
+    `L ${cx + tail} ${tailY}`,
+    `Q ${cx + w} ${tailY} ${cx + w} ${hips}`,
+    `L ${cx + w} ${flare}`,
+    `Q ${cx + w} 18 ${cx + nose} 8`,
+    `Q ${cx} -2 ${cx - nose} 8`,
+    `Z`,
+  ].join(" ");
 }
+
 
 export const TOP_VIEWBOX = "0 0 200 440";
 
@@ -199,21 +218,35 @@ type SideSpec = {
   rearX: number;
   roofY: number;
   beltY: number;
+  sillY: number;
+  wheelR: number;
+  fwX: number;
+  rwX: number;
   doors: 2 | 4;
   quarter: boolean;
   bed?: boolean;
 };
 
+/** Every body style sits on the same ground line, so ride height reads true. */
+const GROUND = 156;
+
 const SIDE: Record<BodyStyle, SideSpec> = {
-  sedan: { frontX: 24, hoodX: 122, lean: 32, roofFrontX: 162, roofRearX: 268, backLean: 30, deckX: 332, rearX: 396, roofY: 44, beltY: 88, doors: 4, quarter: false },
-  coupe: { frontX: 24, hoodX: 134, lean: 38, roofFrontX: 180, roofRearX: 252, backLean: 44, deckX: 338, rearX: 396, roofY: 48, beltY: 90, doors: 2, quarter: true },
-  convertible: { frontX: 24, hoodX: 136, lean: 34, roofFrontX: 178, roofRearX: 250, backLean: 40, deckX: 336, rearX: 396, roofY: 58, beltY: 92, doors: 2, quarter: false },
-  suv: { frontX: 26, hoodX: 108, lean: 28, roofFrontX: 144, roofRearX: 318, backLean: 14, deckX: 348, rearX: 390, roofY: 32, beltY: 86, doors: 4, quarter: true },
-  wagon: { frontX: 26, hoodX: 114, lean: 30, roofFrontX: 150, roofRearX: 318, backLean: 18, deckX: 350, rearX: 394, roofY: 38, beltY: 88, doors: 4, quarter: true },
-  hatch: { frontX: 26, hoodX: 104, lean: 30, roofFrontX: 140, roofRearX: 292, backLean: 28, deckX: 330, rearX: 370, roofY: 40, beltY: 88, doors: 4, quarter: false },
-  truck: { frontX: 22, hoodX: 118, lean: 26, roofFrontX: 152, roofRearX: 248, backLean: 8, deckX: 262, rearX: 398, roofY: 36, beltY: 84, doors: 4, quarter: false, bed: true },
-  van: { frontX: 24, hoodX: 76, lean: 22, roofFrontX: 104, roofRearX: 336, backLean: 10, deckX: 352, rearX: 390, roofY: 28, beltY: 86, doors: 4, quarter: true },
+  // three-box saloon: even overhangs, upright glass, separate trunk
+  sedan: { frontX: 20, hoodX: 122, lean: 36, roofFrontX: 162, roofRearX: 266, backLean: 38, deckX: 340, rearX: 402, roofY: 44, beltY: 88, sillY: 122, wheelR: 26, fwX: 100, rwX: 322, doors: 4, quarter: false },
+  // sports car: long hood, cab pushed back, fastback tail, big wheels, low roof
+  coupe: { frontX: 14, hoodX: 148, lean: 40, roofFrontX: 192, roofRearX: 244, backLean: 82, deckX: 356, rearX: 408, roofY: 58, beltY: 98, sillY: 128, wheelR: 29, fwX: 104, rwX: 328, doors: 2, quarter: true },
+  // roadster: no fixed roof, short cut-down screen, long deck
+  convertible: { frontX: 16, hoodX: 150, lean: 28, roofFrontX: 186, roofRearX: 232, backLean: 58, deckX: 342, rearX: 404, roofY: 66, beltY: 98, sillY: 128, wheelR: 28, fwX: 102, rwX: 324, doors: 2, quarter: false },
+  // SUV: tall boxy greenhouse, high ride height, near-vertical tailgate
+  suv: { frontX: 28, hoodX: 104, lean: 32, roofFrontX: 140, roofRearX: 326, backLean: 14, deckX: 352, rearX: 394, roofY: 26, beltY: 84, sillY: 116, wheelR: 31, fwX: 104, rwX: 318, doors: 4, quarter: true },
+  wagon: { frontX: 24, hoodX: 114, lean: 34, roofFrontX: 152, roofRearX: 324, backLean: 20, deckX: 358, rearX: 400, roofY: 36, beltY: 88, sillY: 122, wheelR: 26, fwX: 102, rwX: 320, doors: 4, quarter: true },
+  hatch: { frontX: 22, hoodX: 104, lean: 32, roofFrontX: 140, roofRearX: 286, backLean: 32, deckX: 336, rearX: 372, roofY: 38, beltY: 88, sillY: 120, wheelR: 25, fwX: 96, rwX: 300, doors: 4, quarter: false },
+  // pickup: tall cab, open bed behind it, biggest wheels
+  truck: { frontX: 18, hoodX: 126, lean: 26, roofFrontX: 158, roofRearX: 238, backLean: 6, deckX: 252, rearX: 406, roofY: 28, beltY: 84, sillY: 114, wheelR: 33, fwX: 100, rwX: 326, doors: 4, quarter: false, bed: true },
+  // van: cab-forward, one long tall box
+  van: { frontX: 22, hoodX: 70, lean: 24, roofFrontX: 96, roofRearX: 348, backLean: 8, deckX: 362, rearX: 398, roofY: 18, beltY: 84, sillY: 120, wheelR: 26, fwX: 90, rwX: 322, doors: 4, quarter: true },
 };
+
 
 const poly = (pts: number[][]): Shape => ({
   kind: "poly",
@@ -310,25 +343,43 @@ export function sideWindows(body: BodyStyle): Record<string, Shape[]> {
  * resolve to the same visible silhouette, so either side still reads clearly. */
 export function sidePanels(body: BodyStyle): Record<string, Shape[]> {
   const s = SIDE[body];
-  const sill = s.beltY + 32;
-  const wheelTop = s.beltY + 10;
-  const frontWheel = s.hoodX - 34;
-  const rearWheel = s.bed ? s.rearX - 74 : s.deckX - 34;
+  const sill = s.sillY;
+  const archTop = sill - s.wheelR * 0.72;
   const cabinMid = s.roofFrontX + (s.roofRearX - s.roofFrontX) * (s.doors === 4 ? 0.48 : 0.68);
-  const rearPanelStart = s.bed ? s.roofRearX + 14 : s.roofRearX + s.backLean;
+  const rearPanelStart = s.bed ? s.deckX : s.roofRearX + s.backLean;
   const same = (shape: Shape) => [shape];
 
-  const frontBumper = poly([[s.frontX - 2, s.beltY + 7], [s.frontX + 25, s.beltY + 4], [s.frontX + 22, sill], [s.frontX, sill]]);
-  const hood = poly([[s.frontX + 24, s.beltY - 12], [s.hoodX - 6, s.beltY - 4], [s.hoodX + 3, s.beltY + 5], [s.frontX + 26, s.beltY + 4]]);
-  const fender = poly([[s.frontX + 24, s.beltY + 5], [s.hoodX + 5, s.beltY + 5], [frontWheel + 25, wheelTop], [frontWheel - 25, wheelTop]]);
-  const frontDoor = poly([[s.roofFrontX - 5, s.beltY], [cabinMid - 3, s.beltY], [cabinMid - 3, sill], [s.roofFrontX - 8, sill]]);
-  const rearDoor = poly([[cabinMid + 2, s.beltY], [s.roofRearX - 2, s.beltY], [rearWheel - 26, sill], [cabinMid + 2, sill]]);
-  const quarter = poly([[s.roofRearX - 1, s.beltY], [s.deckX, s.beltY + 1], [rearWheel + 25, wheelTop], [rearWheel - 25, wheelTop]]);
-  const roof = poly([[s.hoodX + s.lean - 4, s.roofY], [s.roofFrontX + 8, s.roofY - 6], [s.roofRearX - 8, s.roofY - 6], [s.roofRearX + 2, s.roofY + 3], [s.roofFrontX - 4, s.roofY + 3]]);
-  const rocker = rect(s.roofFrontX - 8, sill - 6, Math.max(30, rearWheel - s.roofFrontX - 16), 8, 2);
-  const trunk = rect(rearPanelStart, s.beltY - 1, Math.max(14, s.rearX - rearPanelStart - 8), 14, 3);
-  const rearBumper = poly([[rearWheel + 24, wheelTop], [s.rearX, s.beltY + 16], [s.rearX, sill], [rearWheel + 20, sill]]);
-  const mirror = rect(s.roofFrontX - 15, s.beltY - 5, 14, 8, 3);
+  const frontBumper = poly([[s.frontX, s.beltY + 2], [s.frontX + 26, s.beltY - 2], [s.frontX + 24, sill], [s.frontX + 2, sill]]);
+  const hood = poly([[s.frontX + 26, s.beltY - 14], [s.hoodX - 6, s.beltY - 9], [s.hoodX + 2, s.beltY + 1], [s.frontX + 26, s.beltY - 2]]);
+  const fender = poly([
+    [s.frontX + 24, s.beltY + 1],
+    [s.hoodX + 4, s.beltY + 1],
+    [s.fwX + s.wheelR + 7, archTop],
+    [s.fwX - s.wheelR - 7, archTop],
+  ]);
+  const frontDoor = poly([[s.roofFrontX - 6, s.beltY], [cabinMid - 3, s.beltY], [cabinMid - 3, sill - 2], [s.roofFrontX - 9, sill - 2]]);
+  const rearDoor = poly([[cabinMid + 2, s.beltY], [s.roofRearX - 2, s.beltY], [s.roofRearX - 6, sill - 2], [cabinMid + 2, sill - 2]]);
+  const quarter = s.bed
+    ? rect(s.deckX, s.beltY + 4, Math.max(40, s.rearX - s.deckX - 8), sill - s.beltY - 14, 3)
+    : poly([
+        [s.roofRearX - 1, s.beltY],
+        [s.deckX, s.beltY + 2],
+        [s.rwX + s.wheelR + 7, archTop],
+        [s.rwX - s.wheelR - 7, archTop],
+      ]);
+  const roof = poly([
+    [s.hoodX + s.lean - 4, s.roofY],
+    [s.roofFrontX + 8, s.roofY - 6],
+    [(s.bed ? s.roofRearX : s.roofRearX) - 8, s.roofY - 6],
+    [s.roofRearX + 2, s.roofY + 3],
+    [s.roofFrontX - 4, s.roofY + 3],
+  ]);
+  const rocker = rect(s.roofFrontX - 9, sill - 8, Math.max(30, s.rwX - s.wheelR - s.roofFrontX), 8, 2);
+  const trunk = s.bed
+    ? rect(s.rearX - 18, s.beltY + 6, 16, Math.max(16, sill - s.beltY - 16), 3)
+    : rect(rearPanelStart, s.beltY - 2, Math.max(14, s.rearX - rearPanelStart - 10), 14, 3);
+  const rearBumper = poly([[s.rwX + s.wheelR + 6, archTop], [s.rearX, s.beltY + 14], [s.rearX, sill], [s.rwX + s.wheelR + 2, sill]]);
+  const mirror = rect(s.roofFrontX - 16, s.beltY - 6, 14, 8, 3);
   const pillar = poly([[s.hoodX + s.lean - 5, s.roofY + 2], [s.roofFrontX + 2, s.roofY + 2], [s.roofFrontX - 5, s.beltY], [s.roofFrontX - 13, s.beltY]]);
 
   return {
@@ -357,33 +408,57 @@ export function sidePanels(body: BodyStyle): Record<string, Shape[]> {
 
 export function sideOutline(body: BodyStyle) {
   const s = SIDE[body];
-  const ground = 150;
-  const sill = s.beltY + 32;
-  const roofRear = s.bed ? s.roofRearX + 12 : s.roofRearX;
-  const deckTop = s.bed ? s.beltY + 12 : s.beltY - 2;
+  const sill = s.sillY;
+  const lift = 9; // overhangs sit above the rocker line
+  const arch = (cx: number) =>
+    `L ${cx + s.wheelR + 6} ${sill} A ${s.wheelR + 6} ${s.wheelR + 6} 0 0 0 ${cx - s.wheelR - 6} ${sill}`;
+
+  const roofline = s.bed
+    ? [
+        `Q ${s.hoodX + s.lean + 8} ${s.roofY - 6} ${s.roofFrontX + 8} ${s.roofY - 6}`,
+        `L ${s.roofRearX - 8} ${s.roofY - 6}`,
+        `L ${s.roofRearX + 4} ${s.beltY - 6}`, // back of the cab
+        `L ${s.deckX} ${s.beltY + 2}`, // drop into the bed
+        `L ${s.deckX} ${s.beltY + 6}`,
+        `L ${s.rearX - 6} ${s.beltY + 6}`, // bed rail
+        `Q ${s.rearX} ${s.beltY + 8} ${s.rearX} ${s.beltY + 16}`,
+      ]
+    : body === "convertible"
+      ? [
+          // cut-down screen, no fixed roof: straight to the rear deck
+          `Q ${s.roofFrontX} ${s.roofY - 4} ${s.roofRearX} ${s.roofY + 10}`,
+          `Q ${s.roofRearX + s.backLean} ${s.beltY - 12} ${s.deckX} ${s.beltY - 6}`,
+          `Q ${s.rearX} ${s.beltY - 4} ${s.rearX} ${s.beltY + 14}`,
+        ]
+      : [
+          `Q ${s.hoodX + s.lean + 8} ${s.roofY - 6} ${s.roofFrontX + 8} ${s.roofY - 6}`,
+          `L ${s.roofRearX - 8} ${s.roofY - 6}`,
+          `Q ${s.roofRearX + 8} ${s.roofY - 4} ${s.roofRearX + s.backLean} ${s.beltY - 6}`,
+          `L ${s.deckX} ${s.beltY - 4}`,
+          `Q ${s.rearX} ${s.beltY - 2} ${s.rearX} ${s.beltY + 14}`,
+        ];
+
   return [
-    `M ${s.frontX} ${sill}`,
-    `L ${s.frontX - 2} ${s.beltY + 6}`,
-    `Q ${s.frontX + 2} ${s.beltY - 10} ${s.frontX + 26} ${s.beltY - 12}`,
-    `L ${s.hoodX - 6} ${s.beltY - 4}`,
-    `L ${s.hoodX + s.lean - 4} ${s.roofY}`,
-    `Q ${s.hoodX + s.lean + 6} ${s.roofY - 6} ${s.roofFrontX + 8} ${s.roofY - 6}`,
-    `L ${roofRear - 8} ${s.roofY - 6}`,
-    s.bed
-      ? `L ${roofRear} ${deckTop} L ${s.rearX} ${deckTop}`
-      : `Q ${roofRear + 6} ${s.roofY - 4} ${roofRear + s.backLean} ${s.beltY - 4} L ${s.deckX} ${s.beltY - 2} L ${s.rearX - 10} ${s.beltY + 2}`,
-    `Q ${s.rearX} ${s.beltY + 6} ${s.rearX} ${s.beltY + 18}`,
-    `L ${s.rearX} ${sill}`,
+    `M ${s.frontX} ${sill - lift}`,
+    `Q ${s.frontX} ${s.beltY - 14} ${s.frontX + 28} ${s.beltY - 16}`, // nose
+    `L ${s.hoodX - 6} ${s.beltY - 10}`, // hood line
+    `L ${s.hoodX + s.lean - 4} ${s.roofY}`, // windshield rake
+    ...roofline,
+    `L ${s.rearX} ${sill - lift}`,
+    `Q ${s.rearX} ${sill} ${s.rearX - 16} ${sill}`, // rear overhang tucks up
+    arch(s.rwX),
+    arch(s.fwX),
+    `L ${s.frontX + 16} ${sill}`,
+    `Q ${s.frontX} ${sill} ${s.frontX} ${sill - lift}`,
     `Z`,
   ].join(" ");
 }
 
+
 export function sideWheels(body: BodyStyle) {
   const s = SIDE[body];
-  const y = SIDE[body].beltY + 34;
-  const front = s.hoodX - 34;
-  const rear = s.bed ? s.rearX - 74 : s.deckX - 34;
-  return { y, r: 24, front, rear };
+  return { y: GROUND - s.wheelR, r: s.wheelR, front: s.fwX, rear: s.rwX };
 }
+
 
 export const SIDE_VIEWBOX = "0 0 420 196";
