@@ -81,7 +81,7 @@ function View({
   wheels?: ReturnType<typeof sideWheels>;
   covered: string[];
   colour: string;
-  onToggle?: (key: string) => void;
+  onToggle?: ((key: string) => void) | undefined;
   label: string;
 }) {
   return (
