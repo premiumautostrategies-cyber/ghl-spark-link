@@ -40,10 +40,6 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 type Covered = { coverage_kind?: string | null; coverage_keys?: string[] | null };
 
-const kindOf = (r: Covered): CoverageKind =>
-  r.coverage_kind === "tint" ? "tint" : r.coverage_kind === "none" ? "none" : "panels";
-const keysOf = (r: Covered) => r.coverage_keys ?? [];
-
 function ProposalPage() {
   const data = Route.useLoaderData();
   const [tierId, setTierId] = useState<string | null>(data?.proposal.selected_tier_id ?? null);
