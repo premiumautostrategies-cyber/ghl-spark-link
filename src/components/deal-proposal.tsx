@@ -472,3 +472,51 @@ function NumField({
     </span>
   );
 }
+
+/** Picks what the customer will SEE for this tier — a film coverage map or a
+ *  tint layout, drawn on their own vehicle's body style. */
+function CoveragePicker({
+  body,
+  accent,
+  row,
+  onChange,
+  compact,
+}: {
+  body: ReturnType<typeof resolveBodyStyle>;
+  accent: string | null;
+  row: Coverage;
+  onChange: (patch: { coverage_kind: string; coverage_keys: string[] }) => void;
+  compact?: boolean;
+}) {
+  const value = coverageValue(row);
+  const opt = COVERAGE_OPTIONS.find((o) => o.value === value) ?? COVERAGE_OPTIONS[0]!;
+  return (
+    <div className={compact ? "flex items-center gap-2" : "mt-2 space-y-1.5"}>
+      <select
+        value={value}
+        onChange={(e) => {
+          const next = COVERAGE_OPTIONS.find((o) => o.value === e.target.value)!;
+          onChange({ coverage_kind: next.kind, coverage_keys: next.keys });
+        }}
+        className="h-7 w-full rounded-lg border border-elevated bg-surface px-2 text-[11px] text-foreground"
+      >
+        {COVERAGE_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {opt.kind !== "none" && (
+        <div className={compact ? "w-16" : "rounded-lg border border-hairline/50 bg-surface p-1.5"}>
+          <CoverageVisual
+            kind={opt.kind === "tint" ? "tint" : "panels"}
+            body={body}
+            covered={opt.keys}
+            accent={accent}
+            className={compact ? "" : opt.kind === "tint" ? "max-h-20" : "max-h-32"}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
