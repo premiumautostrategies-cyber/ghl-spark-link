@@ -54,8 +54,11 @@ type Doc = {
   doc_type: string;
   body: string | null;
   status: string;
+  source_url: string | null;
   updated_at: string;
 };
+
+const DOC_BUILDER_URL = "https://systemize-shop-systems.lovable.app";
 
 function DocumentsPage() {
   const qc = useQueryClient();
@@ -70,7 +73,7 @@ function DocumentsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
-        .select("id,name,doc_type,body,status,updated_at")
+        .select("id,name,doc_type,body,status,source_url,updated_at")
         .is("deleted_at", null)
         .order("name");
       if (error) throw error;
@@ -91,6 +94,7 @@ function DocumentsPage() {
             doc_type: doc.doc_type ?? "warranty",
             body: doc.body ?? null,
             status: doc.status ?? "published",
+            source_url: doc.source_url ?? null,
             updated_at: new Date().toISOString(),
           })
           .eq("id", doc.id);
@@ -101,6 +105,7 @@ function DocumentsPage() {
           doc_type: doc.doc_type ?? "warranty",
           body: doc.body ?? null,
           status: doc.status ?? "published",
+          source_url: doc.source_url ?? null,
           organization_id: orgId,
           location_id: locId,
         });
@@ -178,10 +183,15 @@ function DocumentsPage() {
           <h1 className="display-title mt-1 text-3xl font-semibold">Document library</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Warranty terms, liability releases, care instructions and shop policies — written once,
-            attached wherever they are needed.
+            attached wherever they are needed. Write them here or paste in paperwork built elsewhere.
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <a href={DOC_BUILDER_URL} target="_blank" rel="noreferrer">
+              Create a document
+            </a>
+          </Button>
           <Button
             variant="outline"
             onClick={() => loadStarter.mutate()}
@@ -333,7 +343,14 @@ function DocumentsPage() {
           <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
             {reading?.body || "No contents yet."}
           </p>
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-wrap justify-end gap-2 pt-2">
+            {reading?.source_url && (
+              <Button variant="ghost" asChild>
+                <a href={reading.source_url} target="_blank" rel="noreferrer">
+                  Open original
+                </a>
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => {
@@ -370,6 +387,7 @@ function DocumentsPage() {
                 name: String(f.get("name")),
                 doc_type: String(f.get("doc_type")),
                 status: String(f.get("status")),
+                source_url: String(f.get("source_url") || "") || null,
                 body: String(f.get("body") || ""),
               });
             }}
@@ -412,6 +430,20 @@ function DocumentsPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="source_url">Link to the original (optional)</Label>
+              <Input
+                id="source_url"
+                name="source_url"
+                type="url"
+                defaultValue={editing?.source_url ?? ""}
+                placeholder="https://systemize-shop-systems.lovable.app/..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Built the paperwork elsewhere? Paste the link and keep it filed here with the rest
+                of the library.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="body">Contents</Label>
