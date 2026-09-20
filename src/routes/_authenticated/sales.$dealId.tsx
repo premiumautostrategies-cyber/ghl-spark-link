@@ -1374,7 +1374,7 @@ function ServiceConfigurator({
               kind={shown.kind === "tint" ? "tint" : "panels"}
               body={body}
               covered={shown.keys}
-              accent={category?.accent_color}
+              accent={category?.accent_color ?? null}
               className={shown.kind === "tint" ? "max-h-24" : "max-h-40"}
             />
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
