@@ -158,10 +158,26 @@ export function topWindows(body: BodyStyle): Record<string, Shape[]> {
 export function topOutline(body: BodyStyle) {
   const s = TOP[body];
   const cx = 100;
-  const L = cx - s.width - 3;
-  const R = cx + s.width + 3;
-  return `M ${L + 22} 6 L ${R - 22} 6 Q ${R} 6 ${R} 34 L ${R} ${s.deckEnd + 4} Q ${R} ${s.deckEnd + 32} ${R - 22} ${s.deckEnd + 32} L ${L + 22} ${s.deckEnd + 32} Q ${L} ${s.deckEnd + 32} ${L} ${s.deckEnd + 4} L ${L} 34 Q ${L} 6 ${L + 22} 6 Z`;
+  const w = s.width + 3;
+  const nose = s.noseW + 2;
+  const tail = s.tailW + 2;
+  const flare = s.hoodEnd * 0.55; // where the body reaches full width
+  const hips = s.deckEnd - 24;
+  const tailY = s.deckEnd + 30;
+  return [
+    `M ${cx - nose} 8`,
+    `Q ${cx - w} 18 ${cx - w} ${flare}`,
+    `L ${cx - w} ${hips}`,
+    `Q ${cx - w} ${tailY} ${cx - tail} ${tailY}`,
+    `L ${cx + tail} ${tailY}`,
+    `Q ${cx + w} ${tailY} ${cx + w} ${hips}`,
+    `L ${cx + w} ${flare}`,
+    `Q ${cx + w} 18 ${cx + nose} 8`,
+    `Q ${cx} -2 ${cx - nose} 8`,
+    `Z`,
+  ].join(" ");
 }
+
 
 export const TOP_VIEWBOX = "0 0 200 440";
 
