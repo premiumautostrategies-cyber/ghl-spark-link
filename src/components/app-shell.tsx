@@ -21,7 +21,6 @@ import {
   Package,
   Plug,
   Search,
-  Sparkles,
   Settings,
   Users,
   ScanLine,
