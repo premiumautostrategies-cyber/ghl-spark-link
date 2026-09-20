@@ -38,7 +38,6 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     items: [
       { to: "/sales", label: "Pipeline", icon: Briefcase },
       { to: "/customers", label: "Customers", icon: Users },
-      { to: "/packages", label: "Packages", icon: Sparkles },
       { to: "/services", label: "Service Menu", icon: Layers },
       { to: "/payments", label: "Payments", icon: CreditCard },
     ],
