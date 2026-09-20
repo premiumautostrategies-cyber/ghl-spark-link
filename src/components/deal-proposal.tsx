@@ -156,6 +156,8 @@ export function DealProposal({
           film_feet: Math.round(hours * 3),
           sort_order: 0,
           is_recommended: false,
+          coverage_kind: "panels",
+          coverage_keys: presetPanels("Full front"),
         },
         {
           tier: "better",
@@ -167,6 +169,8 @@ export function DealProposal({
           film_feet: Math.round(hours * 4),
           sort_order: 1,
           is_recommended: true,
+          coverage_kind: "panels",
+          coverage_keys: presetPanels("Track pack"),
         },
         {
           tier: "best",
@@ -178,6 +182,8 @@ export function DealProposal({
           film_feet: Math.round(hours * 6),
           sort_order: 2,
           is_recommended: false,
+          coverage_kind: "panels",
+          coverage_keys: presetPanels("Full body"),
         },
       ].map((t) => ({ ...t, organization_id: orgId, proposal_id: created.id }));
 
