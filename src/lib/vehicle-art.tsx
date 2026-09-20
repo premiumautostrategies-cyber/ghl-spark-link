@@ -90,7 +90,7 @@ export function topPanels(body: BodyStyle): Record<string, Shape[]> {
   const mirrorY = s.wsEnd - 18;
 
   return {
-    front_bumper: [rect(L, 10, halfW * 2, 34, 12)],
+    front_bumper: [rect(cx - s.noseW, 10, s.noseW * 2, 34, 14)],
     hood: [rect(cabL - 6, 48, cabW + 12, s.hoodEnd - 52, 8)],
     fender_l: [rect(L, 50, sideW, s.hoodEnd - 54, 8)],
     fender_r: [rect(R - sideW, 50, sideW, s.hoodEnd - 54, 8)],
@@ -114,7 +114,7 @@ export function topPanels(body: BodyStyle): Record<string, Shape[]> {
     quarter_l: [rect(L, s.roofEnd, sideW, s.deckEnd - s.roofEnd - 4, 6)],
     quarter_r: [rect(R - sideW, s.roofEnd, sideW, s.deckEnd - s.roofEnd - 4, 6)],
     trunk: [rect(cabL - 4, s.rgEnd, cabW + 8, s.deckEnd - s.rgEnd - 3, 7)],
-    rear_bumper: [rect(L, s.deckEnd, halfW * 2, 28, 12)],
+    rear_bumper: [rect(cx - s.tailW, s.deckEnd, s.tailW * 2, 28, 12)],
   };
 }
 
