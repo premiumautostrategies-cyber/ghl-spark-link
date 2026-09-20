@@ -54,6 +54,18 @@ function CustomersPage() {
     },
   });
 
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["customer-job-history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id,title,vehicle_id,customer_id,status,price,scheduled_start,service_type")
+        .order("scheduled_start", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const addCustomer = useMutation({
     mutationFn: async (form: FormData) => {
       if (!orgId) throw new Error("No workspace selected");
