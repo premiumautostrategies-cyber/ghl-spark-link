@@ -18,6 +18,8 @@ import {
   Minimize2,
   MoreHorizontal,
   Plus,
+  Receipt,
+  Banknote,
   Settings2,
   Sparkles,
   UserPlus,
@@ -26,6 +28,9 @@ import {
 } from "lucide-react";
 import {
   Area,
+  Bar,
+  BarChart,
+  Legend,
   AreaChart,
   CartesianGrid,
   Cell,
@@ -74,11 +79,20 @@ import {
   DASHBOARD_WIDGETS,
   isDashboardLayout,
   layoutForPreset,
+  withNewWidgets,
   type DashboardPreset,
   type DashboardWidgetId,
   type DashboardWidgetLayout,
   type WidgetSize,
 } from "@/lib/dashboard";
+import {
+  EXPENSE_CATEGORIES,
+  RECURRENCES,
+  expenseCategoryLabel,
+  monthKey,
+  monthLabel,
+  type ExpenseRow,
+} from "@/lib/finance";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/command-center")({
