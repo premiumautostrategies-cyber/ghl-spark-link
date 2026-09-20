@@ -382,7 +382,6 @@ export async function seedDemoData(orgId: string, locId: string | null) {
         status: "paid",
         reference: `hist-${monthDate.getFullYear()}${String(monthDate.getMonth() + 1).padStart(2, "0")}-${slot}`,
         paid_at: new Date(monthDate.getFullYear(), monthDate.getMonth(), slot * 2, 15).toISOString(),
-        customer_id: customerRows[slot % customerRows.length]?.id ?? null,
         ...org,
       });
     }
