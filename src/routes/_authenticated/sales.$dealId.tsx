@@ -20,7 +20,6 @@ import { DEAL_STAGES, DOC_TYPES, PAYMENT_METHODS, dayDate, label, money, shortDa
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PanelCoverage } from "@/components/panel-coverage";
 import { CoverageVisual } from "@/components/coverage-visual";
 import { coverageLabel, resolveCoverage } from "@/lib/coverage-presets";
 import { resolveBodyStyle } from "@/lib/vehicle-library";
