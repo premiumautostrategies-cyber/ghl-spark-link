@@ -34,6 +34,7 @@ import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedWarrantyRouteImport } from './routes/_authenticated/warranty'
+import { Route as AuthenticatedAutomationsIndexRouteImport } from './routes/_authenticated/automations.index'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
 import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync-drain'
@@ -172,6 +173,12 @@ const AuthenticatedWarrantyRoute = AuthenticatedWarrantyRouteImport.update({
   path: '/warranty',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAutomationsIndexRoute =
+  AuthenticatedAutomationsIndexRouteImport.update({
+    id: '/automations/',
+    path: '/automations/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/sales/',
   path: '/sales/',
@@ -258,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
+  '/automations/': typeof AuthenticatedAutomationsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -294,6 +302,7 @@ export interface FileRoutesByTo {
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
+  '/automations': typeof AuthenticatedAutomationsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -332,6 +341,7 @@ export interface FileRoutesById {
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
+  '/_authenticated/automations/': typeof AuthenticatedAutomationsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
+    | '/automations/'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
+    | '/automations'
     | '/sales'
   id:
     | '__root__'
@@ -443,6 +455,7 @@ export interface FileRouteTypes {
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
+    | '/_authenticated/automations/'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -642,6 +655,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWarrantyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/automations/': {
+      id: '/_authenticated/automations/'
+      path: '/automations'
+      fullPath: '/automations/'
+      preLoaderRoute: typeof AuthenticatedAutomationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/': {
       id: '/_authenticated/sales/'
       path: '/sales'
@@ -734,6 +754,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
+  AuthenticatedAutomationsIndexRoute: typeof AuthenticatedAutomationsIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
 
@@ -756,6 +777,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedWarrantyRoute: AuthenticatedWarrantyRoute,
   AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
+  AuthenticatedAutomationsIndexRoute: AuthenticatedAutomationsIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
 }
 
