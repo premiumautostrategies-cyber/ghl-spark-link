@@ -18,7 +18,6 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
-import { Route as AuthenticatedAutomationsRouteImport } from './routes/_authenticated/automations'
 import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authenticated/command-center'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
@@ -35,6 +34,8 @@ import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedWarrantyRouteImport } from './routes/_authenticated/warranty'
+import { Route as AuthenticatedAutomationsIndexRouteImport } from './routes/_authenticated/automations.index'
+import { Route as AuthenticatedAutomationsWorkflowIdRouteImport } from './routes/_authenticated/automations.$workflowId'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
 import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync-drain'
@@ -90,12 +91,6 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAutomationsRoute =
-  AuthenticatedAutomationsRouteImport.update({
-    id: '/automations',
-    path: '/automations',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedCommandCenterRoute =
   AuthenticatedCommandCenterRouteImport.update({
     id: '/command-center',
@@ -179,6 +174,18 @@ const AuthenticatedWarrantyRoute = AuthenticatedWarrantyRouteImport.update({
   path: '/warranty',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAutomationsIndexRoute =
+  AuthenticatedAutomationsIndexRouteImport.update({
+    id: '/automations/',
+    path: '/automations/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAutomationsWorkflowIdRoute =
+  AuthenticatedAutomationsWorkflowIdRouteImport.update({
+    id: '/automations/$workflowId',
+    path: '/automations/$workflowId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSalesIndexRoute = AuthenticatedSalesIndexRouteImport.update({
   id: '/sales/',
   path: '/sales/',
@@ -240,7 +247,6 @@ export interface FileRoutesByFullPath {
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/automations': typeof AuthenticatedAutomationsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -257,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/warranty': typeof AuthenticatedWarrantyRoute
+  '/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
+  '/automations/': typeof AuthenticatedAutomationsIndexRoute
   '/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -277,7 +285,6 @@ export interface FileRoutesByTo {
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
-  '/automations': typeof AuthenticatedAutomationsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -294,6 +301,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/warranty': typeof AuthenticatedWarrantyRoute
+  '/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -303,6 +311,7 @@ export interface FileRoutesByTo {
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
+  '/automations': typeof AuthenticatedAutomationsIndexRoute
   '/sales': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRoutesById {
@@ -316,7 +325,6 @@ export interface FileRoutesById {
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
-  '/_authenticated/automations': typeof AuthenticatedAutomationsRoute
   '/_authenticated/command-center': typeof AuthenticatedCommandCenterRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/warranty': typeof AuthenticatedWarrantyRoute
+  '/_authenticated/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
@@ -342,6 +351,7 @@ export interface FileRoutesById {
   '/p/proposal/$token': typeof PProposalTokenRoute
   '/p/waiver/$token': typeof PWaiverTokenRoute
   '/p/warranty/$token': typeof PWarrantyTokenRoute
+  '/_authenticated/automations/': typeof AuthenticatedAutomationsIndexRoute
   '/_authenticated/sales/': typeof AuthenticatedSalesIndexRoute
 }
 export interface FileRouteTypes {
@@ -355,7 +365,6 @@ export interface FileRouteTypes {
     | '/platform'
     | '/workflow'
     | '/analytics'
-    | '/automations'
     | '/command-center'
     | '/customers'
     | '/documents'
@@ -372,6 +381,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/warranty'
+    | '/automations/$workflowId'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
+    | '/automations/'
     | '/sales/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -392,7 +403,6 @@ export interface FileRouteTypes {
     | '/platform'
     | '/workflow'
     | '/analytics'
-    | '/automations'
     | '/command-center'
     | '/customers'
     | '/documents'
@@ -409,6 +419,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/team'
     | '/warranty'
+    | '/automations/$workflowId'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
+    | '/automations'
     | '/sales'
   id:
     | '__root__'
@@ -430,7 +442,6 @@ export interface FileRouteTypes {
     | '/platform'
     | '/workflow'
     | '/_authenticated/analytics'
-    | '/_authenticated/automations'
     | '/_authenticated/command-center'
     | '/_authenticated/customers'
     | '/_authenticated/documents'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/team'
     | '/_authenticated/warranty'
+    | '/_authenticated/automations/$workflowId'
     | '/_authenticated/sales/$dealId'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
@@ -456,6 +468,7 @@ export interface FileRouteTypes {
     | '/p/proposal/$token'
     | '/p/waiver/$token'
     | '/p/warranty/$token'
+    | '/_authenticated/automations/'
     | '/_authenticated/sales/'
   fileRoutesById: FileRoutesById
 }
@@ -541,13 +554,6 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/automations': {
-      id: '/_authenticated/automations'
-      path: '/automations'
-      fullPath: '/automations'
-      preLoaderRoute: typeof AuthenticatedAutomationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/command-center': {
@@ -662,6 +668,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWarrantyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/automations/': {
+      id: '/_authenticated/automations/'
+      path: '/automations'
+      fullPath: '/automations/'
+      preLoaderRoute: typeof AuthenticatedAutomationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/automations/$workflowId': {
+      id: '/_authenticated/automations/$workflowId'
+      path: '/automations/$workflowId'
+      fullPath: '/automations/$workflowId'
+      preLoaderRoute: typeof AuthenticatedAutomationsWorkflowIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/sales/': {
       id: '/_authenticated/sales/'
       path: '/sales'
@@ -737,7 +757,6 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
-  AuthenticatedAutomationsRoute: typeof AuthenticatedAutomationsRoute
   AuthenticatedCommandCenterRoute: typeof AuthenticatedCommandCenterRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
@@ -754,13 +773,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
+  AuthenticatedAutomationsWorkflowIdRoute: typeof AuthenticatedAutomationsWorkflowIdRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
+  AuthenticatedAutomationsIndexRoute: typeof AuthenticatedAutomationsIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
-  AuthenticatedAutomationsRoute: AuthenticatedAutomationsRoute,
   AuthenticatedCommandCenterRoute: AuthenticatedCommandCenterRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
@@ -777,7 +797,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedWarrantyRoute: AuthenticatedWarrantyRoute,
+  AuthenticatedAutomationsWorkflowIdRoute:
+    AuthenticatedAutomationsWorkflowIdRoute,
   AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
+  AuthenticatedAutomationsIndexRoute: AuthenticatedAutomationsIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
 }
 
