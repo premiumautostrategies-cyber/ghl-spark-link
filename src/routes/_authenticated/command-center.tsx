@@ -344,6 +344,23 @@ function CommandCenter() {
         const status = String(form.get("status") || "paid");
         const { error } = await supabase.from("payments").insert({ amount: Number(form.get("amount") || 0), kind: String(form.get("kind") || "payment"), method: String(form.get("method") || "card"), status, paid_at: status === "paid" ? new Date().toISOString() : null, customer_id: String(form.get("customer_id") || "") || null, organization_id: orgId, location_id: locId });
         if (error) throw error;
+      } else if (quickAction === "expense") {
+        const status = String(form.get("expense_status") || "paid");
+        const date = String(form.get("expense_date") || "") || new Date().toISOString().slice(0, 10);
+        const { error } = await supabase.from("expenses").insert({
+          amount: Number(form.get("amount") || 0),
+          category: String(form.get("category") || "other"),
+          vendor: String(form.get("vendor") || "") || null,
+          description: String(form.get("description") || "") || null,
+          recurrence: String(form.get("recurrence") || "one_off"),
+          method: String(form.get("expense_method") || "") || null,
+          status,
+          expense_date: date,
+          due_date: status === "due" ? date : null,
+          organization_id: orgId,
+          location_id: locId,
+        });
+        if (error) throw error;
       } else {
         const start = String(form.get("scheduled_start") || "");
         const { error } = await supabase.from("jobs").insert({ title: String(form.get("title")), service_type: String(form.get("service_type") || "other"), status: "scheduled", price: Number(form.get("price") || 0), bay: String(form.get("bay") || "") || null, installer: String(form.get("installer") || "") || null, scheduled_start: start ? new Date(start).toISOString() : null, customer_id: String(form.get("customer_id") || "") || null, organization_id: orgId, location_id: locId });
