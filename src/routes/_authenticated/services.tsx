@@ -953,6 +953,8 @@ function ServicesPage() {
         </form>
       </Panel>
 
+      </div>
+
       {/* New / edit service */}
       <Dialog
         open={newService || !!editing}
