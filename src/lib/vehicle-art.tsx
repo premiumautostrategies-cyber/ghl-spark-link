@@ -409,39 +409,51 @@ export function sidePanels(body: BodyStyle): Record<string, Shape[]> {
 export function sideOutline(body: BodyStyle) {
   const s = SIDE[body];
   const sill = s.sillY;
+  const lift = 9; // overhangs sit above the rocker line
   const arch = (cx: number) =>
     `L ${cx + s.wheelR + 6} ${sill} A ${s.wheelR + 6} ${s.wheelR + 6} 0 0 0 ${cx - s.wheelR - 6} ${sill}`;
 
-  const upper = s.bed
+  const roofline = s.bed
     ? [
+        `Q ${s.hoodX + s.lean + 8} ${s.roofY - 6} ${s.roofFrontX + 8} ${s.roofY - 6}`,
         `L ${s.roofRearX - 8} ${s.roofY - 6}`,
         `L ${s.roofRearX + 4} ${s.beltY - 6}`, // back of the cab
         `L ${s.deckX} ${s.beltY + 2}`, // drop into the bed
         `L ${s.deckX} ${s.beltY + 6}`,
-        `L ${s.rearX - 4} ${s.beltY + 6}`, // bed rail
-        `L ${s.rearX} ${s.beltY + 12}`,
+        `L ${s.rearX - 6} ${s.beltY + 6}`, // bed rail
+        `Q ${s.rearX} ${s.beltY + 8} ${s.rearX} ${s.beltY + 16}`,
       ]
-    : [
-        `L ${s.roofRearX - 8} ${s.roofY - 6}`,
-        `Q ${s.roofRearX + 8} ${s.roofY - 4} ${s.roofRearX + s.backLean} ${s.beltY - 6}`,
-        `L ${s.deckX} ${s.beltY - 4}`,
-        `Q ${s.rearX} ${s.beltY - 2} ${s.rearX} ${s.beltY + 14}`,
-      ];
+    : body === "convertible"
+      ? [
+          // cut-down screen, no fixed roof: straight to the rear deck
+          `Q ${s.roofFrontX} ${s.roofY - 4} ${s.roofRearX} ${s.roofY + 10}`,
+          `Q ${s.roofRearX + s.backLean} ${s.beltY - 12} ${s.deckX} ${s.beltY - 6}`,
+          `Q ${s.rearX} ${s.beltY - 4} ${s.rearX} ${s.beltY + 14}`,
+        ]
+      : [
+          `Q ${s.hoodX + s.lean + 8} ${s.roofY - 6} ${s.roofFrontX + 8} ${s.roofY - 6}`,
+          `L ${s.roofRearX - 8} ${s.roofY - 6}`,
+          `Q ${s.roofRearX + 8} ${s.roofY - 4} ${s.roofRearX + s.backLean} ${s.beltY - 6}`,
+          `L ${s.deckX} ${s.beltY - 4}`,
+          `Q ${s.rearX} ${s.beltY - 2} ${s.rearX} ${s.beltY + 14}`,
+        ];
 
   return [
-    `M ${s.frontX} ${sill}`,
-    `L ${s.frontX} ${s.beltY + 4}`,
+    `M ${s.frontX} ${sill - lift}`,
     `Q ${s.frontX} ${s.beltY - 14} ${s.frontX + 28} ${s.beltY - 16}`, // nose
     `L ${s.hoodX - 6} ${s.beltY - 10}`, // hood line
     `L ${s.hoodX + s.lean - 4} ${s.roofY}`, // windshield rake
-    `Q ${s.hoodX + s.lean + 8} ${s.roofY - 6} ${s.roofFrontX + 8} ${s.roofY - 6}`,
-    ...upper,
-    `L ${s.rearX} ${sill}`,
+    ...roofline,
+    `L ${s.rearX} ${sill - lift}`,
+    `Q ${s.rearX} ${sill} ${s.rearX - 16} ${sill}`, // rear overhang tucks up
     arch(s.rwX),
     arch(s.fwX),
+    `L ${s.frontX + 16} ${sill}`,
+    `Q ${s.frontX} ${sill} ${s.frontX} ${sill - lift}`,
     `Z`,
   ].join(" ");
 }
+
 
 export function sideWheels(body: BodyStyle) {
   const s = SIDE[body];
