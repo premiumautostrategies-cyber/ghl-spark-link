@@ -117,22 +117,57 @@ function SalesPage() {
   const addDeal = useMutation({
     mutationFn: async (form: FormData) => {
       if (!orgId) throw new Error("No workspace selected");
-      const customerId = String(form.get("customer_id") || "");
-      const close = String(form.get("expected_close") || "");
+      let customerId = String(form.get("customer_id") || "") || null;
+      const newName = String(form.get("new_customer_name") || "").trim();
+      const newPhone = String(form.get("new_customer_phone") || "").trim();
+
+      if (!customerId && newName) {
+        const { data: cust, error: custErr } = await supabase
+          .from("customers")
+          .insert({
+            name: newName,
+            phone: newPhone || null,
+            organization_id: orgId,
+            location_id: locId,
+          })
+          .select("id")
+          .single();
+        if (custErr) throw custErr;
+        customerId = cust.id;
+      }
+      if (!customerId) throw new Error("Pick a customer or add a new one");
+
+      const year = String(form.get("vehicle_year") || "").trim();
+      const make = String(form.get("vehicle_make") || "").trim();
+      const model = String(form.get("vehicle_model") || "").trim();
+      let vehicleId: string | null = null;
+      if (make || model || year) {
+        const { data: veh, error: vehErr } = await supabase
+          .from("vehicles")
+          .insert({
+            customer_id: customerId,
+            owner_id: customerId,
+            year: year ? Number(year) : null,
+            make: make || null,
+            model: model || null,
+            organization_id: orgId,
+            location_id: locId,
+          })
+          .select("id")
+          .single();
+        if (vehErr) throw vehErr;
+        vehicleId = veh.id;
+      }
+
+      const wants = String(form.get("title") || "").trim();
       const { data: created, error } = await supabase.from("deals").insert({
-        title: String(form.get("title")),
-        stage: String(form.get("stage")),
-        value: Number(form.get("value") || 0),
-        probability: Number(form.get("probability") || 25),
-        source: String(form.get("source") || "") || null,
-        owner_name: String(form.get("owner_name") || "") || null,
+        title: wants || "New enquiry",
+        stage: "new_lead",
+        value: 0,
+        probability: 25,
         notes: String(form.get("notes") || "") || null,
-        expected_close: close || null,
-        customer_id: customerId || null,
-        service_tags: String(form.get("service_tags") || "")
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+        customer_id: customerId,
+        vehicle_id: vehicleId,
         organization_id: orgId,
         location_id: locId,
       }).select("id,stage,customer_id").single();
