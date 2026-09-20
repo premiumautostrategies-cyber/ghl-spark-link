@@ -109,7 +109,7 @@ export const Route = createFileRoute("/_authenticated/command-center")({
   component: CommandCenter,
 });
 
-type QuickAction = "lead" | "job" | "appointment" | "payment" | null;
+type QuickAction = "lead" | "job" | "appointment" | "payment" | "expense" | null;
 
 function startOfMonth(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -147,6 +147,7 @@ function CommandCenter() {
   const quarterStart = startOfQuarter(now);
   const historyStart = new Date(now);
   historyStart.setDate(historyStart.getDate() - 60);
+  const financeStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
   const { data: preference } = useQuery({
     queryKey: ["dashboard-preference", orgId, user.id],
@@ -167,23 +168,28 @@ function CommandCenter() {
     if (!preference) return;
     const nextPreset = preference.preset === "compact" ? "compact" : "executive";
     setPreset(nextPreset);
-    setLayout(isDashboardLayout(preference.widget_layout) ? preference.widget_layout : layoutForPreset(nextPreset));
+    setLayout(
+      isDashboardLayout(preference.widget_layout)
+        ? withNewWidgets(preference.widget_layout, nextPreset)
+        : layoutForPreset(nextPreset),
+    );
   }, [preference]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["command-center", orgId],
     enabled: Boolean(orgId),
     queryFn: async () => {
-      const [jobs, deals, payments, estimates, members, inventory, customers] = await Promise.all([
+      const [jobs, deals, payments, estimates, members, inventory, customers, expenses] = await Promise.all([
         supabase.from("jobs").select("*, customers(name), vehicles(year,make,model)").gte("created_at", historyStart.toISOString()).order("scheduled_start", { ascending: true, nullsFirst: false }),
         supabase.from("deals").select("*").gte("created_at", historyStart.toISOString()).order("created_at", { ascending: false }),
-        supabase.from("payments").select("*").gte("created_at", quarterStart.toISOString()).order("created_at"),
+        supabase.from("payments").select("*").gte("created_at", financeStart.toISOString()).order("created_at"),
         supabase.from("estimates").select("id,status,title,created_at"),
         supabase.from("team_members").select("*").eq("is_active", true).order("full_name"),
         supabase.from("inventory_items").select("id,name,quantity_on_hand,reorder_point"),
         supabase.from("customers").select("id,name").order("name"),
+        supabase.from("expenses").select("*").gte("expense_date", financeStart.toISOString().slice(0, 10)).order("expense_date", { ascending: false }),
       ]);
-      const error = [jobs, deals, payments, estimates, members, inventory, customers].find((result) => result.error)?.error;
+      const error = [jobs, deals, payments, estimates, members, inventory, customers, expenses].find((result) => result.error)?.error;
       if (error) throw error;
       return {
         jobs: jobs.data,
@@ -193,6 +199,7 @@ function CommandCenter() {
         members: members.data,
         inventory: inventory.data,
         customers: customers.data,
+        expenses: expenses.data,
       };
     },
   });
