@@ -89,29 +89,28 @@ function PackagesPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <PageHeader
-        title="Services & Packages"
-        subtitle="Every package we sell, priced for the vehicle in front of you."
-        action={
-          <div className="flex rounded-full border border-elevated bg-surface p-1">
-            {(["grid", "table"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setView(v)}
-                className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors",
-                  view === v
-                    ? "bg-bronze text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {v === "grid" ? "Grid" : "Compare"}
-              </button>
-            ))}
-          </div>
-        }
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Every package we sell, priced for the vehicle in front of you.
+        </p>
+        <div className="flex rounded-full border border-elevated bg-surface p-1">
+          {(["grid", "table"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setView(v)}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors",
+                view === v
+                  ? "bg-bronze text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {v === "grid" ? "Grid" : "Compare"}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Category tabs */}
       <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
