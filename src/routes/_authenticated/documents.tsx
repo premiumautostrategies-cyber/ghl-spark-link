@@ -266,11 +266,15 @@ function DocumentsPage() {
                 <SectionTitle title={group.label} hint={`${group.docs.length} document${group.docs.length === 1 ? "" : "s"}`} />
                 <div className="divide-y divide-elevated">
                   {group.docs.map((d) => (
-                    <button
+                    <div
                       key={d.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setReading(d)}
-                      className="flex w-full flex-wrap items-center gap-3 px-5 py-3 text-left transition hover:bg-elevated/40"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") setReading(d);
+                      }}
+                      className="flex w-full cursor-pointer flex-wrap items-center gap-3 px-5 py-3 text-left transition hover:bg-elevated/40"
                     >
                       <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <div className="min-w-0 flex-1">
