@@ -190,9 +190,12 @@ function SalesPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Opportunity added — speed-to-lead text sent");
+      toast.success("Lead added — first text sent");
       setOpen(false);
+      setAddingCustomer(false);
       qc.invalidateQueries({ queryKey: ["deals"] });
+      qc.invalidateQueries({ queryKey: ["customers"] });
+      qc.invalidateQueries({ queryKey: ["customers-lite"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
