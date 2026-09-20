@@ -356,6 +356,12 @@ export function DealProposal({
                 <NumField label="h" value={t.labor_hours} onCommit={(v) => patchTier.mutate({ id: t.id, patch: { labor_hours: v } })} />
                 <NumField label="ft" value={t.film_feet} onCommit={(v) => patchTier.mutate({ id: t.id, patch: { film_feet: v } })} />
               </div>
+              <CoveragePicker
+                body={body}
+                accent={organization?.accent_color ?? null}
+                row={t}
+                onChange={(patch) => patchTier.mutate({ id: t.id, patch })}
+              />
               <ul className="mt-2 space-y-0.5">
                 {t.includes.map((inc) => (
                   <li key={inc} className="text-[11px] text-muted-foreground">• {inc}</li>
