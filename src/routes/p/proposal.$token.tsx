@@ -11,7 +11,12 @@ import { toast } from "sonner";
 import { CoverageVisual } from "@/components/coverage-visual";
 import { resolveBodyStyle } from "@/lib/vehicle-library";
 import { BODY_LABELS, type BodyStyle } from "@/lib/vehicle-art";
-import { coverageItemLabels, coverageLabel, type CoverageKind } from "@/lib/coverage-presets";
+import {
+  coverageItemLabels,
+  coverageLabel,
+  resolveCoverage,
+  type CoverageKind,
+} from "@/lib/coverage-presets";
 
 export const Route = createFileRoute("/p/proposal/$token")({
   head: () => ({

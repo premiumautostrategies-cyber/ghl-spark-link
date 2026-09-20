@@ -12,7 +12,12 @@ import { makeToken } from "@/lib/shop";
 import { Copy, Trash2 } from "lucide-react";
 import { CoverageVisual } from "@/components/coverage-visual";
 import { resolveBodyStyle } from "@/lib/vehicle-library";
-import { PPF_PRESETS, TINT_PRESETS, type CoverageKind } from "@/lib/coverage-presets";
+import {
+  PPF_PRESETS,
+  TINT_PRESETS,
+  resolveCoverage,
+  type CoverageKind,
+} from "@/lib/coverage-presets";
 import { useQuery as useRQ } from "@tanstack/react-query";
 
 type Coverage = { coverage_kind?: string | null; coverage_keys?: string[] | null };
