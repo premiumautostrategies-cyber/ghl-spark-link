@@ -242,12 +242,13 @@ function ProposalPage() {
                         {active && <Check className="h-3.5 w-3.5" />}
                       </span>
                       {kind !== "none" && keys.length > 0 && (
-                        <span className="hidden w-20 shrink-0 sm:block">
+                        <span className="hidden w-14 shrink-0 sm:block">
                           <CoverageVisual
                             kind={kind === "tint" ? "tint" : "panels"}
                             body={body}
                             covered={keys}
                             accent={accent}
+                            className="max-h-14"
                           />
                         </span>
                       )}
