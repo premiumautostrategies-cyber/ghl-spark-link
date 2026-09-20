@@ -115,6 +115,43 @@ export function topPanels(body: BodyStyle): Record<string, Shape[]> {
   };
 }
 
+/** Glass geometry seen from above, keyed to the same tint coverage options as
+ * the side view. Door glass is shown on both sides of the vehicle. */
+export function topWindows(body: BodyStyle): Record<string, Shape[]> {
+  const s = TOP[body];
+  const cx = 100;
+  const L = cx - s.width;
+  const R = cx + s.width;
+  const glassL = L + 29;
+  const glassR = R - 29;
+  const glassW = glassR - glassL;
+  const doorTop = s.wsEnd + 4;
+  const doorBottom = s.roofEnd - 4;
+  const doorMid = s.doors === 4 ? doorTop + (doorBottom - doorTop) * 0.52 : doorBottom;
+
+  return {
+    win_windshield: [rect(glassL, s.hoodEnd + 2, glassW, s.wsEnd - s.hoodEnd - 5, 5)],
+    win_brow: [rect(glassL + 2, s.hoodEnd + 3, glassW - 4, 7, 2)],
+    win_front: [
+      rect(L + 9, doorTop, 15, doorMid - doorTop - 2, 3),
+      rect(R - 24, doorTop, 15, doorMid - doorTop - 2, 3),
+    ],
+    win_rear:
+      s.doors === 4
+        ? [
+            rect(L + 9, doorMid, 15, doorBottom - doorMid, 3),
+            rect(R - 24, doorMid, 15, doorBottom - doorMid, 3),
+          ]
+        : [],
+    win_quarter: [
+      rect(L + 10, s.roofEnd - 1, 14, Math.max(12, s.rgEnd - s.roofEnd - 6), 3),
+      rect(R - 24, s.roofEnd - 1, 14, Math.max(12, s.rgEnd - s.roofEnd - 6), 3),
+    ],
+    win_back_glass: [rect(glassL, s.roofEnd, glassW, s.rgEnd - s.roofEnd - 3, 5)],
+    win_sunroof: [rect(glassL + 8, s.wsEnd + 24, glassW - 16, Math.min(64, s.roofEnd - s.wsEnd - 42), 6)],
+  };
+}
+
 export function topOutline(body: BodyStyle) {
   const s = TOP[body];
   const cx = 100;
@@ -266,6 +303,55 @@ export function sideWindows(body: BodyStyle): Record<string, Shape[]> {
     win_quarter: quarterGlass,
     win_back_glass: [back],
     win_sunroof: [sunroof],
+  };
+}
+
+/** Exterior panel geometry seen from the driver's side. Left/right panel keys
+ * resolve to the same visible silhouette, so either side still reads clearly. */
+export function sidePanels(body: BodyStyle): Record<string, Shape[]> {
+  const s = SIDE[body];
+  const sill = s.beltY + 32;
+  const wheelTop = s.beltY + 10;
+  const frontWheel = s.hoodX - 34;
+  const rearWheel = s.bed ? s.rearX - 74 : s.deckX - 34;
+  const cabinMid = s.roofFrontX + (s.roofRearX - s.roofFrontX) * (s.doors === 4 ? 0.48 : 0.68);
+  const rearPanelStart = s.bed ? s.roofRearX + 14 : s.roofRearX + s.backLean;
+  const same = (shape: Shape) => [shape];
+
+  const frontBumper = poly([[s.frontX - 2, s.beltY + 7], [s.frontX + 25, s.beltY + 4], [s.frontX + 22, sill], [s.frontX, sill]]);
+  const hood = poly([[s.frontX + 24, s.beltY - 12], [s.hoodX - 6, s.beltY - 4], [s.hoodX + 3, s.beltY + 5], [s.frontX + 26, s.beltY + 4]]);
+  const fender = poly([[s.frontX + 24, s.beltY + 5], [s.hoodX + 5, s.beltY + 5], [frontWheel + 25, wheelTop], [frontWheel - 25, wheelTop]]);
+  const frontDoor = poly([[s.roofFrontX - 5, s.beltY], [cabinMid - 3, s.beltY], [cabinMid - 3, sill], [s.roofFrontX - 8, sill]]);
+  const rearDoor = poly([[cabinMid + 2, s.beltY], [s.roofRearX - 2, s.beltY], [rearWheel - 26, sill], [cabinMid + 2, sill]]);
+  const quarter = poly([[s.roofRearX - 1, s.beltY], [s.deckX, s.beltY + 1], [rearWheel + 25, wheelTop], [rearWheel - 25, wheelTop]]);
+  const roof = poly([[s.hoodX + s.lean - 4, s.roofY], [s.roofFrontX + 8, s.roofY - 6], [s.roofRearX - 8, s.roofY - 6], [s.roofRearX + 2, s.roofY + 3], [s.roofFrontX - 4, s.roofY + 3]]);
+  const rocker = rect(s.roofFrontX - 8, sill - 6, Math.max(30, rearWheel - s.roofFrontX - 16), 8, 2);
+  const trunk = rect(rearPanelStart, s.beltY - 1, Math.max(14, s.rearX - rearPanelStart - 8), 14, 3);
+  const rearBumper = poly([[rearWheel + 24, wheelTop], [s.rearX, s.beltY + 16], [s.rearX, sill], [rearWheel + 20, sill]]);
+  const mirror = rect(s.roofFrontX - 15, s.beltY - 5, 14, 8, 3);
+  const pillar = poly([[s.hoodX + s.lean - 5, s.roofY + 2], [s.roofFrontX + 2, s.roofY + 2], [s.roofFrontX - 5, s.beltY], [s.roofFrontX - 13, s.beltY]]);
+
+  return {
+    front_bumper: same(frontBumper),
+    hood: same(hood),
+    fender_l: same(fender),
+    fender_r: same(fender),
+    windshield: same(pillar),
+    a_pillars: same(pillar),
+    mirror_l: same(mirror),
+    mirror_r: same(mirror),
+    roof: same(roof),
+    rocker_l: same(rocker),
+    rocker_r: same(rocker),
+    door_front_l: same(frontDoor),
+    door_front_r: same(frontDoor),
+    door_rear_l: s.doors === 4 ? same(rearDoor) : [],
+    door_rear_r: s.doors === 4 ? same(rearDoor) : [],
+    rear_glass: same(quarter),
+    quarter_l: same(quarter),
+    quarter_r: same(quarter),
+    trunk: same(trunk),
+    rear_bumper: same(rearBumper),
   };
 }
 
