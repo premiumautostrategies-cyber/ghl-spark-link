@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { Car, Link as LinkIcon, Plus } from "lucide-react";
 import { useEmitEvent } from "@/lib/integrations/emit";
+import { label, money, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({
