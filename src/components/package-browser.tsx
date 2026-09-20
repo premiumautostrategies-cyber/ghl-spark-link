@@ -1,10 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronDown, Clock, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
-import { PageHeader } from "@/components/page-header";
 import { Panel, Tag } from "@/components/os-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,31 +30,10 @@ import {
 } from "@/lib/packages-data";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/packages")({
-  head: () => ({
-    meta: [
-      { title: "Services & Packages — Systemize" },
-      {
-        name: "description",
-        content:
-          "Protection, wrap, coating, tint and detailing packages with vehicle-class pricing and coverage specs.",
-      },
-      { property: "og:title", content: "Services & Packages — Systemize" },
-      {
-        property: "og:description",
-        content:
-          "Protection, wrap, coating, tint and detailing packages with vehicle-class pricing and coverage specs.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: PackagesPage,
-});
 
 type CatFilter = PackageCategorySlug | "all";
 
-function PackagesPage() {
+export function PackageBrowser() {
   const [cat, setCat] = useState<CatFilter>("all");
   const [vclass, setVclass] = useState<VehicleClass>(VEHICLE_CLASSES[0]!);
   const [term, setTerm] = useState("");
