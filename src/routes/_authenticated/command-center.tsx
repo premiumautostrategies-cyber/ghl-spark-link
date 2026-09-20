@@ -273,6 +273,37 @@ function CommandCenter() {
   const completedJobs = jobs.filter((job) => ["completed", "invoiced"].includes(job.status));
   const averageTicket = completedJobs.length ? completedJobs.reduce((sum, job) => sum + Number(job.price), 0) / completedJobs.length : 0;
 
+  // --- Money out ----------------------------------------------------------
+  const expenses = (data?.expenses ?? []) as ExpenseRow[];
+  const spent = expenses.filter((expense) => expense.status !== "due");
+  const billsDue = expenses.filter((expense) => expense.status === "due").sort((a, b) => String(a.due_date ?? a.expense_date).localeCompare(String(b.due_date ?? b.expense_date)));
+  const monthExpenses = spent.filter((expense) => new Date(`${expense.expense_date}T12:00:00`) >= monthStart);
+  const moneyOutMTD = monthExpenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
+  const billsDueTotal = billsDue.reduce((sum, expense) => sum + Number(expense.amount), 0);
+  const netProfit = mtdRevenue - moneyOutMTD;
+  const margin = mtdRevenue > 0 ? Math.round((netProfit / mtdRevenue) * 100) : 0;
+
+  const pnlSeries = useMemo(() => {
+    const months: { key: string; label: string; in: number; out: number; profit: number }[] = [];
+    for (let index = 5; index >= 0; index -= 1) {
+      const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+      const key = monthKey(date);
+      const income = paid.filter((payment) => monthKey(new Date(payment.paid_at as string)) === key).reduce((sum, payment) => sum + Number(payment.amount), 0);
+      const outgoing = spent.filter((expense) => expense.expense_date.slice(0, 7) === key).reduce((sum, expense) => sum + Number(expense.amount), 0);
+      months.push({ key, label: monthLabel(key), in: Math.round(income), out: Math.round(outgoing), profit: Math.round(income - outgoing) });
+    }
+    return months;
+  }, [paid, spent, now.getTime()]);
+
+  const expenseBreakdown = Object.entries(
+    monthExpenses.reduce<Record<string, number>>((acc, expense) => {
+      acc[expense.category] = (acc[expense.category] ?? 0) + Number(expense.amount);
+      return acc;
+    }, {}),
+  )
+    .map(([key, value]) => ({ name: expenseCategoryLabel(key), value }))
+    .sort((a, b) => b.value - a.value);
+
   const revenueSeries = useMemo(() => {
     const start = revenueRange === "month" ? monthStart : quarterStart;
     const points: { label: string; actual: number; target: number }[] = [];
@@ -292,6 +323,9 @@ function CommandCenter() {
   }, [paid, revenueRange, monthStart.getTime(), quarterStart.getTime(), now.getTime(), monthlyTarget, daysInMonth]);
 
   const kpis = [
+    { label: "Money in (MTD)", value: money(mtdRevenue), note: `${money(projectedRevenue)} projected month end`, progress: mtdRevenue / Math.max(monthlyTarget, 1) * 100, to: "/payments", values: pnlSeries.map((point) => point.in), tone: "revenue" },
+    { label: "Money out (MTD)", value: money(moneyOutMTD), note: `${money(billsDueTotal)} in bills still due`, progress: moneyOutMTD / Math.max(mtdRevenue, 1) * 100, to: "/analytics", values: pnlSeries.map((point) => point.out), tone: "critical" },
+    { label: "Net profit (MTD)", value: money(netProfit), note: `${margin}% margin after costs`, progress: Math.max(margin, 0), to: "/analytics", values: pnlSeries.map((point) => Math.max(point.profit, 0)), tone: netProfit >= 0 ? "revenue" : "critical" },
     { label: "Today / goal", value: money(todayRevenue), note: `${Math.round(todayRevenue / Math.max(dailyTarget, 1) * 100)}% of ${money(dailyTarget)}`, progress: todayRevenue / Math.max(dailyTarget, 1) * 100, to: "/payments", values: revenueSeries.slice(-7).map((point) => point.actual), tone: "bronze" },
     { label: "MTD revenue", value: money(mtdRevenue), note: `${money(projectedRevenue)} projected`, progress: mtdRevenue / Math.max(monthlyTarget, 1) * 100, to: "/analytics", values: revenueSeries.slice(-7).map((point) => point.actual), tone: "revenue" },
     { label: "Active pipeline", value: money(pipelineValue), note: `${money(weightedPipeline)} weighted`, progress: weightedPipeline / Math.max(pipelineValue, 1) * 100, to: "/sales", values: activeDeals.slice(0, 7).reverse().map((deal) => Number(deal.value)), tone: "rig" },
