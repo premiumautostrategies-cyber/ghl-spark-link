@@ -660,3 +660,98 @@ function LostWidget({ data }: { data: { name: string; value: number }[] }) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   return <div className="grid min-w-0 items-center gap-2 p-4 sm:grid-cols-[140px_minmax(0,1fr)]"><div className="relative h-[150px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data.length ? data : [{ name: "No losses", value: 1 }]} dataKey="value" innerRadius={46} outerRadius={64} paddingAngle={3} stroke="none">{(data.length ? data : [{ name: "No losses", value: 1 }]).map((item, index) => <Cell key={item.name} fill={data.length ? colors[index % colors.length] : "var(--elevated)"} />)}</Pie></PieChart></ResponsiveContainer><div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"><span className="text-base font-semibold">{money(total)}</span><span className="micro-label">lost</span></div></div><div className="min-w-0 space-y-2">{data.map((item, index) => <Link key={item.name} to="/sales" className="flex min-w-0 items-center justify-between gap-2 text-xs"><span className="flex min-w-0 items-center gap-2"><span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} /><span className="truncate">{item.name}</span></span><span className="shrink-0 font-semibold tabular-nums">{money(item.value)}</span></Link>)}{data.length === 0 && <p className="text-xs text-muted-foreground">No lost opportunities in this period.</p>}</div></div>;
 }
+function PnlWidget({ data, netProfit, margin }: { data: { key: string; label: string; in: number; out: number; profit: number }[]; netProfit: number; margin: number }) {
+  return (
+    <div className="p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm">
+          <span className={cn("font-semibold", netProfit >= 0 ? "text-revenue" : "text-critical")}>{money(netProfit)}</span> net this month · {margin}% margin
+        </p>
+        <span className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-revenue" /> money in</span>
+          <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-critical" /> money out</span>
+        </span>
+      </div>
+      <div className="h-[220px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} barGap={4}>
+            <CartesianGrid stroke="var(--elevated)" vertical={false} />
+            <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
+            <YAxis tickFormatter={(value) => `$${Math.round(Number(value) / 1000)}k`} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} width={40} />
+            <Tooltip cursor={{ fill: "var(--elevated)", opacity: 0.4 }} contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--elevated)", borderRadius: 8 }} formatter={(value, name) => [money(Number(value)), name === "in" ? "Money in" : name === "out" ? "Money out" : "Net"]} />
+            <Bar dataKey="in" fill="var(--revenue)" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="out" fill="var(--critical)" radius={[3, 3, 0, 0]} />
+            <Line type="monotone" dataKey="profit" stroke="var(--bronze)" strokeWidth={2} dot={false} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function ExpensesWidget({ data, total, recent, onAdd }: { data: { name: string; value: number }[]; total: number; recent: ExpenseRow[]; onAdd: () => void }) {
+  const colors = ["var(--critical)", "var(--urgent)", "var(--bronze)", "var(--comms)", "var(--rig)", "var(--muted-foreground)"];
+  return (
+    <div className="space-y-3 p-4">
+      <div className="grid min-w-0 items-center gap-2 sm:grid-cols-[140px_minmax(0,1fr)]">
+        <div className="relative h-[140px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data.length ? data : [{ name: "No spend", value: 1 }]} dataKey="value" innerRadius={44} outerRadius={62} paddingAngle={3} stroke="none">
+                {(data.length ? data : [{ name: "No spend", value: 1 }]).map((item, index) => <Cell key={item.name} fill={data.length ? colors[index % colors.length] : "var(--elevated)"} />)}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-base font-semibold">{money(total)}</span>
+            <span className="micro-label">this month</span>
+          </div>
+        </div>
+        <div className="min-w-0 space-y-1.5">
+          {data.slice(0, 6).map((item, index) => (
+            <div key={item.name} className="flex min-w-0 items-center justify-between gap-2 text-xs">
+              <span className="flex min-w-0 items-center gap-2"><span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} /><span className="truncate">{item.name}</span></span>
+              <span className="shrink-0 font-semibold tabular-nums">{money(item.value)}</span>
+            </div>
+          ))}
+          {data.length === 0 && <p className="text-xs text-muted-foreground">Nothing logged this month. Add rent, insurance, film and payroll to see true profit.</p>}
+        </div>
+      </div>
+      <div className="space-y-1 border-t border-elevated pt-3">
+        {recent.map((expense) => (
+          <div key={expense.id} className="flex items-center justify-between gap-2 text-[11px]">
+            <span className="truncate text-muted-foreground">{expense.vendor || expenseCategoryLabel(expense.category)} · {expense.description || expenseCategoryLabel(expense.category)}</span>
+            <span className="shrink-0 tabular-nums">{money(expense.amount)}</span>
+          </div>
+        ))}
+      </div>
+      <Button size="sm" variant="outline" className="w-full" onClick={onAdd}><Banknote /> Log an expense</Button>
+    </div>
+  );
+}
+
+function ObligationsWidget({ bills, invoices, onBillPaid, onInvoicePaid }: { bills: ExpenseRow[]; invoices: { id: string; amount: number | string; reference: string | null; kind: string }[]; onBillPaid: (id: string) => void; onInvoicePaid: (id: string) => void }) {
+  const owed = invoices.reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+  const owing = bills.reduce((sum, bill) => sum + Number(bill.amount), 0);
+  return (
+    <div className="divide-y divide-elevated">
+      <div className="grid grid-cols-2 divide-x divide-elevated">
+        <div className="p-4"><p className="micro-label">Owed to the shop</p><p className="font-display text-xl font-semibold text-revenue tabular-nums">{money(owed)}</p></div>
+        <div className="p-4"><p className="micro-label">Bills due</p><p className="font-display text-xl font-semibold text-critical tabular-nums">{money(owing)}</p></div>
+      </div>
+      {invoices.map((invoice) => (
+        <div key={invoice.id} className="flex items-center gap-3 px-4 py-2.5">
+          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{money(invoice.amount)} · {invoice.kind}</p><p className="truncate text-[11px] text-muted-foreground">{invoice.reference || "Unpaid customer balance"}</p></div>
+          <Button size="sm" variant="outline" onClick={() => onInvoicePaid(invoice.id)}>Mark paid</Button>
+        </div>
+      ))}
+      {bills.map((bill) => (
+        <div key={bill.id} className="flex items-center gap-3 px-4 py-2.5">
+          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-critical">{money(bill.amount)} · {bill.vendor || expenseCategoryLabel(bill.category)}</p><p className="truncate text-[11px] text-muted-foreground">{expenseCategoryLabel(bill.category)} · due {bill.due_date ?? bill.expense_date}</p></div>
+          <Button size="sm" variant="outline" onClick={() => onBillPaid(bill.id)}>Pay</Button>
+        </div>
+      ))}
+      {invoices.length === 0 && bills.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">Nothing owed either way.</p>}
+    </div>
+  );
+}
