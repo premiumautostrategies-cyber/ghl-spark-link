@@ -434,7 +434,22 @@ function CommandCenter() {
     return { ...member, assigned: owned.filter((deal) => !["won", "lost"].includes(deal.stage)).length, closeRate, value, efficiency };
   }).sort((a, b) => b.value - a.value);
 
+  const markExpensePaid = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("expenses").update({ status: "paid", expense_date: new Date().toISOString().slice(0, 10) }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Bill marked paid");
+      qc.invalidateQueries({ queryKey: ["command-center"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const widgetContent: Record<DashboardWidgetId, ReactNode> = {
+    pnl: <PnlWidget data={pnlSeries} netProfit={netProfit} margin={margin} />,
+    expenses: <ExpensesWidget data={expenseBreakdown} total={moneyOutMTD} recent={spent.slice(0, 4)} onAdd={() => setQuickAction("expense")} />,
+    obligations: <ObligationsWidget bills={billsDue.slice(0, 5)} invoices={outstandingPayments.slice(0, 5)} onBillPaid={(id) => markExpensePaid.mutate(id)} onInvoicePaid={(id) => markPaymentPaid.mutate(id)} />,
     revenue: <RevenueWidget data={revenueSeries} range={revenueRange} onRange={setRevenueRange} projected={projectedRevenue} target={monthlyTarget} />,
     funnel: <FunnelWidget data={funnel} />,
     bays: <BaysWidget bays={bays} jobs={todayJobs} now={now} />,
@@ -450,7 +465,7 @@ function CommandCenter() {
         <div>
           <p className="micro-label">{organization?.name ?? "Systemize"} · Live operations</p>
           <h1 className="display-title mt-1 text-3xl font-semibold">Command Center</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Revenue, capacity, pipeline, and today's priorities in one view.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Money in, money out, capacity and today's priorities in one view.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-lg border border-elevated bg-surface p-1">
