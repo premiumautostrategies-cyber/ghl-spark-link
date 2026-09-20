@@ -6,6 +6,7 @@ import { useOrg } from "@/lib/use-org";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { Kpi, Panel, SectionTitle, Tag } from "@/components/os-ui";
 import { PanelCoverage } from "@/components/panel-coverage";
+import { PackageBrowser } from "@/components/package-browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -140,7 +141,7 @@ function ServicesPage() {
   const [vehClass, setVehClass] = useState("any");
   const [showPills, setShowPills] = useState(false);
   const [filmsOnly, setFilmsOnly] = useState(false);
-  const navigate = useNavigate();
+  const [showPackages, setShowPackages] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"alpha" | "price_desc" | "price_asc" | "duration" | "popular">(
     "alpha",
