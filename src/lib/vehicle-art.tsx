@@ -218,21 +218,35 @@ type SideSpec = {
   rearX: number;
   roofY: number;
   beltY: number;
+  sillY: number;
+  wheelR: number;
+  fwX: number;
+  rwX: number;
   doors: 2 | 4;
   quarter: boolean;
   bed?: boolean;
 };
 
+/** Every body style sits on the same ground line, so ride height reads true. */
+const GROUND = 156;
+
 const SIDE: Record<BodyStyle, SideSpec> = {
-  sedan: { frontX: 24, hoodX: 122, lean: 32, roofFrontX: 162, roofRearX: 268, backLean: 30, deckX: 332, rearX: 396, roofY: 44, beltY: 88, doors: 4, quarter: false },
-  coupe: { frontX: 24, hoodX: 134, lean: 38, roofFrontX: 180, roofRearX: 252, backLean: 44, deckX: 338, rearX: 396, roofY: 48, beltY: 90, doors: 2, quarter: true },
-  convertible: { frontX: 24, hoodX: 136, lean: 34, roofFrontX: 178, roofRearX: 250, backLean: 40, deckX: 336, rearX: 396, roofY: 58, beltY: 92, doors: 2, quarter: false },
-  suv: { frontX: 26, hoodX: 108, lean: 28, roofFrontX: 144, roofRearX: 318, backLean: 14, deckX: 348, rearX: 390, roofY: 32, beltY: 86, doors: 4, quarter: true },
-  wagon: { frontX: 26, hoodX: 114, lean: 30, roofFrontX: 150, roofRearX: 318, backLean: 18, deckX: 350, rearX: 394, roofY: 38, beltY: 88, doors: 4, quarter: true },
-  hatch: { frontX: 26, hoodX: 104, lean: 30, roofFrontX: 140, roofRearX: 292, backLean: 28, deckX: 330, rearX: 370, roofY: 40, beltY: 88, doors: 4, quarter: false },
-  truck: { frontX: 22, hoodX: 118, lean: 26, roofFrontX: 152, roofRearX: 248, backLean: 8, deckX: 262, rearX: 398, roofY: 36, beltY: 84, doors: 4, quarter: false, bed: true },
-  van: { frontX: 24, hoodX: 76, lean: 22, roofFrontX: 104, roofRearX: 336, backLean: 10, deckX: 352, rearX: 390, roofY: 28, beltY: 86, doors: 4, quarter: true },
+  // three-box saloon: even overhangs, upright glass, separate trunk
+  sedan: { frontX: 20, hoodX: 122, lean: 36, roofFrontX: 162, roofRearX: 266, backLean: 38, deckX: 340, rearX: 402, roofY: 44, beltY: 88, sillY: 122, wheelR: 26, fwX: 100, rwX: 322, doors: 4, quarter: false },
+  // sports car: long hood, cab pushed back, fastback tail, big wheels, low roof
+  coupe: { frontX: 14, hoodX: 148, lean: 40, roofFrontX: 192, roofRearX: 244, backLean: 82, deckX: 356, rearX: 408, roofY: 58, beltY: 98, sillY: 128, wheelR: 29, fwX: 104, rwX: 328, doors: 2, quarter: true },
+  // roadster: no fixed roof, short cut-down screen, long deck
+  convertible: { frontX: 16, hoodX: 150, lean: 28, roofFrontX: 186, roofRearX: 232, backLean: 58, deckX: 342, rearX: 404, roofY: 66, beltY: 98, sillY: 128, wheelR: 28, fwX: 102, rwX: 324, doors: 2, quarter: false },
+  // SUV: tall boxy greenhouse, high ride height, near-vertical tailgate
+  suv: { frontX: 28, hoodX: 104, lean: 32, roofFrontX: 140, roofRearX: 326, backLean: 14, deckX: 352, rearX: 394, roofY: 26, beltY: 84, sillY: 116, wheelR: 31, fwX: 104, rwX: 318, doors: 4, quarter: true },
+  wagon: { frontX: 24, hoodX: 114, lean: 34, roofFrontX: 152, roofRearX: 324, backLean: 20, deckX: 358, rearX: 400, roofY: 36, beltY: 88, sillY: 122, wheelR: 26, fwX: 102, rwX: 320, doors: 4, quarter: true },
+  hatch: { frontX: 22, hoodX: 104, lean: 32, roofFrontX: 140, roofRearX: 286, backLean: 32, deckX: 336, rearX: 372, roofY: 38, beltY: 88, sillY: 120, wheelR: 25, fwX: 96, rwX: 300, doors: 4, quarter: false },
+  // pickup: tall cab, open bed behind it, biggest wheels
+  truck: { frontX: 18, hoodX: 126, lean: 26, roofFrontX: 158, roofRearX: 238, backLean: 6, deckX: 252, rearX: 406, roofY: 28, beltY: 84, sillY: 114, wheelR: 33, fwX: 100, rwX: 326, doors: 4, quarter: false, bed: true },
+  // van: cab-forward, one long tall box
+  van: { frontX: 22, hoodX: 70, lean: 24, roofFrontX: 96, roofRearX: 348, backLean: 8, deckX: 362, rearX: 398, roofY: 18, beltY: 84, sillY: 120, wheelR: 26, fwX: 90, rwX: 322, doors: 4, quarter: true },
 };
+
 
 const poly = (pts: number[][]): Shape => ({
   kind: "poly",
