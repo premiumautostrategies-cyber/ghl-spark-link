@@ -1114,10 +1114,10 @@ function ServicePicker({
   body: ReturnType<typeof resolveBodyStyle>;
   onAdd: (line: { description: string; quantity: number; unit_price: number }) => void;
 }) {
-  const [cat, setCat] = useState<string>("all");
+  const [cat, setCat] = useState<string>(categories[0]?.id ?? "all");
   const [picked, setPicked] = useState<CatalogService | null>(null);
 
-  const visible = services.filter((s) => (cat === "all" ? true : s.category_id === cat));
+  const visible = services.filter((s) => s.category_id === cat);
   const catById = Object.fromEntries(categories.map((c) => [c.id, c])) as Record<
     string,
     CatalogCategory
@@ -1134,7 +1134,6 @@ function ServicePicker({
   return (
     <div className="min-w-0">
       <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-2">
-        <PickPill label="All" active={cat === "all"} onClick={() => setCat("all")} />
         {categories.map((c) => (
           <PickPill
             key={c.id}
