@@ -1,6 +1,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/shop";
 import { ALL_PANELS, STARTER_CATEGORIES } from "@/lib/catalog";
+import type { Database } from "@/integrations/supabase/types";
+
+type ExpenseInsert = Database["public"]["Tables"]["expenses"]["Insert"];
 
 function daysFromNow(days: number, hour = 9) {
   const d = new Date();
@@ -312,7 +315,7 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { category: "materials", vendor: "Detail Depot", description: "Coatings, chemicals and towels", amount: 780 },
     { category: "tools", vendor: "Tool Crib", description: "Blades, squeegees and heat guns", amount: 340 },
   ];
-  const expenseRows: Record<string, unknown>[] = [];
+  const expenseRows: ExpenseInsert[] = [];
   for (let back = 5; back >= 0; back -= 1) {
     const base = new Date();
     const monthDate = new Date(base.getFullYear(), base.getMonth() - back, 1);
