@@ -35,7 +35,6 @@ import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
-import { Route as AuthenticatedVehiclesRouteImport } from './routes/_authenticated/vehicles'
 import { Route as AuthenticatedWarrantyRouteImport } from './routes/_authenticated/warranty'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
@@ -181,11 +180,6 @@ const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedVehiclesRoute = AuthenticatedVehiclesRouteImport.update({
-  id: '/vehicles',
-  path: '/vehicles',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedWarrantyRoute = AuthenticatedWarrantyRouteImport.update({
   id: '/warranty',
   path: '/warranty',
@@ -269,7 +263,6 @@ export interface FileRoutesByFullPath {
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
-  '/vehicles': typeof AuthenticatedVehiclesRoute
   '/warranty': typeof AuthenticatedWarrantyRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
@@ -308,7 +301,6 @@ export interface FileRoutesByTo {
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
-  '/vehicles': typeof AuthenticatedVehiclesRoute
   '/warranty': typeof AuthenticatedWarrantyRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
@@ -349,7 +341,6 @@ export interface FileRoutesById {
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
-  '/_authenticated/vehicles': typeof AuthenticatedVehiclesRoute
   '/_authenticated/warranty': typeof AuthenticatedWarrantyRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
@@ -390,7 +381,6 @@ export interface FileRouteTypes {
     | '/services'
     | '/settings'
     | '/team'
-    | '/vehicles'
     | '/warranty'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
@@ -429,7 +419,6 @@ export interface FileRouteTypes {
     | '/services'
     | '/settings'
     | '/team'
-    | '/vehicles'
     | '/warranty'
     | '/sales/$dealId'
     | '/api/public/sync-drain'
@@ -469,7 +458,6 @@ export interface FileRouteTypes {
     | '/_authenticated/services'
     | '/_authenticated/settings'
     | '/_authenticated/team'
-    | '/_authenticated/vehicles'
     | '/_authenticated/warranty'
     | '/_authenticated/sales/$dealId'
     | '/api/public/sync-drain'
@@ -686,13 +674,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/vehicles': {
-      id: '/_authenticated/vehicles'
-      path: '/vehicles'
-      fullPath: '/vehicles'
-      preLoaderRoute: typeof AuthenticatedVehiclesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/warranty': {
       id: '/_authenticated/warranty'
       path: '/warranty'
@@ -792,7 +773,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
-  AuthenticatedVehiclesRoute: typeof AuthenticatedVehiclesRoute
   AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
@@ -817,7 +797,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
-  AuthenticatedVehiclesRoute: AuthenticatedVehiclesRoute,
   AuthenticatedWarrantyRoute: AuthenticatedWarrantyRoute,
   AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,

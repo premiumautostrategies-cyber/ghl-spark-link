@@ -12,7 +12,6 @@ import {
   Bot,
   Briefcase,
   CalendarRange,
-  Car,
   ClipboardList,
   Command,
   CreditCard,
