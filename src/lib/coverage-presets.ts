@@ -110,7 +110,7 @@ const RULES: { match: RegExp; out: Inferred }[] = [
   { match: /partial front|18|standard front/, out: { kind: "panels", keys: P("Partial front") } },
   { match: /track|blast zone|touring/, out: { kind: "panels", keys: P("Track pack") } },
   {
-    match: /full (body|vehicle|car)|whole car|complete coverage|colou?r change|full wrap|ceramic coat|paint correction|polish/,
+    match: /full (body|vehicle|car)|whole car|complete coverage|colou?r change|full wrap|ceramic|topper|hydrophobic|graphene|sealant|paint correction|polish/,
     out: { kind: "panels", keys: P("Full body") },
   },
   { match: /full front|front end/, out: { kind: "panels", keys: P("Full front") } },
@@ -137,6 +137,5 @@ export function resolveCoverage(
       row.coverage_kind === "tint" ? "tint" : row.coverage_kind === "none" ? "none" : "panels";
     return { kind, keys };
   }
-  if (row.coverage_kind === "none") return { kind: "none", keys: [] };
   return inferCoverage(...text);
 }
