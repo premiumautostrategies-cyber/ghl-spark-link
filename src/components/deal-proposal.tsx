@@ -375,8 +375,17 @@ export function DealProposal({
           <p className="micro-label mb-2">Live add-ons</p>
           <div className="space-y-1.5">
             {addons.map((a) => (
-              <div key={a.id} className="flex items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
+              <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
                 <span className="min-w-0 flex-1 truncate text-sm">{a.name}</span>
+                <span className="w-44">
+                  <CoveragePicker
+                    body={body}
+                    accent={organization?.accent_color ?? null}
+                    row={a}
+                    compact
+                    onChange={(patch) => patchAddon.mutate({ id: a.id, patch })}
+                  />
+                </span>
                 <NumField label="$" value={a.price} onCommit={(v) => patchAddon.mutate({ id: a.id, patch: { price: v } })} />
                 <NumField label="h" value={a.labor_hours} onCommit={(v) => patchAddon.mutate({ id: a.id, patch: { labor_hours: v } })} />
                 <NumField label="ft" value={a.film_feet} onCommit={(v) => patchAddon.mutate({ id: a.id, patch: { film_feet: v } })} />
