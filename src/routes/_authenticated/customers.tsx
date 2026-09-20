@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { Car, Link as LinkIcon, Plus } from "lucide-react";
 import { useEmitEvent } from "@/lib/integrations/emit";
+import { label, money, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({
@@ -49,6 +50,18 @@ function CustomersPage() {
         .from("customers")
         .select("*, vehicles(*)")
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["customer-job-history"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id,title,vehicle_id,customer_id,status,price,scheduled_start,service_type")
+        .order("scheduled_start", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -216,24 +229,52 @@ function CustomersPage() {
                 </Button>
               </div>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3">
               {c.vehicles.length === 0 && (
                 <p className="text-xs text-muted-foreground">No vehicles on file.</p>
               )}
-              {c.vehicles.map((v) => (
-                <div
-                  key={v.id}
-                  className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm"
-                >
-                  <Car className="size-4 text-primary" />
-                  <span>
-                    {[v.year, v.make, v.model, v.color].filter(Boolean).join(" ") || "Vehicle"}
-                  </span>
-                  {v.plate && (
-                    <span className="ml-auto text-xs text-muted-foreground">{v.plate}</span>
-                  )}
-                </div>
-              ))}
+              {c.vehicles.map((v) => {
+                const history = jobs.filter((j) => j.vehicle_id === v.id);
+                const spend = history.reduce((t, j) => t + Number(j.price ?? 0), 0);
+                return (
+                  <div
+                    key={v.id}
+                    className="rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Car className="size-4 text-primary" />
+                      <span>
+                        {[v.year, v.make, v.model, v.color].filter(Boolean).join(" ") || "Vehicle"}
+                      </span>
+                      <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
+                        {[v.plate, history.length ? `${history.length} jobs · ${money(spend)}` : "No work yet"]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    </div>
+                    {history.length > 0 && (
+                      <div className="mt-2 space-y-1 border-t border-border/60 pt-2">
+                        {history.map((j) => (
+                          <div
+                            key={j.id}
+                            className="flex items-center justify-between gap-3 text-xs text-muted-foreground"
+                          >
+                            <span className="min-w-0 truncate">
+                              {j.title} · {label(j.status)}
+                            </span>
+                            <span className="whitespace-nowrap">
+                              {shortDate(j.scheduled_start)} · {money(j.price ?? 0)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {v.vin && (
+                      <p className="mt-2 text-[11px] text-muted-foreground">VIN {v.vin}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             {c.notes && <p className="mt-4 text-sm text-muted-foreground">{c.notes}</p>}
           </div>

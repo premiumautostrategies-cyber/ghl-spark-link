@@ -88,6 +88,8 @@ function SalesPage() {
   const navigate = useNavigate();
   const { orgId, locId } = useOrg();
   const [open, setOpen] = useState(false);
+  const [addingCustomer, setAddingCustomer] = useState(false);
+  const [customerId, setCustomerId] = useState("");
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
@@ -117,22 +119,57 @@ function SalesPage() {
   const addDeal = useMutation({
     mutationFn: async (form: FormData) => {
       if (!orgId) throw new Error("No workspace selected");
-      const customerId = String(form.get("customer_id") || "");
-      const close = String(form.get("expected_close") || "");
+      let customerId = String(form.get("customer_id") || "") || null;
+      const newName = String(form.get("new_customer_name") || "").trim();
+      const newPhone = String(form.get("new_customer_phone") || "").trim();
+
+      if (!customerId && newName) {
+        const { data: cust, error: custErr } = await supabase
+          .from("customers")
+          .insert({
+            name: newName,
+            phone: newPhone || null,
+            organization_id: orgId,
+            location_id: locId,
+          })
+          .select("id")
+          .single();
+        if (custErr) throw custErr;
+        customerId = cust.id;
+      }
+      if (!customerId) throw new Error("Pick a customer or add a new one");
+
+      const year = String(form.get("vehicle_year") || "").trim();
+      const make = String(form.get("vehicle_make") || "").trim();
+      const model = String(form.get("vehicle_model") || "").trim();
+      let vehicleId: string | null = null;
+      if (make || model || year) {
+        const { data: veh, error: vehErr } = await supabase
+          .from("vehicles")
+          .insert({
+            customer_id: customerId,
+            owner_id: customerId,
+            year: year ? Number(year) : null,
+            make: make || null,
+            model: model || null,
+            organization_id: orgId,
+            location_id: locId,
+          })
+          .select("id")
+          .single();
+        if (vehErr) throw vehErr;
+        vehicleId = veh.id;
+      }
+
+      const wants = String(form.get("title") || "").trim();
       const { data: created, error } = await supabase.from("deals").insert({
-        title: String(form.get("title")),
-        stage: String(form.get("stage")),
-        value: Number(form.get("value") || 0),
-        probability: Number(form.get("probability") || 25),
-        source: String(form.get("source") || "") || null,
-        owner_name: String(form.get("owner_name") || "") || null,
+        title: wants || "New enquiry",
+        stage: "new_lead",
+        value: 0,
+        probability: 25,
         notes: String(form.get("notes") || "") || null,
-        expected_close: close || null,
-        customer_id: customerId || null,
-        service_tags: String(form.get("service_tags") || "")
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+        customer_id: customerId,
+        vehicle_id: vehicleId,
         organization_id: orgId,
         location_id: locId,
       }).select("id,stage,customer_id").single();
@@ -155,9 +192,12 @@ function SalesPage() {
       }
     },
     onSuccess: () => {
-      toast.success("Opportunity added — speed-to-lead text sent");
+      toast.success("Lead added — first text sent");
       setOpen(false);
+      setAddingCustomer(false);
       qc.invalidateQueries({ queryKey: ["deals"] });
+      qc.invalidateQueries({ queryKey: ["customers"] });
+      qc.invalidateQueries({ queryKey: ["customers-lite"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -217,13 +257,22 @@ function SalesPage() {
         title="Sales Pipeline"
         subtitle="Leads, quotes and negotiations — the money before it hits a bay."
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog
+            open={open}
+            onOpenChange={(v) => {
+              setOpen(v);
+              if (!v) {
+                setAddingCustomer(false);
+                setCustomerId("");
+              }
+            }}
+          >
             <DialogTrigger asChild>
-              <Button>New opportunity</Button>
+              <Button>New lead</Button>
             </DialogTrigger>
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>New opportunity</DialogTitle>
+                <DialogTitle>New lead</DialogTitle>
               </DialogHeader>
               <form
                 className="space-y-4"
@@ -233,75 +282,69 @@ function SalesPage() {
                 }}
               >
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input id="title" name="title" placeholder="Full body PPF — GT3" required />
+                  <Label>Customer</Label>
+                  {addingCustomer ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Input name="new_customer_name" placeholder="Name" required autoFocus />
+                      <Input name="new_customer_phone" placeholder="Phone" />
+                      <button
+                        type="button"
+                        className="justify-self-start text-xs text-muted-foreground underline sm:col-span-2"
+                        onClick={() => setAddingCustomer(false)}
+                      >
+                        Pick an existing customer instead
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <input type="hidden" name="customer_id" value={customerId} />
+                      <Select value={customerId} onValueChange={setCustomerId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose a customer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {customers.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline"
+                        onClick={() => {
+                          setAddingCustomer(true);
+                          setCustomerId("");
+                        }}
+                      >
+                        + New customer
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Customer</Label>
-                    <Select name="customer_id">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Unassigned" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Stage</Label>
-                    <Select name="stage" defaultValue="new_lead">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DEAL_STAGES.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {label(s)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="value">Value</Label>
-                    <Input id="value" name="value" type="number" step="0.01" defaultValue="0" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="probability">Probability %</Label>
-                    <Input id="probability" name="probability" type="number" defaultValue="25" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="source">Source</Label>
-                    <Input id="source" name="source" placeholder="Instagram" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="expected_close">Expected close</Label>
-                    <Input id="expected_close" name="expected_close" type="date" />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="owner_name">Owner</Label>
-                    <Input id="owner_name" name="owner_name" placeholder="Advisor name" />
-                  </div>
-                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="service_tags">Service tags</Label>
-                  <Input
-                    id="service_tags"
-                    name="service_tags"
-                    placeholder="ppf, full front, ceramic — comma separated"
-                  />
+                  <Label>Vehicle (optional)</Label>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <Input name="vehicle_year" type="number" placeholder="Year" />
+                    <Input name="vehicle_make" placeholder="Make" />
+                    <Input name="vehicle_model" placeholder="Model" />
+                  </div>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea id="notes" name="notes" />
+                  <Label htmlFor="title">What do they want?</Label>
+                  <Input id="title" name="title" placeholder="Full front PPF + ceramic" required />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Notes (optional)</Label>
+                  <Textarea id="notes" name="notes" rows={2} />
+                </div>
+
                 <Button type="submit" className="w-full" disabled={addDeal.isPending}>
-                  Save opportunity
+                  Save lead
                 </Button>
               </form>
             </DialogContent>

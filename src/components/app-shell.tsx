@@ -12,7 +12,6 @@ import {
   Bot,
   Briefcase,
   CalendarRange,
-  Car,
   ClipboardList,
   Command,
   CreditCard,
@@ -39,7 +38,6 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     items: [
       { to: "/sales", label: "Pipeline", icon: Briefcase },
       { to: "/customers", label: "Customers", icon: Users },
-      { to: "/vehicles", label: "Vehicles", icon: Car },
       { to: "/packages", label: "Packages", icon: Sparkles },
       { to: "/services", label: "Service Menu", icon: Layers },
       { to: "/payments", label: "Payments", icon: CreditCard },
