@@ -144,6 +144,16 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { name: "Tasha Bell", email: "tasha.bell@example.com", phone: "(704) 555-0147" },
     { name: "Raj Anand", email: "raj.anand@example.com", phone: "(704) 555-0152", notes: "Track car — wants full protection package." },
     { name: "Kyle Donnelly", email: "kyle.d@example.com", phone: "(704) 555-0176" },
+    { name: "Monica Reyes", email: "monica.reyes@example.com", phone: "(704) 555-0181", notes: "Referred by Elena Marsh." },
+    { name: "Dev Patel", email: "dev.patel@example.com", phone: "(704) 555-0193", notes: "Wants satin PPF on delivery day." },
+    { name: "Queen City Electric", email: "fleet@qcelectric.test", phone: "(704) 555-0204", company: "Queen City Electric", notes: "Fleet of 11 trucks, annual graphics refresh." },
+    { name: "Harper Lin", email: "harper.lin@example.com", phone: "(704) 555-0216" },
+    { name: "Owen Brady", email: "owen.brady@example.com", phone: "(704) 555-0228", notes: "Second vehicle this year." },
+    { name: "Lakeside Dental", email: "office@lakesidedental.test", phone: "(704) 555-0233", company: "Lakeside Dental", notes: "Two branded SUVs." },
+    { name: "Sierra Nakamura", email: "sierra.n@example.com", phone: "(704) 555-0241", notes: "Track day regular." },
+    { name: "Grant Oyelaran", email: "grant.o@example.com", phone: "(704) 555-0259" },
+    { name: "Bianca Rossi", email: "bianca.rossi@example.com", phone: "(704) 555-0267", notes: "Wedding car — deadline sensitive." },
+    { name: "Travis Coleman", email: "travis.c@example.com", phone: "(704) 555-0272" },
   ].map((c) => ({ ...c, ...org }));
 
   const { data: customers, error: custErr } = await supabase
@@ -163,6 +173,17 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { customer_id: cid("Tasha Bell"), year: 2025, make: "Tesla", model: "Model Y", color: "Stealth Grey", plate: "TSH-5" },
     { customer_id: cid("Raj Anand"), year: 2023, make: "Chevrolet", model: "Corvette Z06", color: "Amplify Orange", plate: "Z06-RAJ" },
     { customer_id: cid("Kyle Donnelly"), year: 2019, make: "Jeep", model: "Wrangler", color: "Firecracker Red", plate: "KYL-4X4" },
+    { customer_id: cid("Monica Reyes"), year: 2024, make: "BMW", model: "M340i", color: "Portimao Blue", plate: "MON-340" },
+    { customer_id: cid("Dev Patel"), year: 2025, make: "Rivian", model: "R1S", color: "El Cap Granite", plate: "DEV-R1S" },
+    { customer_id: cid("Queen City Electric"), year: 2023, make: "Ford", model: "Transit 250", color: "Oxford White", plate: "QCE-201" },
+    { customer_id: cid("Queen City Electric"), year: 2023, make: "Ford", model: "Transit 250", color: "Oxford White", plate: "QCE-202" },
+    { customer_id: cid("Harper Lin"), year: 2022, make: "Lexus", model: "IS 500", color: "Ultrasonic Blue", plate: "HRP-500" },
+    { customer_id: cid("Owen Brady"), year: 2021, make: "Toyota", model: "Tacoma TRD", color: "Lunar Rock", plate: "OWB-TRD" },
+    { customer_id: cid("Lakeside Dental"), year: 2024, make: "Volvo", model: "XC90", color: "Denim Blue", plate: "LKD-90" },
+    { customer_id: cid("Sierra Nakamura"), year: 2023, make: "Porsche", model: "718 Cayman GT4", color: "Shark Blue", plate: "SRA-GT4" },
+    { customer_id: cid("Grant Oyelaran"), year: 2020, make: "Mercedes-Benz", model: "GLE 450", color: "Obsidian Black", plate: "GRT-450" },
+    { customer_id: cid("Bianca Rossi"), year: 2025, make: "Land Rover", model: "Defender 110", color: "Fuji White", plate: "BNC-110" },
+    { customer_id: cid("Travis Coleman"), year: 2018, make: "Subaru", model: "WRX STI", color: "World Rally Blue", plate: "TRV-STI" },
   ].map((v) => ({ ...v, ...org }));
 
   const { data: vehicles, error: vehErr } = await supabase
@@ -182,6 +203,16 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { title: "Ceramic coating — Q5", service_type: "ceramic", status: "completed", bay: "Bay 2", installer: "Marcus Webb", price: priceOf("Ceramic coating — 5 year"), customer_id: cid("Elena Marsh"), vehicle_id: vid("ELN-22"), scheduled_start: daysFromNow(-9, 8), scheduled_end: daysFromNow(-8, 16) },
     { title: "Two-step correction — Wrangler", service_type: "paint_correction", status: "invoiced", bay: "Bay 3", installer: "Marcus Webb", price: priceOf("Two-step paint correction"), customer_id: cid("Kyle Donnelly"), vehicle_id: vid("KYL-4X4"), scheduled_start: daysFromNow(-16, 9), scheduled_end: daysFromNow(-16, 17) },
     { title: "Maintenance detail — van 102", service_type: "detail", status: "lead", price: priceOf("Maintenance detail"), customer_id: cid("Southside Plumbing"), vehicle_id: vid("SSP-102") },
+    { title: "Full front PPF — M340i", service_type: "ppf", status: "scheduled", bay: "Bay 1", installer: "Marcus Webb", price: 2400, customer_id: cid("Monica Reyes"), vehicle_id: vid("MON-340"), scheduled_start: daysFromNow(3, 8), scheduled_end: daysFromNow(3, 17) },
+    { title: "Stealth PPF + tint — R1S", service_type: "protection_package", status: "scheduled", bay: "Bay 1", installer: "Marcus Webb", price: 7400, customer_id: cid("Dev Patel"), vehicle_id: vid("DEV-R1S"), scheduled_start: daysFromNow(6, 8), scheduled_end: daysFromNow(9, 17) },
+    { title: "Fleet graphics — QCE 201", service_type: "commercial_graphics", status: "scheduled", bay: "Bay 3", installer: "Corey Lang", price: 1800, customer_id: cid("Queen City Electric"), vehicle_id: vid("QCE-201"), scheduled_start: daysFromNow(4, 8), scheduled_end: daysFromNow(4, 16) },
+    { title: "Ceramic tint — IS 500", service_type: "tint", status: "completed", bay: "Bay 2", installer: "Dani Ortiz", price: 549, customer_id: cid("Harper Lin"), vehicle_id: vid("HRP-500"), scheduled_start: daysFromNow(-5, 10), scheduled_end: daysFromNow(-5, 14) },
+    { title: "Ceramic coating — XC90", service_type: "ceramic", status: "completed", bay: "Bay 2", installer: "Marcus Webb", price: 1650, customer_id: cid("Lakeside Dental"), vehicle_id: vid("LKD-90"), scheduled_start: daysFromNow(-12, 8), scheduled_end: daysFromNow(-11, 16) },
+    { title: "Track PPF — Cayman GT4", service_type: "ppf", status: "invoiced", bay: "Bay 1", installer: "Marcus Webb", price: 3900, customer_id: cid("Sierra Nakamura"), vehicle_id: vid("SRA-GT4"), scheduled_start: daysFromNow(-20, 8), scheduled_end: daysFromNow(-19, 17) },
+    { title: "Paint correction + coating — GLE 450", service_type: "paint_correction", status: "completed", bay: "Bay 3", installer: "Marcus Webb", price: 2150, customer_id: cid("Grant Oyelaran"), vehicle_id: vid("GRT-450"), scheduled_start: daysFromNow(-26, 8), scheduled_end: daysFromNow(-25, 17) },
+    { title: "Satin wrap — Defender 110", service_type: "color_change", status: "scheduled", bay: "Bay 3", installer: "Corey Lang", price: 5400, customer_id: cid("Bianca Rossi"), vehicle_id: vid("BNC-110"), scheduled_start: daysFromNow(10, 8), scheduled_end: daysFromNow(13, 17) },
+    { title: "Tint refresh — WRX STI", service_type: "tint", status: "lead", price: 420, customer_id: cid("Travis Coleman"), vehicle_id: vid("TRV-STI") },
+    { title: "Tacoma partial front PPF", service_type: "ppf", status: "estimate", price: 1250, customer_id: cid("Owen Brady"), vehicle_id: vid("OWB-TRD") },
   ].map((j) => ({ ...j, ...org }));
 
   const { data: jobs, error: jobErr } = await supabase
@@ -226,6 +257,14 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { title: "Wrangler full PPF", stage: "contacted", value: 6800, probability: 25, source: "Walk-in", customer_id: cid("Kyle Donnelly"), vehicle_id: vid("KYL-4X4"), owner_name: "Priya Raman", expected_close: daysFromNow(30).slice(0, 10) },
     { title: "Macan ceramic add-on", stage: "new_lead", value: 1650, probability: 20, source: "Existing client", customer_id: cid("Elena Marsh"), vehicle_id: vid("ELN-914"), owner_name: "Priya Raman", expected_close: daysFromNow(14).slice(0, 10) },
     { title: "Show car full wrap (lost)", stage: "lost", value: 5200, probability: 0, source: "Facebook", owner_name: "Priya Raman", notes: "Went with a cheaper shop across town.", expected_close: daysFromNow(-12).slice(0, 10) },
+    { title: "M340i full front PPF", stage: "won", value: 2400, probability: 100, source: "Referral", customer_id: cid("Monica Reyes"), vehicle_id: vid("MON-340"), owner_name: "Priya Raman", expected_close: daysFromNow(3).slice(0, 10), last_activity_at: daysFromNow(0, 9) },
+    { title: "R1S stealth protection package", stage: "won", value: 7400, probability: 100, source: "Dealer partner", customer_id: cid("Dev Patel"), vehicle_id: vid("DEV-R1S"), owner_name: "Priya Raman", expected_close: daysFromNow(6).slice(0, 10), last_activity_at: daysFromNow(-1, 14) },
+    { title: "Queen City Electric graphics refresh", stage: "negotiating", value: 19800, probability: 55, source: "Cold outreach", customer_id: cid("Queen City Electric"), owner_name: "Priya Raman", expected_close: daysFromNow(24).slice(0, 10), last_activity_at: daysFromNow(-1, 10) },
+    { title: "Defender satin wrap", stage: "won", value: 5400, probability: 100, source: "Instagram", customer_id: cid("Bianca Rossi"), vehicle_id: vid("BNC-110"), owner_name: "Priya Raman", expected_close: daysFromNow(10).slice(0, 10), last_activity_at: daysFromNow(-2, 12) },
+    { title: "Tacoma partial front PPF", stage: "quoted", value: 1250, probability: 50, source: "Google", customer_id: cid("Owen Brady"), vehicle_id: vid("OWB-TRD"), owner_name: "Priya Raman", expected_close: daysFromNow(9).slice(0, 10), last_activity_at: daysFromNow(-1, 16) },
+    { title: "WRX tint refresh", stage: "new_lead", value: 420, probability: 20, source: "Walk-in", customer_id: cid("Travis Coleman"), vehicle_id: vid("TRV-STI"), owner_name: "Dani Ortiz", expected_close: daysFromNow(12).slice(0, 10) },
+    { title: "Lakeside Dental second SUV", stage: "contacted", value: 2100, probability: 30, source: "Existing client", customer_id: cid("Lakeside Dental"), owner_name: "Priya Raman", expected_close: daysFromNow(18).slice(0, 10) },
+    { title: "Cayman ceramic renewal (lost)", stage: "lost", value: 1650, probability: 0, source: "Existing client", customer_id: cid("Sierra Nakamura"), owner_name: "Priya Raman", notes: "Timing — moving out of state.", expected_close: daysFromNow(-6).slice(0, 10) },
   ].map((d) => ({ ...d, ...org }));
   const dealRes = await supabase.from("deals").insert(deals);
   if (dealRes.error) throw dealRes.error;
@@ -237,9 +276,95 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { amount: 900, kind: "invoice", method: "ach", status: "pending", customer_id: cid("Kyle Donnelly"), job_id: jid("Two-step correction — Wrangler"), reference: "inv-2190", paid_at: null },
     { amount: 2100, kind: "deposit", method: "financing", status: "paid", customer_id: cid("Jordan Pike"), job_id: jid("Satin black color change — Bronco"), reference: "dep-2205", paid_at: daysFromNow(-3, 10) },
     { amount: 549, kind: "payment", method: "cash", status: "paid", customer_id: cid("Tasha Bell"), reference: "pay-2207", paid_at: daysFromNow(-1, 16) },
+    { amount: 720, kind: "deposit", method: "card", status: "paid", customer_id: cid("Monica Reyes"), job_id: jid("Full front PPF — M340i"), reference: "dep-2212", paid_at: daysFromNow(-2, 11) },
+    { amount: 2220, kind: "deposit", method: "card", status: "paid", customer_id: cid("Dev Patel"), job_id: jid("Stealth PPF + tint — R1S"), reference: "dep-2215", paid_at: daysFromNow(-1, 9) },
+    { amount: 549, kind: "payment", method: "card", status: "paid", customer_id: cid("Harper Lin"), job_id: jid("Ceramic tint — IS 500"), reference: "pay-2216", paid_at: daysFromNow(-5, 15) },
+    { amount: 1650, kind: "payment", method: "ach", status: "paid", customer_id: cid("Lakeside Dental"), job_id: jid("Ceramic coating — XC90"), reference: "pay-2180", paid_at: daysFromNow(-11, 17) },
+    { amount: 3900, kind: "invoice", method: "ach", status: "pending", customer_id: cid("Sierra Nakamura"), job_id: jid("Track PPF — Cayman GT4"), reference: "inv-2170", paid_at: null },
+    { amount: 2150, kind: "payment", method: "card", status: "paid", customer_id: cid("Grant Oyelaran"), job_id: jid("Paint correction + coating — GLE 450"), reference: "pay-2160", paid_at: daysFromNow(-25, 17) },
+    { amount: 1620, kind: "deposit", method: "card", status: "paid", customer_id: cid("Bianca Rossi"), job_id: jid("Satin wrap — Defender 110"), reference: "dep-2219", paid_at: daysFromNow(-1, 13) },
+    { amount: 900, kind: "deposit", method: "card", status: "paid", customer_id: cid("Queen City Electric"), job_id: jid("Fleet graphics — QCE 201"), reference: "dep-2220", paid_at: daysFromNow(-3, 10) },
   ].map((p) => ({ ...p, ...org }));
   const payRes = await supabase.from("payments").insert(payments);
   if (payRes.error) throw payRes.error;
+
+  // --- Money out: overhead, materials, payroll ----------------------------
+  const monthly = [
+    { category: "rent", vendor: "Northgate Industrial LLC", description: "Shop lease — 6,200 sq ft", amount: 6400, recurrence: "monthly", method: "ach", day: 1 },
+    { category: "utilities", vendor: "Duke Energy", description: "Power and heat", amount: 742, recurrence: "monthly", method: "ach", day: 6 },
+    { category: "utilities", vendor: "City Water & Waste", description: "Water, sewer and waste pickup", amount: 214, recurrence: "monthly", method: "ach", day: 6 },
+    { category: "insurance", vendor: "Garagekeepers Mutual", description: "Garage liability and vehicle coverage", amount: 985, recurrence: "monthly", method: "ach", day: 4 },
+    { category: "insurance", vendor: "StateComp", description: "Workers compensation", amount: 410, recurrence: "monthly", method: "ach", day: 4 },
+    { category: "payroll", vendor: "Shop payroll", description: "Installers, advisor and detailer", amount: 21600, recurrence: "monthly", method: "ach", day: 15 },
+    { category: "software", vendor: "Systemize", description: "Shop operating system", amount: 249, recurrence: "monthly", method: "card", day: 2 },
+    { category: "software", vendor: "Plotter software + cut files", description: "Pattern subscription", amount: 189, recurrence: "monthly", method: "card", day: 2 },
+    { category: "marketing", vendor: "Meta Ads", description: "Local lead campaigns", amount: 850, recurrence: "monthly", method: "card", day: 8 },
+    { category: "marketing", vendor: "Google Ads", description: "Search — tint and PPF", amount: 1100, recurrence: "monthly", method: "card", day: 8 },
+    { category: "loan", vendor: "First Carolina Bank", description: "Equipment loan — plotter and lift", amount: 968, recurrence: "monthly", method: "ach", day: 12 },
+    { category: "fees", vendor: "Card processing", description: "Merchant fees on collected payments", amount: 615, recurrence: "monthly", method: "card", day: 28 },
+    { category: "vehicle", vendor: "Fuel and shop truck", description: "Pickups, deliveries and supply runs", amount: 320, recurrence: "monthly", method: "card", day: 20 },
+    { category: "maintenance", vendor: "Clean Air HVAC", description: "Filter changes and booth service", amount: 265, recurrence: "monthly", method: "card", day: 18 },
+  ];
+  const materialBuys = [
+    { category: "materials", vendor: "XPEL", description: "Ultimate Plus 60\" rolls", amount: 4600 },
+    { category: "materials", vendor: "SunTek", description: "Ceramic CIR tint rolls", amount: 1680 },
+    { category: "materials", vendor: "Metro Wrap Supply", description: "3M 2080 cast vinyl + knifeless tape", amount: 2140 },
+    { category: "materials", vendor: "Detail Depot", description: "Coatings, chemicals and towels", amount: 780 },
+    { category: "tools", vendor: "Tool Crib", description: "Blades, squeegees and heat guns", amount: 340 },
+  ];
+  const expenseRows: Record<string, unknown>[] = [];
+  for (let back = 5; back >= 0; back -= 1) {
+    const base = new Date();
+    const monthDate = new Date(base.getFullYear(), base.getMonth() - back, 1);
+    const iso = (day: number) =>
+      new Date(monthDate.getFullYear(), monthDate.getMonth(), Math.min(day, 28))
+        .toISOString()
+        .slice(0, 10);
+    for (const row of monthly) {
+      const overdue = back === 0 && row.day > base.getDate();
+      expenseRows.push({
+        category: row.category,
+        vendor: row.vendor,
+        description: row.description,
+        amount: Math.round(row.amount * (0.94 + Math.random() * 0.12)),
+        recurrence: row.recurrence,
+        method: row.method,
+        status: overdue ? "due" : "paid",
+        expense_date: iso(row.day),
+        due_date: overdue ? iso(row.day) : null,
+        ...org,
+      });
+    }
+    for (const row of materialBuys) {
+      expenseRows.push({
+        category: row.category,
+        vendor: row.vendor,
+        description: row.description,
+        amount: Math.round(row.amount * (0.7 + Math.random() * 0.6)),
+        recurrence: "one_off",
+        method: "card",
+        status: "paid",
+        expense_date: iso(9 + Math.floor(Math.random() * 15)),
+        ...org,
+      });
+    }
+    if (back % 3 === 0) {
+      expenseRows.push({
+        category: "taxes",
+        vendor: "NC Dept of Revenue",
+        description: "Quarterly sales tax remittance",
+        amount: 3850,
+        recurrence: "yearly",
+        method: "ach",
+        status: back === 0 ? "due" : "paid",
+        expense_date: iso(20),
+        due_date: back === 0 ? iso(20) : null,
+        ...org,
+      });
+    }
+  }
+  const expRes = await supabase.from("expenses").insert(expenseRows);
+  if (expRes.error) throw expRes.error;
 
   // --- Documents ----------------------------------------------------------
   const docs = [
