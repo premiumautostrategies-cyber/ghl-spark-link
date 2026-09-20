@@ -371,17 +371,18 @@ export async function seedDemoData(orgId: string, locId: string | null) {
 
   // Past months of collected work so the profit chart has history.
   const historyRows: Record<string, unknown>[] = [];
-  for (let back = 5; back >= 1; back -= 1) {
+  for (let back = 5; back >= 0; back -= 1) {
     const base = new Date();
     const monthDate = new Date(base.getFullYear(), base.getMonth() - back, 1);
-    for (let slot = 1; slot <= 10; slot += 1) {
+    const slotCount = back === 0 ? 6 : 10;
+    for (let slot = 1; slot <= slotCount; slot += 1) {
       historyRows.push({
         amount: Math.round(900 + Math.random() * 3800),
         kind: "payment",
         method: "card",
         status: "paid",
         reference: `hist-${monthDate.getFullYear()}${String(monthDate.getMonth() + 1).padStart(2, "0")}-${slot}`,
-        paid_at: new Date(monthDate.getFullYear(), monthDate.getMonth(), slot * 2, 15).toISOString(),
+        paid_at: new Date(monthDate.getFullYear(), monthDate.getMonth(), back === 0 ? slot * 3 : slot * 2, 15).toISOString(),
         ...org,
       });
     }
