@@ -21,6 +21,9 @@ import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PanelCoverage } from "@/components/panel-coverage";
+import { CoverageVisual } from "@/components/coverage-visual";
+import { coverageLabel, resolveCoverage } from "@/lib/coverage-presets";
+import { resolveBodyStyle } from "@/lib/vehicle-library";
 import { OPTION_KIND_LABELS, catalogImage } from "@/lib/catalog";
 import { useEmitEvent } from "@/lib/integrations/emit";
 import { DealComms } from "@/components/deal-comms";
@@ -598,6 +601,7 @@ function DealDesk() {
               services={services}
               categories={catalogCategories}
               options={catalogOptions}
+              body={resolveBodyStyle(vehicle?.make, vehicle?.model, vehicle?.year ?? undefined)}
               onAdd={(line) => addLine.mutate(line)}
             />
 
@@ -1102,11 +1106,13 @@ function ServicePicker({
   services,
   categories,
   options,
+  body,
   onAdd,
 }: {
   services: CatalogService[];
   categories: CatalogCategory[];
   options: CatalogOption[];
+  body: ReturnType<typeof resolveBodyStyle>;
   onAdd: (line: { description: string; quantity: number; unit_price: number }) => void;
 }) {
   const [cat, setCat] = useState<string>("all");
@@ -1183,6 +1189,7 @@ function ServicePicker({
               service={picked}
               category={picked.category_id ? catById[picked.category_id] : undefined}
               options={options.filter((o) => o.service_id === picked.id)}
+              body={body}
               onAdd={(line) => {
                 onAdd(line);
                 setPicked(null);
@@ -1227,11 +1234,13 @@ function ServiceConfigurator({
   service,
   category,
   options,
+  body,
   onAdd,
 }: {
   service: CatalogService;
   category?: CatalogCategory | undefined;
   options: CatalogOption[];
+  body: ReturnType<typeof resolveBodyStyle>;
   onAdd: (line: { description: string; quantity: number; unit_price: number }) => void;
 }) {
   const single = options.filter((o) => o.kind !== "addon");
@@ -1253,6 +1262,14 @@ function ServiceConfigurator({
   const coverage = chosen.reduce<string[]>(
     (acc, o) => (o.coverage_panels?.length ? o.coverage_panels : acc),
     service.coverage_panels ?? [],
+  );
+  /** Nothing mapped by hand? Read the wording so each option still looks like itself. */
+  const shown = resolveCoverage(
+    { coverage_kind: "panels", coverage_keys: coverage },
+    service.name,
+    service.customer_description,
+    service.description,
+    chosen.map((o) => o.name).join(" "),
   );
 
   return (
@@ -1348,12 +1365,20 @@ function ServiceConfigurator({
           )}
         </div>
 
-        {coverage.length > 0 && (
-          <div className="rounded-xl border border-elevated bg-surface-2 p-3">
-            <p className="micro-label mb-2">Panels covered</p>
-            <PanelCoverage panels={coverage} compact accent={category?.accent_color} />
+        {shown.kind !== "none" && shown.keys.length > 0 && (
+          <div className="rounded-xl border border-elevated bg-surface-2 p-3 sm:w-48">
+            <p className="micro-label mb-2">
+              {shown.kind === "tint" ? "Glass covered" : "Panels covered"}
+            </p>
+            <CoverageVisual
+              kind={shown.kind === "tint" ? "tint" : "panels"}
+              body={body}
+              covered={shown.keys}
+              accent={category?.accent_color}
+              className={shown.kind === "tint" ? "max-h-24" : "max-h-40"}
+            />
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
-              {coverage.length} panels
+              {coverageLabel(shown.kind, shown.keys)}
             </p>
           </div>
         )}
