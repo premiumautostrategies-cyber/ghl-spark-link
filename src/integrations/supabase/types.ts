@@ -970,6 +970,54 @@ export type Database = {
           },
         ]
       }
+      import_batches: {
+        Row: {
+          created_at: string
+          error_count: number
+          file_name: string | null
+          id: string
+          imported_count: number
+          mapping: Json
+          name: string
+          notes: string | null
+          organization_id: string
+          row_count: number
+          source_system: string | null
+          status: string
+          target: string
+        }
+        Insert: {
+          created_at?: string
+          error_count?: number
+          file_name?: string | null
+          id?: string
+          imported_count?: number
+          mapping?: Json
+          name: string
+          notes?: string | null
+          organization_id: string
+          row_count?: number
+          source_system?: string | null
+          status?: string
+          target?: string
+        }
+        Update: {
+          created_at?: string
+          error_count?: number
+          file_name?: string | null
+          id?: string
+          imported_count?: number
+          mapping?: Json
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          row_count?: number
+          source_system?: string | null
+          status?: string
+          target?: string
+        }
+        Relationships: []
+      }
       inspection_defects: {
         Row: {
           created_at: string
@@ -3496,6 +3544,101 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workflow_runs: {
+        Row: {
+          context: Json
+          finished_at: string | null
+          id: string
+          mode: string
+          organization_id: string
+          started_at: string
+          status: string
+          steps: Json
+          trigger_summary: string | null
+          workflow_id: string
+        }
+        Insert: {
+          context?: Json
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          organization_id: string
+          started_at?: string
+          status?: string
+          steps?: Json
+          trigger_summary?: string | null
+          workflow_id: string
+        }
+        Update: {
+          context?: Json
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          organization_id?: string
+          started_at?: string
+          status?: string
+          steps?: Json
+          trigger_summary?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          builder: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          graph: Json
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          name: string
+          organization_id: string
+          run_count: number
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          builder?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          graph?: Json
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name: string
+          organization_id: string
+          run_count?: number
+          trigger_event?: string
+          updated_at?: string
+        }
+        Update: {
+          builder?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          graph?: Json
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          name?: string
+          organization_id?: string
+          run_count?: number
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
