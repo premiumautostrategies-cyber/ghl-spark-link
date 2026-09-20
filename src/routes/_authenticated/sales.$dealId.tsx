@@ -1134,7 +1134,6 @@ function ServicePicker({
   return (
     <div className="min-w-0">
       <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-2">
-        <PickPill label="All" active={cat === "all"} onClick={() => setCat("all")} />
         {categories.map((c) => (
           <PickPill
             key={c.id}
