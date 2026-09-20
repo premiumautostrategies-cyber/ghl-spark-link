@@ -28,7 +28,7 @@ export function CoverageVisual({
   covered: string[];
   accent?: string | null;
   className?: string;
-  onToggle?: (key: string) => void;
+  onToggle?: ((key: string) => void) | undefined;
 }) {
   const id = useId();
   const colour = accent || "#c99a5b";
