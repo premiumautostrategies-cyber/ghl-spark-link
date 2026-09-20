@@ -12,10 +12,20 @@ import { makeToken } from "@/lib/shop";
 import { Copy, Trash2 } from "lucide-react";
 import { CoverageVisual } from "@/components/coverage-visual";
 import { resolveBodyStyle } from "@/lib/vehicle-library";
-import { PPF_PRESETS, TINT_PRESETS, type CoverageKind } from "@/lib/coverage-presets";
+import {
+  PPF_PRESETS,
+  TINT_PRESETS,
+  resolveCoverage,
+  type CoverageKind,
+} from "@/lib/coverage-presets";
 import { useQuery as useRQ } from "@tanstack/react-query";
 
-type Coverage = { coverage_kind?: string | null; coverage_keys?: string[] | null };
+type Coverage = {
+  coverage_kind?: string | null;
+  coverage_keys?: string[] | null;
+  name?: string | null;
+  description?: string | null;
+};
 
 type Tier = {
   id: string;
@@ -57,25 +67,24 @@ const COVERAGE_OPTIONS: { value: string; label: string; kind: CoverageKind; keys
 ];
 
 function coverageValue(row: Coverage) {
-  const keys = row.coverage_keys ?? [];
-  const kind = row.coverage_kind === "tint" ? "tint" : row.coverage_kind === "none" ? "none" : "panels";
+  const { kind, keys } = resolveCoverage(row, row.name, row.description);
   if (kind === "none" || keys.length === 0) return "none";
   const hit = COVERAGE_OPTIONS.find(
     (o) => o.kind === kind && o.keys.length === keys.length && o.keys.every((k) => keys.includes(k)),
   );
-  return hit?.value ?? "none";
+  return hit?.value ?? "auto";
 }
 
 const presetPanels = (name: string) => PPF_PRESETS.find((p) => p.name === name)?.panels ?? [];
 const presetWindows = (name: string) => TINT_PRESETS.find((p) => p.name === name)?.windows ?? [];
 
 const DEFAULT_ADDONS = [
-  { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
-  { name: "Glass coating", description: "Windshield and side glass", price: 250, labor_hours: 2, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Ceramic boost topper", description: "Hydrophobic topper over the film", price: 350, labor_hours: 1.5, film_feet: 0, coverage_kind: "panels", coverage_keys: presetPanels("Full body") },
+  { name: "Glass coating", description: "Windshield and side glass", price: 250, labor_hours: 2, film_feet: 0, coverage_kind: "panels", coverage_keys: ["windshield", "rear_glass"] as string[] },
   { name: "Wheel face protection", description: "Coating on all four faces", price: 300, labor_hours: 2, film_feet: 0, coverage_kind: "none", coverage_keys: [] as string[] },
   { name: "Two front windows tinted", description: "Match the rears already on the car", price: 180, labor_hours: 1, film_feet: 0, coverage_kind: "tint", coverage_keys: presetWindows("Two front windows") },
   { name: "Full vehicle tint", description: "Ceramic IR film on all side and rear glass", price: 595, labor_hours: 3, film_feet: 0, coverage_kind: "tint", coverage_keys: presetWindows("Full vehicle") },
-  { name: "Windshield defense film", description: "Impact-resistant clear film", price: 795, labor_hours: 2.5, film_feet: 6, coverage_kind: "none", coverage_keys: [] as string[] },
+  { name: "Windshield defense film", description: "Impact-resistant clear film", price: 795, labor_hours: 2.5, film_feet: 6, coverage_kind: "panels", coverage_keys: ["windshield"] as string[] },
 ];
 
 export function DealProposal({
@@ -498,18 +507,31 @@ function CoveragePicker({
   compact?: boolean;
 }) {
   const value = coverageValue(row);
-  const opt = COVERAGE_OPTIONS.find((o) => o.value === value) ?? COVERAGE_OPTIONS[0]!;
+  const auto = resolveCoverage(row, row.name, row.description);
+  const options =
+    value === "auto"
+      ? [
+          {
+            value: "auto",
+            label: "Matched to the description",
+            kind: auto.kind,
+            keys: auto.keys,
+          },
+          ...COVERAGE_OPTIONS,
+        ]
+      : COVERAGE_OPTIONS;
+  const opt = options.find((o) => o.value === value) ?? options[0]!;
   return (
     <div className={compact ? "flex items-center gap-2" : "mt-2 space-y-1.5"}>
       <select
         value={value}
         onChange={(e) => {
-          const next = COVERAGE_OPTIONS.find((o) => o.value === e.target.value)!;
+          const next = options.find((o) => o.value === e.target.value)!;
           onChange({ coverage_kind: next.kind, coverage_keys: next.keys });
         }}
         className="h-7 w-full rounded-lg border border-elevated bg-surface px-2 text-[11px] text-foreground"
       >
-        {COVERAGE_OPTIONS.map((o) => (
+        {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
           </option>

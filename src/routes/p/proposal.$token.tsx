@@ -11,7 +11,12 @@ import { toast } from "sonner";
 import { CoverageVisual } from "@/components/coverage-visual";
 import { resolveBodyStyle } from "@/lib/vehicle-library";
 import { BODY_LABELS, type BodyStyle } from "@/lib/vehicle-art";
-import { coverageItemLabels, coverageLabel, type CoverageKind } from "@/lib/coverage-presets";
+import {
+  coverageItemLabels,
+  coverageLabel,
+  resolveCoverage,
+  type CoverageKind,
+} from "@/lib/coverage-presets";
 
 export const Route = createFileRoute("/p/proposal/$token")({
   head: () => ({
@@ -39,10 +44,6 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 type Covered = { coverage_kind?: string | null; coverage_keys?: string[] | null };
-
-const kindOf = (r: Covered): CoverageKind =>
-  r.coverage_kind === "tint" ? "tint" : r.coverage_kind === "none" ? "none" : "panels";
-const keysOf = (r: Covered) => r.coverage_keys ?? [];
 
 function ProposalPage() {
   const data = Route.useLoaderData();
@@ -141,8 +142,12 @@ function ProposalPage() {
             <div className="grid gap-3 sm:grid-cols-3">
               {tiers.map((t) => {
                 const active = t.id === tierId;
-                const kind = kindOf(t as Covered);
-                const keys = keysOf(t as Covered);
+                const { kind, keys } = resolveCoverage(
+                  t as Covered,
+                  t.name,
+                  t.description,
+                  (t.includes ?? []).join(" "),
+                );
                 return (
                   <div
                     key={t.id}
@@ -217,8 +222,7 @@ function ProposalPage() {
               <div className="space-y-2">
                 {addons.map((a) => {
                   const active = addonIds.includes(a.id);
-                  const kind = kindOf(a as Covered);
-                  const keys = keysOf(a as Covered);
+                  const { kind, keys } = resolveCoverage(a as Covered, a.name, a.description);
                   return (
                     <button
                       key={a.id}
@@ -238,12 +242,13 @@ function ProposalPage() {
                         {active && <Check className="h-3.5 w-3.5" />}
                       </span>
                       {kind !== "none" && keys.length > 0 && (
-                        <span className="hidden w-20 shrink-0 sm:block">
+                        <span className="hidden w-14 shrink-0 sm:block">
                           <CoverageVisual
                             kind={kind === "tint" ? "tint" : "panels"}
                             body={body}
                             covered={keys}
                             accent={accent}
+                            className="max-h-14"
                           />
                         </span>
                       )}
