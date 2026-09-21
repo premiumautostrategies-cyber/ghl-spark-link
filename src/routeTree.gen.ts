@@ -28,6 +28,7 @@ import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authent
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedKioskRouteImport } from './routes/_authenticated/kiosk'
+import { Route as AuthenticatedMobileRouteImport } from './routes/_authenticated/mobile'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedQcRouteImport } from './routes/_authenticated/qc'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
@@ -143,6 +144,11 @@ const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
 const AuthenticatedKioskRoute = AuthenticatedKioskRouteImport.update({
   id: '/kiosk',
   path: '/kiosk',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMobileRoute = AuthenticatedMobileRouteImport.update({
+  id: '/mobile',
+  path: '/mobile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/kiosk': typeof AuthenticatedKioskRoute
+  '/mobile': typeof AuthenticatedMobileRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/qc': typeof AuthenticatedQcRoute
   '/schedule': typeof AuthenticatedScheduleRoute
@@ -302,6 +309,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof AuthenticatedInventoryRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/kiosk': typeof AuthenticatedKioskRoute
+  '/mobile': typeof AuthenticatedMobileRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/qc': typeof AuthenticatedQcRoute
   '/schedule': typeof AuthenticatedScheduleRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRoute
   '/_authenticated/kiosk': typeof AuthenticatedKioskRoute
+  '/_authenticated/mobile': typeof AuthenticatedMobileRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/qc': typeof AuthenticatedQcRoute
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/jobs'
     | '/kiosk'
+    | '/mobile'
     | '/payments'
     | '/qc'
     | '/schedule'
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/jobs'
     | '/kiosk'
+    | '/mobile'
     | '/payments'
     | '/qc'
     | '/schedule'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory'
     | '/_authenticated/jobs'
     | '/_authenticated/kiosk'
+    | '/_authenticated/mobile'
     | '/_authenticated/payments'
     | '/_authenticated/qc'
     | '/_authenticated/schedule'
@@ -638,6 +650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedKioskRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mobile': {
+      id: '/_authenticated/mobile'
+      path: '/mobile'
+      fullPath: '/mobile'
+      preLoaderRoute: typeof AuthenticatedMobileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/payments': {
       id: '/_authenticated/payments'
       path: '/payments'
@@ -786,6 +805,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
   AuthenticatedKioskRoute: typeof AuthenticatedKioskRoute
+  AuthenticatedMobileRoute: typeof AuthenticatedMobileRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedQcRoute: typeof AuthenticatedQcRoute
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
@@ -811,6 +831,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRoute,
   AuthenticatedKioskRoute: AuthenticatedKioskRoute,
+  AuthenticatedMobileRoute: AuthenticatedMobileRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedQcRoute: AuthenticatedQcRoute,
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
