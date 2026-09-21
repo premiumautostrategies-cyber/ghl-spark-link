@@ -3860,6 +3860,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_user_workspace: {
+        Args: { _full_name?: string; _shop_name?: string }
+        Returns: string
+      }
       has_organization_permission: {
         Args: {
           _organization_id: string
