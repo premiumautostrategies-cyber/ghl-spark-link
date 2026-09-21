@@ -62,7 +62,6 @@ function AuthPage() {
       // Make sure the shop workspace exists before entering the app.
       await supabase.rpc("bootstrap_user_workspace", {
         _shop_name: shopName || "My shop",
-        _full_name: null,
       });
       navigate({ to: "/command-center", replace: true });
     } catch (err) {
