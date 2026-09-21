@@ -1775,6 +1775,51 @@ export type Database = {
           },
         ]
       }
+      lead_events: {
+        Row: {
+          actor: string
+          created_at: string
+          deal_id: string
+          detail: string | null
+          id: string
+          kind: string
+          organization_id: string
+        }
+        Insert: {
+          actor?: string
+          created_at?: string
+          deal_id: string
+          detail?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          deal_id?: string
+          detail?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_events_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           address: string | null
