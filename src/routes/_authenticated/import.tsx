@@ -254,7 +254,7 @@ function ImportPage() {
                 color: r['color'] ?? null,
                 plate: r['plate'] ?? null,
                 vin: r['vin'] ?? null,
-                notes: r['notes'] ?? null,
+                location_id: locId,
               });
               if (error) throw error;
             } else {
