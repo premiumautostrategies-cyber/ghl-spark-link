@@ -26,6 +26,7 @@ import {
   ScanLine,
   ShieldCheck,
   Tablet,
+  Upload,
   Wrench,
 } from "lucide-react";
 
@@ -60,7 +61,8 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { to: "/inventory", label: "Stock", icon: Package },
       { to: "/warranty", label: "Warranty & Aftercare", icon: ShieldCheck },
       { to: "/analytics", label: "Reports", icon: BarChart3 },
-      { to: "/automations", label: "Automations", icon: Bot },
+      { to: "/automations", label: "Workflows", icon: Bot },
+      { to: "/import", label: "Data Import", icon: Upload },
       { to: "/integrations", label: "Integrations", icon: Plug },
       { to: "/settings", label: "Settings", icon: Settings },
     ],

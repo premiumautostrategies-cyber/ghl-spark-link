@@ -54,3 +54,6 @@
 
 ## Verified end to end (Sep 19)
 Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay booking -> inspection -> phase timers -> QC gate/key release -> warranty certificate -> aftercare cadence. Fixed: warranty certificate dates on the customer page showed a time instead of the coverage year.
+
+- [x] Workflow engine (visual canvas, step-by-step builder, preview runs, starter recipes)
+- [x] CSV data import with AI column matching
