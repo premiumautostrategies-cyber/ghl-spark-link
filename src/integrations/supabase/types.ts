@@ -1613,6 +1613,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          arrival_window: string | null
           bay: string | null
           bay_id: string | null
           created_at: string
@@ -1624,6 +1625,7 @@ export type Database = {
           film_feet_estimate: number
           id: string
           installer: string | null
+          is_mobile: boolean
           key_released: boolean
           location_id: string | null
           notes: string | null
@@ -1632,16 +1634,23 @@ export type Database = {
           price: number
           qc_status: string
           roll_id: string | null
+          route_id: string | null
           scheduled_end: string | null
           scheduled_start: string | null
+          service_address: string | null
+          service_city: string | null
           service_type: string
+          service_zip: string | null
           status: string
+          stop_order: number | null
           title: string
+          travel_minutes: number
           updated_at: string
           updated_by: string | null
           vehicle_id: string | null
         }
         Insert: {
+          arrival_window?: string | null
           bay?: string | null
           bay_id?: string | null
           created_at?: string
@@ -1653,6 +1662,7 @@ export type Database = {
           film_feet_estimate?: number
           id?: string
           installer?: string | null
+          is_mobile?: boolean
           key_released?: boolean
           location_id?: string | null
           notes?: string | null
@@ -1661,16 +1671,23 @@ export type Database = {
           price?: number
           qc_status?: string
           roll_id?: string | null
+          route_id?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
+          service_address?: string | null
+          service_city?: string | null
           service_type?: string
+          service_zip?: string | null
           status?: string
+          stop_order?: number | null
           title: string
+          travel_minutes?: number
           updated_at?: string
           updated_by?: string | null
           vehicle_id?: string | null
         }
         Update: {
+          arrival_window?: string | null
           bay?: string | null
           bay_id?: string | null
           created_at?: string
@@ -1682,6 +1699,7 @@ export type Database = {
           film_feet_estimate?: number
           id?: string
           installer?: string | null
+          is_mobile?: boolean
           key_released?: boolean
           location_id?: string | null
           notes?: string | null
@@ -1690,11 +1708,17 @@ export type Database = {
           price?: number
           qc_status?: string
           roll_id?: string | null
+          route_id?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
+          service_address?: string | null
+          service_city?: string | null
           service_type?: string
+          service_zip?: string | null
           status?: string
+          stop_order?: number | null
           title?: string
+          travel_minutes?: number
           updated_at?: string
           updated_by?: string | null
           vehicle_id?: string | null
@@ -1733,6 +1757,13 @@ export type Database = {
             columns: ["roll_id"]
             isOneToOne: false
             referencedRelation: "inventory_rolls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_routes"
             referencedColumns: ["id"]
           },
           {
@@ -1936,6 +1967,145 @@ export type Database = {
           },
           {
             foreignKeyName: "messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_routes: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          drive_minutes: number
+          id: string
+          location_id: string | null
+          organization_id: string
+          route_date: string
+          start_time: string
+          status: string
+          summary: string | null
+          unit_id: string | null
+          updated_at: string
+          warnings: string[]
+          work_hours: number
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          drive_minutes?: number
+          id?: string
+          location_id?: string | null
+          organization_id: string
+          route_date: string
+          start_time?: string
+          status?: string
+          summary?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          warnings?: string[]
+          work_hours?: number
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          drive_minutes?: number
+          id?: string
+          location_id?: string | null
+          organization_id?: string
+          route_date?: string
+          start_time?: string
+          status?: string
+          summary?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          warnings?: string[]
+          work_hours?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_routes_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_routes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_routes_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_units: {
+        Row: {
+          active: boolean
+          base_address: string | null
+          capacity_hours: number
+          created_at: string
+          deleted_at: string | null
+          id: string
+          kind: string
+          location_id: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          skills: string[]
+          tech_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_address?: string | null
+          capacity_hours?: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          location_id?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          skills?: string[]
+          tech_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_address?: string | null
+          capacity_hours?: number
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          location_id?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          skills?: string[]
+          tech_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_units_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_units_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
