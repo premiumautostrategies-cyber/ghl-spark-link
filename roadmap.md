@@ -57,3 +57,10 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 
 - [x] Workflow engine (visual canvas, step-by-step builder, preview runs, starter recipes)
 - [x] CSV data import with AI column matching
+
+## Current push (Sep 21)
+- [ ] Installer phone experience (my day, big timers, photo capture) — paused, folded into mobile work
+- [ ] Mobile services: off-site jobs with addresses, service areas, travel time
+- [ ] AI batching + route optimisation for mobile crews (day plan, drive order, gaps)
+- [ ] Inventory rethink — a clear opinionated way to run stock (rolls, consumables, reorder, usage per job)
+- [ ] Investor/developer polish pass: consistent empty states, demo data, no dead ends
