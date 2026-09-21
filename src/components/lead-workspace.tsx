@@ -93,7 +93,7 @@ export function LeadWorkspace({
         .eq("id", deal.id);
       if (error) throw error;
       await supabase.from("lead_events").insert({
-        organization_id: deal.organization_id,
+        organization_id: deal.organization_id!,
         deal_id: deal.id,
         actor: "shop",
         kind: "stage_moved",
@@ -166,7 +166,7 @@ export function LeadWorkspace({
                 )}
                 {signal?.lastCustomerAt && (
                   <span className="text-[11px] text-muted-foreground">
-                    Customer活 {sinceLabel(signal.lastCustomerAt)}
+                    Customer {sinceLabel(signal.lastCustomerAt)}
                   </span>
                 )}
               </div>
