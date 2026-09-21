@@ -57,19 +57,21 @@ function DemoEntry() {
             });
             if (retry.error) throw retry.error;
 
-            setStatus("Loading demo vehicles and jobs…");
-            const profile = await supabase
-              .from("profiles")
-              .select("organization_id,location_id")
-              .maybeSingle();
-            const orgId = profile.data?.organization_id;
-            if (orgId) {
-              const jobs = await supabase
-                .from("jobs")
-                .select("id", { count: "exact", head: true });
-              if (!jobs.count) await seedDemoData(orgId, profile.data?.location_id ?? null);
-            }
           }
+        }
+
+        setStatus("Loading demo vehicles and jobs…");
+        await supabase.rpc("bootstrap_user_workspace", {
+          _shop_name: "Apex Restyling (Demo)",
+        });
+        const profile = await supabase
+          .from("profiles")
+          .select("organization_id,location_id")
+          .maybeSingle();
+        const orgId = profile.data?.organization_id;
+        if (orgId) {
+          const jobs = await supabase.from("jobs").select("id", { count: "exact", head: true });
+          if (!jobs.count) await seedDemoData(orgId, profile.data?.location_id ?? null);
         }
         if (!cancelled) navigate({ to: "/command-center", replace: true });
       } catch {

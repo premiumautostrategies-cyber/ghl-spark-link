@@ -268,9 +268,55 @@ export async function seedDemoData(orgId: string, locId: string | null) {
     { title: "WRX tint refresh", stage: "new_lead", value: 420, probability: 20, source: "Walk-in", customer_id: cid("Travis Coleman"), vehicle_id: vid("TRV-STI"), owner_name: "Dani Ortiz", expected_close: daysFromNow(12).slice(0, 10) },
     { title: "Lakeside Dental second SUV", stage: "contacted", value: 2100, probability: 30, source: "Existing client", customer_id: cid("Lakeside Dental"), owner_name: "Priya Raman", expected_close: daysFromNow(18).slice(0, 10) },
     { title: "Cayman ceramic renewal (lost)", stage: "lost", value: 1650, probability: 0, source: "Existing client", customer_id: cid("Sierra Nakamura"), owner_name: "Priya Raman", notes: "Timing — moving out of state.", expected_close: daysFromNow(-6).slice(0, 10) },
+    { title: "X5 full front PPF + ceramic tint", stage: "scheduled", value: 2195, probability: 90, source: "Website", customer_id: cid("Harper Lin"), owner_name: "Dani Ortiz", expected_close: daysFromNow(4).slice(0, 10), last_activity_at: daysFromNow(0, 8) },
   ].map((d) => ({ ...d, ...org }));
-  const dealRes = await supabase.from("deals").insert(deals);
+  const dealRes = await supabase.from("deals").insert(deals).select("id,title");
   if (dealRes.error) throw dealRes.error;
+
+  // --- Customer activity fingerprints (drives the dynamic pipeline) --------
+  const dealId = (title: string) => dealRes.data?.find((d) => d.title === title)?.id ?? null;
+  const minsAgo = (m: number) => new Date(Date.now() - m * 60000).toISOString();
+  const activity: { title: string; actor: string; kind: string; detail: string; mins: number }[] = [
+    // Live: customer is in the quote right now.
+    { title: "Z06 track protection package", actor: "shop", kind: "quote_sent", detail: "Quote sent by text", mins: 190 },
+    { title: "Z06 track protection package", actor: "customer", kind: "quote_opened", detail: "Opened quote", mins: 41 },
+    { title: "Z06 track protection package", actor: "customer", kind: "quote_reopened", detail: "Reopened quote — Better package", mins: 9 },
+    { title: "Z06 track protection package", actor: "customer", kind: "quote_viewing", detail: "Viewing quote now", mins: 2 },
+    // Unanswered reply today.
+    { title: "Tacoma partial front PPF", actor: "shop", kind: "sms_out", detail: "Sent PPF coverage options", mins: 300 },
+    { title: "Tacoma partial front PPF", actor: "customer", kind: "sms_in", detail: "Asked if it covers the mirrors", mins: 52 },
+    // Warm: opened the scheduling link yesterday.
+    { title: "Southside fleet wrap program", actor: "shop", kind: "quote_sent", detail: "Fleet quote sent", mins: 3400 },
+    { title: "Southside fleet wrap program", actor: "customer", kind: "quote_opened", detail: "Opened quote", mins: 2600 },
+    { title: "Southside fleet wrap program", actor: "customer", kind: "link_opened", detail: "Opened scheduling link", mins: 2580 },
+    // Cooling.
+    { title: "Queen City Electric graphics refresh", actor: "shop", kind: "sms_out", detail: "Follow-up on the graphics proof", mins: 9000 },
+    { title: "Queen City Electric graphics refresh", actor: "customer", kind: "sms_in", detail: "Waiting on their board to approve", mins: 6000 },
+    // Dormant.
+    { title: "Wrangler full PPF", actor: "customer", kind: "sms_in", detail: "Asked for a ballpark on full body PPF", mins: 44000 },
+    // Active today from a web form.
+    { title: "Lakeside Dental second SUV", actor: "customer", kind: "form_completed", detail: "Completed website estimate form", mins: 780 },
+    { title: "Lakeside Dental second SUV", actor: "customer", kind: "call_in", detail: "Called the shop", mins: 400 },
+    // Closed the loop: deposit paid, install booked.
+    { title: "X5 full front PPF + ceramic tint", actor: "shop", kind: "quote_sent", detail: "Good / Better / Best sent", mins: 2600 },
+    { title: "X5 full front PPF + ceramic tint", actor: "customer", kind: "quote_accepted", detail: "Accepted the Better package", mins: 700 },
+    { title: "X5 full front PPF + ceramic tint", actor: "customer", kind: "deposit_paid", detail: "Deposit paid — $650", mins: 690 },
+    { title: "X5 full front PPF + ceramic tint", actor: "customer", kind: "appointment_requested", detail: "Booked Thursday 8am", mins: 660 },
+  ];
+  const leadEvents = activity
+    .map((a) => ({
+      organization_id: orgId,
+      deal_id: dealId(a.title),
+      actor: a.actor,
+      kind: a.kind,
+      detail: a.detail,
+      created_at: minsAgo(a.mins),
+    }))
+    .filter((a): a is typeof a & { deal_id: string } => Boolean(a.deal_id));
+  if (leadEvents.length) {
+    const evRes = await supabase.from("lead_events").insert(leadEvents);
+    if (evRes.error) throw evRes.error;
+  }
 
   // --- Payments -----------------------------------------------------------
   const payments = [

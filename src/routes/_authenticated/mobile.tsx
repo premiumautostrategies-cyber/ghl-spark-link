@@ -406,7 +406,7 @@ function MobilePage() {
                 <Panel key={r.id}>
                   <SectionTitle
                     title={unit?.name ?? "Crew"}
-                    hint={r.summary ?? undefined}
+                    {...(r.summary ? { hint: r.summary } : {})}
                     right={
                       <div className="flex items-center gap-2">
                         <Tag tone="rig">{stops.length} stops</Tag>

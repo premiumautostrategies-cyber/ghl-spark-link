@@ -66,6 +66,7 @@
   --color-urgent: var(--urgent);
   --color-comms: var(--comms);
   --color-rig: var(--rig);
+  --color-heat: var(--heat);
   --shadow-lux: 0 24px 60px -20px oklch(0 0 0 / 0.75);
   --shadow-glow: 0 0 0 1px oklch(0.775 0.075 70 / 0.25), 0 18px 40px -18px oklch(0.775 0.075 70 / 0.35);
 }
@@ -88,6 +89,7 @@
   --urgent: oklch(0.88 0.185 97);
   --comms: oklch(0.63 0.21 258);
   --rig: oklch(0.81 0.115 220);
+  --heat: oklch(0.76 0.17 52);
 
   --background: var(--obsidian);
   --foreground: oklch(0.97 0.003 260);

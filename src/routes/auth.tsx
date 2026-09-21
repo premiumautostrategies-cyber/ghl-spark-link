@@ -59,6 +59,10 @@ function AuthPage() {
           if (retry.error) throw retry.error;
         }
       }
+      // Make sure the shop workspace exists before entering the app.
+      await supabase.rpc("bootstrap_user_workspace", {
+        _shop_name: shopName || "My shop",
+      });
       navigate({ to: "/command-center", replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
