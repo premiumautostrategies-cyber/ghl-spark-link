@@ -4,17 +4,7 @@ import { z } from "zod";
 export const IMPORT_TARGETS = {
   customers: {
     label: "Customers",
-    fields: [
-      "name",
-      "email",
-      "phone",
-      "company",
-      "address",
-      "city",
-      "state",
-      "postal_code",
-      "notes",
-    ],
+    fields: ["name", "email", "phone", "company", "notes"],
   },
   vehicles: {
     label: "Vehicles",
