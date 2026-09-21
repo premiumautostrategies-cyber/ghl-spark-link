@@ -26,6 +26,7 @@ import {
   ScanLine,
   ShieldCheck,
   Tablet,
+  Upload,
   Wrench,
 } from "lucide-react";
 
