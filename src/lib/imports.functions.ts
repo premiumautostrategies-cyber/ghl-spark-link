@@ -8,7 +8,7 @@ export const IMPORT_TARGETS = {
   },
   vehicles: {
     label: "Vehicles",
-    fields: ["customer_name", "year", "make", "model", "color", "plate", "vin", "notes"],
+    fields: ["customer_name", "year", "make", "model", "color", "plate", "vin"],
   },
   deals: {
     label: "Leads & quotes",

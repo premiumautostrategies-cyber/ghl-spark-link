@@ -8,7 +8,6 @@ import { useOrg } from "@/lib/use-org";
 import { EmptyState, PageHeader, StatCard } from "@/components/page-header";
 import { Panel, SectionTitle, Tag } from "@/components/os-ui";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -479,8 +478,6 @@ function ImportPage() {
           )}
         </div>
       </Panel>
-
-      <Input className="hidden" readOnly value="" aria-hidden />
     </div>
   );
 }
