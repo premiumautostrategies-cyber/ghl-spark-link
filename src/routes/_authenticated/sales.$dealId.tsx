@@ -965,9 +965,14 @@ function DealDesk() {
                 <Label htmlFor="p-ref" className="text-xs">Reference</Label>
                 <Input id="p-ref" name="reference" placeholder="Auth code" />
               </div>
-              <Button type="submit" className="sm:col-span-2" disabled={takePayment.isPending}>
-                Record payment
-              </Button>
+              <div className="sm:col-span-2 space-y-2">
+                <Button type="submit" className="w-full" disabled={takePayment.isPending}>
+                  Record money already received
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  This records a payment you've already taken — nothing is charged here.
+                </p>
+              </div>
             </form>
             {payments.length > 0 && (
               <div className="space-y-1.5 border-t border-elevated p-4 pt-3">
@@ -982,6 +987,45 @@ function DealDesk() {
               </div>
             )}
           </Panel>
+
+          {/* Delivery handoff */}
+          <Panel>
+            <SectionTitle
+              title="Delivery handoff"
+              hint={
+                job?.qc_status === "passed"
+                  ? `QC passed · ${money(balance)} outstanding`
+                  : "Available once QC passes the vehicle."
+              }
+            />
+            <div className="space-y-2 border-t border-elevated p-4">
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={job?.qc_status !== "passed" || deliver.isPending}
+                onClick={() => deliver.mutate("ready")}
+              >
+                Tell the customer it's ready
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={job?.qc_status !== "passed" || deliver.isPending}
+                onClick={() => deliver.mutate("delivered")}
+              >
+                {balance > 0 ? `Mark delivered (${money(balance)} due)` : "Mark delivered"}
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                disabled={job?.qc_status !== "passed" || deliver.isPending}
+                onClick={() => deliver.mutate("review")}
+              >
+                Send review request
+              </Button>
+            </div>
+          </Panel>
+
 
           {/* Client hub documents */}
           <Panel>
