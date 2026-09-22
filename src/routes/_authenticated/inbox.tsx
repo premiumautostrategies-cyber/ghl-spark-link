@@ -7,10 +7,10 @@ import { LeadWorkspace } from "@/components/lead-workspace";
 export const Route = createFileRoute("/_authenticated/inbox")({
   head: () => ({
     meta: [
-      { title: "Sales Inbox — Systemize" },
-      { name: "description", content: "Customer conversations with vehicle and opportunity context." },
-      { property: "og:title", content: "Sales Inbox — Systemize" },
-      { property: "og:description", content: "Customer conversations with vehicle and opportunity context." },
+      { title: "Messages — Systemize" },
+      { name: "description", content: "Customer context, conversations and quotes in one workspace." },
+      { property: "og:title", content: "Messages — Systemize" },
+      { property: "og:description", content: "Customer context, conversations and quotes in one workspace." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -22,7 +22,7 @@ function SalesInboxPage() {
   const [openDealId, setOpenDealId] = useState<string | null>(null);
   return (
     <div className="min-w-0 space-y-5">
-      <PageHeader title="Sales Inbox" subtitle="Customer conversations with the opportunity context needed to act." />
+      <PageHeader title="Messages" subtitle="Customer history, conversation and quoting in one workspace." />
       <SalesInbox onOpenRecord={setOpenDealId} />
       <LeadWorkspace dealId={openDealId} onClose={() => setOpenDealId(null)} />
     </div>

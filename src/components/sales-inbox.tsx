@@ -1,26 +1,31 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { CalendarClock, Car, ExternalLink, Search, UserRound } from "lucide-react";
+import { Car, ChevronDown, Clock3, ExternalLink, Mail, Phone, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DealComms } from "@/components/deal-comms";
+import { InboxQuoteBuilder } from "@/components/inbox-quote-builder";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { money } from "@/lib/format";
+import { money, shortDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { leadSignal, sinceLabel, stageLabel, TEMP_META, type LeadEvent } from "@/lib/pipeline";
+import { clockTime, eventLabel, leadSignal, sinceLabel, stageLabel, TEMP_META, type LeadEvent } from "@/lib/pipeline";
 
 type InboxDeal = {
   id: string;
   customer_id: string | null;
+  vehicle_id: string | null;
+  estimate_id: string | null;
   title: string;
   stage: string;
   value: number | string;
+  service_tags: string[];
   created_at: string;
   speed_to_lead_at: string | null;
   last_activity_at: string | null;
-  customers: { id: string; name: string; phone: string | null; email: string | null } | null;
-  vehicles: { id: string; year: number | null; make: string | null; model: string | null } | null;
+  customers: { id: string; name: string; phone: string | null; email: string | null; company: string | null; notes: string | null; created_at: string } | null;
+  vehicles: { id: string; year: number | null; make: string | null; model: string | null; color: string | null; plate: string | null } | null;
 };
 
 type InboxMessage = { id: string; deal_id: string; body: string; direction: string; channel: string; sent_at: string };
@@ -32,7 +37,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const { data: deals = [] } = useQuery({
     queryKey: ["sales-inbox-deals"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("deals").select("id,customer_id,title,stage,value,created_at,speed_to_lead_at,last_activity_at,customers(id,name,phone,email),vehicles(id,year,make,model)").not("stage", "in", "(won,lost)").order("last_activity_at", { ascending: false, nullsFirst: false });
+      const { data, error } = await supabase.from("deals").select("id,customer_id,vehicle_id,estimate_id,title,stage,value,service_tags,created_at,speed_to_lead_at,last_activity_at,customers(id,name,phone,email,company,notes,created_at),vehicles(id,year,make,model,color,plate)").not("stage", "in", "(won,lost)").order("last_activity_at", { ascending: false, nullsFirst: false });
       if (error) throw error;
       return data as unknown as InboxDeal[];
     },
@@ -62,58 +67,56 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
       const thread = messages.filter((message) => message.deal_id === deal.id);
       const dealEvents = events.filter((event) => event.deal_id === deal.id);
       const latestMessage = thread[0] ?? null;
-      const latestEvent = dealEvents[0] ?? null;
       const signal = leadSignal(deal, dealEvents);
-      const latestAt = latestMessage?.sent_at ?? latestEvent?.created_at ?? deal.last_activity_at ?? deal.created_at;
-      const preview = latestMessage?.body ?? latestEvent?.detail ?? signal.focusReason ?? deal.title;
-      return { deal, latestAt, preview, signal, unread: latestMessage?.direction === "in" || signal.awaitingReply };
-    }).filter(({ deal, preview }) => !query || [deal.customers?.name, deal.title, preview, deal.vehicles ? `${deal.vehicles.year ?? ""} ${deal.vehicles.make ?? ""} ${deal.vehicles.model ?? ""}` : ""].filter(Boolean).join(" ").toLowerCase().includes(query)).sort((a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime());
+      const latestAt = latestMessage?.sent_at ?? dealEvents[0]?.created_at ?? deal.last_activity_at ?? deal.created_at;
+      return { deal, signal, latestAt, preview: latestMessage?.body ?? dealEvents[0]?.detail ?? deal.title };
+    }).filter(({ deal, preview }) => !query || [deal.customers?.name, deal.customers?.phone, deal.customers?.email, deal.title, preview].filter(Boolean).join(" ").toLowerCase().includes(query));
   }, [deals, events, messages, search]);
 
   const selected = rows.find((row) => row.deal.id === selectedId) ?? rows[0] ?? null;
   const deal = selected?.deal ?? null;
+  const history = deal ? [...events.filter((event) => event.deal_id === deal.id), ...messages.filter((message) => message.deal_id === deal.id).map((message) => ({ id: message.id, deal_id: message.deal_id, actor: message.direction === "in" ? "customer" : "shop", kind: message.channel, detail: message.body, created_at: message.sent_at }))].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) : [];
   const vehicle = deal?.vehicles ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ") : "No vehicle on file";
 
-  const { data: proposal } = useQuery({
-    queryKey: ["sales-inbox-proposal", deal?.id],
-    enabled: Boolean(deal?.id),
-    queryFn: async () => {
-      if (!deal?.id) return null;
-      const { data, error } = await supabase.from("proposals").select("id,token").eq("deal_id", deal.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
-
   return (
-    <div className="grid min-h-[680px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[296px_minmax(420px,1fr)_260px]">
-      <aside className="flex min-h-0 flex-col border-b border-elevated bg-background/30 xl:border-b-0 xl:border-r">
+    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface 2xl:h-[calc(100vh-12rem)] 2xl:grid-cols-[300px_minmax(390px,1fr)_360px]">
+      <aside className="flex min-h-0 flex-col border-b border-elevated bg-background/25 2xl:border-b-0 2xl:border-r">
         <div className="space-y-3 border-b border-elevated p-4">
-          <div className="flex items-center justify-between"><h2 className="text-base font-semibold">Inbox</h2><span className="text-xs tabular-nums text-muted-foreground">{rows.length} open</span></div>
-          <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search conversations" className="pl-9" /></div>
+          <div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Customer</h2><span className="text-xs text-muted-foreground">{rows.length} conversations</span></div>
+          <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find customer" className="pl-9" /></div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button variant="secondary" className="w-full justify-between"><span className="truncate">{deal?.customers?.name ?? "Select a conversation"}</span><ChevronDown className="size-4" /></Button></DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="max-h-80 w-[268px] overflow-y-auto">
+              {rows.map((row) => <DropdownMenuItem key={row.deal.id} onSelect={() => setSelectedId(row.deal.id)} className="items-start gap-2 py-2.5"><span className={cn("mt-1.5 size-2 shrink-0 rounded-full", TEMP_META[row.signal.temperature].dot)} /><span className="min-w-0"><span className="block truncate text-sm font-medium">{row.deal.customers?.name ?? "No customer"}</span><span className="block truncate text-xs text-muted-foreground">{row.preview} · {sinceLabel(row.latestAt)}</span></span></DropdownMenuItem>)}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {rows.map((row) => {
-            const active = row.deal.id === deal?.id;
-            return <button key={row.deal.id} type="button" onClick={() => setSelectedId(row.deal.id)} className={cn("relative block w-full border-b border-elevated px-4 py-3 text-left transition-colors hover:bg-surface-2", active && "bg-surface-2", row.unread && "before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-bronze")}>
-              <div className="flex items-start gap-2"><span className={cn("mt-1.5 size-2 shrink-0 rounded-full", TEMP_META[row.signal.temperature].dot)} /><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><p className={cn("truncate text-sm", row.unread ? "font-semibold" : "font-medium")}>{row.deal.customers?.name ?? "No customer"}</p><span className="shrink-0 text-[11px] text-muted-foreground">{sinceLabel(row.latestAt)}</span></div><p className="mt-1 truncate text-xs text-muted-foreground">{row.preview}</p><p className="mt-1 truncate text-[11px] text-muted-foreground/70">{row.deal.title}</p></div></div>
-            </button>;
-          })}
-          {rows.length === 0 && <p className="p-5 text-sm text-muted-foreground">No matching conversations.</p>}
-        </div>
+
+        {deal ? <div className="min-h-0 flex-1 overflow-y-auto">
+          <section className="space-y-3 border-b border-elevated p-4">
+            <div className="flex items-start gap-3"><div className="grid size-10 shrink-0 place-items-center rounded-lg bg-bronze/10 text-sm font-semibold text-bronze">{(deal.customers?.name ?? "?").split(" ").map((part) => part[0]).join("").slice(0, 2)}</div><div className="min-w-0"><h3 className="truncate text-base font-semibold">{deal.customers?.name}</h3><p className="text-xs text-muted-foreground">Customer since {shortDate(deal.customers?.created_at)}</p></div></div>
+            <div className="space-y-1.5 text-xs text-muted-foreground">{deal.customers?.phone && <p className="flex items-center gap-2"><Phone className="size-3.5" />{deal.customers.phone}</p>}{deal.customers?.email && <p className="flex items-center gap-2"><Mail className="size-3.5" />{deal.customers.email}</p>}</div>
+            <Button size="sm" variant="secondary" className="w-full" onClick={() => onOpenRecord(deal.id)}><UserRound className="mr-1.5 size-3.5" />Full customer record</Button>
+          </section>
+          <section className="space-y-3 border-b border-elevated p-4">
+            <Context icon={Car} label="Vehicle" value={vehicle} detail={[deal.vehicles?.color, deal.vehicles?.plate].filter(Boolean).join(" · ")} />
+            <Context label="Opportunity" value={deal.title} detail={`${stageLabel(deal.stage)} · ${money(deal.value)}`} />
+            <div><p className="micro-label mb-2">Tags</p><div className="flex flex-wrap gap-1.5">{deal.service_tags.length ? deal.service_tags.map((tag) => <span key={tag} className="rounded-full border border-elevated bg-surface-2 px-2 py-1 text-[11px] text-muted-foreground">{tag}</span>) : <span className="text-xs text-muted-foreground">No tags</span>}</div></div>
+            {deal.customers?.notes && <div><p className="micro-label mb-1">Notes</p><p className="text-xs leading-5 text-muted-foreground">{deal.customers.notes}</p></div>}
+          </section>
+          <section className="p-4"><div className="mb-3 flex items-center justify-between"><p className="micro-label">History</p><Button asChild size="sm" variant="ghost" className="h-7 px-2"><Link to="/sales/$dealId" params={{ dealId: deal.id }}>Full deal <ExternalLink className="ml-1 size-3" /></Link></Button></div>{history.length ? <ol className="space-y-0">{history.slice(0, 14).map((item, index) => <li key={`${item.kind}-${item.id}`} className="relative grid grid-cols-[10px_1fr] gap-2 pb-4 last:pb-0"><span className={cn("mt-1.5 size-2 rounded-full", item.actor === "customer" ? "bg-bronze" : "bg-muted-foreground/50")} />{index < Math.min(history.length, 14) - 1 && <span className="absolute bottom-0 left-[3px] top-3 w-px bg-elevated" />}<div className="min-w-0"><p className="line-clamp-2 text-xs leading-5">{"body" in item ? item.detail : eventLabel(item)}</p><p className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground"><Clock3 className="size-3" />{clockTime(item.created_at)}</p></div></li>)}</ol> : <p className="text-xs text-muted-foreground">No history yet.</p>}</section>
+        </div> : <p className="p-5 text-sm text-muted-foreground">No conversations found.</p>}
       </aside>
 
-      <section className="flex min-h-[620px] min-w-0 flex-col border-b border-elevated xl:min-h-0 xl:border-b-0">
-        {deal ? <><header className="flex min-h-16 items-center justify-between gap-3 border-b border-elevated px-5 py-3"><div className="min-w-0"><h3 className="truncate text-sm font-semibold">{deal.customers?.name ?? "No customer"}</h3><p className="truncate text-xs text-muted-foreground">{vehicle} · {deal.title}</p></div><div className="flex shrink-0 gap-2"><Button size="sm" variant="secondary" asChild><Link to="/calendar"><CalendarClock className="mr-1.5 size-3.5" />Schedule</Link></Button>{proposal && <Button size="sm" asChild><a href={`/p/proposal/${proposal.token}`} target="_blank" rel="noreferrer"><ExternalLink className="mr-1.5 size-3.5" />Quote</a></Button>}</div></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name ?? null} variant="inbox" /></> : <div className="grid flex-1 place-items-center p-6 text-sm text-muted-foreground">Select a conversation.</div>}
+      <section className="flex min-h-[620px] min-w-0 flex-col border-b border-elevated 2xl:min-h-0 2xl:border-b-0 2xl:border-r">
+        {deal ? <><header className="border-b border-elevated px-5 py-3"><h2 className="text-sm font-semibold">Conversation</h2><p className="truncate text-xs text-muted-foreground">Text and email with {deal.customers?.name}</p></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name} variant="inbox" channels={["sms", "email"]} /></> : <div className="grid flex-1 place-items-center text-sm text-muted-foreground">Select a customer.</div>}
       </section>
 
-      <aside className="min-h-0 overflow-y-auto bg-background/20">
-        {deal && <><div className="border-b border-elevated p-5"><div className="mb-3 grid size-10 place-items-center rounded-xl bg-bronze/10 text-sm font-semibold text-bronze">{(deal.customers?.name ?? "?").split(" ").map((part) => part[0]).join("").slice(0, 2)}</div><h3 className="text-base font-semibold">{deal.customers?.name ?? "No customer"}</h3><p className="mt-1 text-xs text-muted-foreground">{deal.customers?.phone ?? "No phone"}</p><p className="text-xs text-muted-foreground">{deal.customers?.email ?? "No email"}</p></div><div className="space-y-4 border-b border-elevated p-5"><Context label="Vehicle" value={vehicle} /><Context label="Service" value={deal.title} /><Context label="Opportunity" value={money(deal.value)} /><Context label="Stage" value={stageLabel(deal.stage)} /></div><div className="grid grid-cols-2 gap-2 p-5">{proposal && <Button size="sm" variant="secondary" asChild><a href={`/p/proposal/${proposal.token}`} target="_blank" rel="noreferrer"><ExternalLink className="mr-1.5 size-3.5" />Quote</a></Button>}<Button size="sm" variant="secondary" asChild><Link to="/calendar"><CalendarClock className="mr-1.5 size-3.5" />Appointment</Link></Button><Button size="sm" variant="secondary" onClick={() => onOpenRecord(deal.id)}><UserRound className="mr-1.5 size-3.5" />Customer</Button><Button size="sm" variant="secondary" onClick={() => onOpenRecord(deal.id)}><Car className="mr-1.5 size-3.5" />Vehicle</Button></div></>}
-      </aside>
+      <aside className="min-h-[680px] bg-background/15 2xl:min-h-0">{deal ? <InboxQuoteBuilder key={deal.id} deal={deal} /> : null}</aside>
     </div>
   );
 }
 
-function Context({ label, value }: { label: string; value: string }) {
-  return <div><p className="micro-label">{label}</p><p className="mt-1 text-sm font-medium">{value}</p></div>;
+function Context({ icon: Icon, label, value, detail }: { icon?: typeof Car; label: string; value: string; detail?: string }) {
+  return <div className="flex gap-2">{Icon && <Icon className="mt-0.5 size-4 shrink-0 text-bronze" />}<div className="min-w-0"><p className="micro-label">{label}</p><p className="mt-1 text-sm font-medium">{value}</p>{detail && <p className="text-xs text-muted-foreground">{detail}</p>}</div></div>;
 }

@@ -31,16 +31,21 @@ export function DealComms({
   customerId,
   customerName,
   variant = "panel",
+  channels,
 }: {
   dealId: string;
   customerId: string | null;
   customerName?: string | null;
   variant?: "panel" | "inbox";
+  channels?: Array<(typeof CHANNELS)[number]["key"]>;
 }) {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
   const [channel, setChannel] = useState<string>("sms");
   const [body, setBody] = useState("");
+  const visibleChannels = channels
+    ? CHANNELS.filter((item) => channels.includes(item.key))
+    : CHANNELS;
 
   const { data: messages = [] } = useQuery({
     queryKey: ["deal-messages", dealId],
@@ -126,7 +131,7 @@ export function DealComms({
         </div>
 
         <div className={cn("flex flex-wrap gap-1.5", variant === "inbox" ? "border-t border-elevated px-4 pt-3" : "mt-3")}>
-          {CHANNELS.map((c) => (
+          {visibleChannels.map((c) => (
             <button
               key={c.key}
               type="button"

@@ -15,7 +15,7 @@ import {
   CreditCard,
   FileInput,
   FileText,
-  GalleryVerticalEnd,
+  MessageSquareText,
   Layers3,
   LogOut,
   Package,
@@ -98,7 +98,7 @@ const SALES: NavSection = {
   icon: BriefcaseBusiness,
   items: [
     { to: "/sales", label: "Pipeline", icon: BriefcaseBusiness },
-    { to: "/inbox", label: "Inbox", icon: GalleryVerticalEnd, searchTerms: "messages conversations" },
+    { to: "/inbox", label: "Messages", icon: MessageSquareText, searchTerms: "inbox conversations text email" },
     { to: "/estimates", label: "Quotes", icon: FileText, searchTerms: "estimates proposals" },
   ],
 };
