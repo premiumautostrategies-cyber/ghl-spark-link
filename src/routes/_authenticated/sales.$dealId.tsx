@@ -538,7 +538,7 @@ function DealDesk() {
   });
 
   if (isLoading) {
-    return <div className="h-64 animate-pulse rounded-2xl border border-elevated bg-surface" />;
+    return <div className="h-64 animate-pulse rounded-xl border border-elevated bg-surface" />;
   }
 
   if (!deal) {
@@ -1161,7 +1161,7 @@ function ServicePicker({
                       unit_price: Number(s.base_price),
                     })
               }
-              className="rounded-2xl border border-elevated bg-surface p-4 text-left transition-colors hover:border-bronze/50"
+               className="rounded-xl border border-elevated bg-surface p-4 text-left transition-colors hover:border-bronze/50"
             >
               <div className="flex items-start justify-between gap-2">
                 <p className="text-sm font-semibold leading-tight">{s.name}</p>

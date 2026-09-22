@@ -173,8 +173,8 @@ function BuilderPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-elevated pb-5">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-elevated pb-4">
         <div className="min-w-0">
           <Link
             to="/automations"

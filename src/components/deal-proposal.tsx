@@ -341,7 +341,7 @@ export function DealProposal({
       <div className="space-y-4 border-t border-elevated p-4">
         <div className="grid gap-3 sm:grid-cols-3">
           {tiers.map((t) => (
-            <div key={t.id} className="rounded-2xl border border-elevated bg-surface-2 p-3">
+            <div key={t.id} className="rounded-xl border border-elevated bg-surface-2 p-3">
               <div className="flex items-center justify-between gap-2">
                 <Input
                   className="h-7 border-0 bg-transparent px-0 text-sm font-semibold focus-visible:ring-0"
