@@ -14,6 +14,7 @@ import { QC_TEMPLATE } from "@/lib/shop";
 import { toast } from "sonner";
 import { Lock, LockOpen } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { logOpsAlert, OPS_ALERTS_KEY } from "@/lib/ops-alerts";
 
 export const Route = createFileRoute("/_authenticated/qc")({
   head: () => ({
@@ -74,6 +75,8 @@ function QcPage() {
     qc.invalidateQueries({ queryKey: ["qc-checklists"] });
     qc.invalidateQueries({ queryKey: ["qc-jobs"] });
     qc.invalidateQueries({ queryKey: ["jobs"] });
+    qc.invalidateQueries({ queryKey: ["floor-jobs"] });
+    qc.invalidateQueries({ queryKey: OPS_ALERTS_KEY });
   };
 
   const startChecklist = useMutation({
@@ -149,6 +152,17 @@ function QcPage() {
         .from("jobs")
         .update({ qc_status: "passed", key_released: true, status: "ready_for_pickup" })
         .eq("id", jobId);
+      if (orgId) {
+        const job = jobs.find((j) => j.id === jobId);
+        await logOpsAlert({
+          organizationId: orgId,
+          jobId,
+          kind: "qc_passed",
+          title: `Vehicle ready — ${job?.title ?? "vehicle"}`,
+          body: `${job?.customers?.name ?? "The customer"} can be called for pickup.`,
+          actor: inspector.trim() || null,
+        });
+      }
     },
     onSuccess: () => {
       toast.success("QC passed — keys released and invoicing unlocked");

@@ -79,3 +79,5 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 - [x] P4 Command Center redesigned around sales execution and immediate attention
 - [x] P5 Visual consistency pass across modules
 - [ ] P6 Automation recipes, document/SOP attachment, integration presentation
+
+- [x] Installer work center: Shop Floor accept/claim, check-in, inspection, prep/install timers, QC request; QC-requested and QC-passed shop alerts in bell + Command Center
