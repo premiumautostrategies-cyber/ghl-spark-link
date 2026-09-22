@@ -331,6 +331,7 @@ function QcPage() {
                       temp: Number(f.get("temp") || 0),
                       notes: String(f.get("notes") || ""),
                       items: currentItems,
+                      requireTemp: needsHeatCheck(current.service_type),
                     });
                   }}
                 >
@@ -356,17 +357,24 @@ function QcPage() {
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="temp" className="text-xs">Post-heat edge temp (°F)</Label>
-                      <Input
-                        id="temp"
-                        name="temp"
-                        type="number"
-                        step="1"
-                        defaultValue={currentList.edge_temp_f ?? 195}
-                      />
-                    </div>
-                    <div className="space-y-1.5 sm:col-span-2">
+                    {needsHeatCheck(current.service_type) && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="temp" className="text-xs">Post-heat edge temp (°F)</Label>
+                        <Input
+                          id="temp"
+                          name="temp"
+                          type="number"
+                          step="1"
+                          defaultValue={currentList.edge_temp_f ?? 195}
+                        />
+                      </div>
+                    )}
+                    <div
+                      className={cn(
+                        "space-y-1.5",
+                        needsHeatCheck(current.service_type) ? "sm:col-span-2" : "sm:col-span-3",
+                      )}
+                    >
                       <Label htmlFor="inspector" className="text-xs">Signed off by</Label>
                       <Input
                         id="inspector"
@@ -376,7 +384,25 @@ function QcPage() {
                       />
                     </div>
                   </div>
+                  {!needsHeatCheck(current.service_type) && (
+                    <p className="text-xs text-muted-foreground">
+                      {label(current.service_type ?? "this service")} does not use a post-heat temperature check.
+                    </p>
+                  )}
                   <Textarea name="notes" rows={2} placeholder="Notes for the file" defaultValue={currentList.notes ?? ""} />
+
+                  <div className="space-y-2 rounded-xl border border-elevated bg-surface-2 p-3">
+                    <Label htmlFor="correction" className="text-xs">
+                      If something needs redoing, tell the installer what to correct
+                    </Label>
+                    <Textarea
+                      id="correction"
+                      rows={2}
+                      value={correction}
+                      onChange={(e) => setCorrection(e.target.value)}
+                      placeholder="Lifted edge on the driver fender — re-tuck and post-heat."
+                    />
+                  </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button type="submit" disabled={signOff.isPending || currentList.status === "passed"}>
@@ -385,17 +411,27 @@ function QcPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => failQc.mutate({ checklistId: currentList.id, jobId: current.id })}
+                      disabled={failQc.isPending || correction.trim().length < 5}
+                      onClick={() =>
+                        failQc.mutate({
+                          checklistId: currentList.id,
+                          jobId: current.id,
+                          reason: correction,
+                          existingNotes: currentList.notes ?? null,
+                        })
+                      }
                     >
                       Fail — send back to installer
                     </Button>
                   </div>
                   {currentList.status === "passed" && (
                     <p className="text-xs text-revenue">
-                      Passed by {currentList.inspector} at {Number(currentList.edge_temp_f)}°F — invoicing unlocked.
+                      Passed by {currentList.inspector}
+                      {currentList.edge_temp_f ? ` at ${Number(currentList.edge_temp_f)}°F` : ""} — invoicing unlocked.
                     </p>
                   )}
                 </form>
+
               )}
             </div>
           </Panel>
