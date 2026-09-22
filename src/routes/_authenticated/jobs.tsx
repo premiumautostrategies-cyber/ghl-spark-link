@@ -741,18 +741,31 @@ function TechnicianProductionPage() {
         </div>
 
 
-        {/* Step 1–2 */}
+        {/* Start of day */}
         <Panel className="p-5">
           <p className="micro-label">Start of day</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Button size="lg" className="min-h-14" disabled={s.accept || acceptJob.isPending} onClick={() => acceptJob.mutate(job.id)}>
-              {s.accept ? `Accepted${job.accepted_by ? ` by ${job.accepted_by}` : ""}` : "Accept this job"}
-            </Button>
-            <Button size="lg" variant={s.accept && !s.checkin ? "default" : "outline"} className="min-h-14" disabled={!s.accept || s.checkin || checkIn.isPending} onClick={() => checkIn.mutate(job.id)}>
-              {s.checkin ? `Checked in ${clock(job.checked_in_at)}` : "Check in vehicle"}
-            </Button>
-          </div>
+          {s.checkin ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Checked in {clock(job.checked_in_at)}
+              {job.accepted_by ? ` · ${job.accepted_by}` : ""}
+            </p>
+          ) : (
+            <>
+              <Button
+                size="lg"
+                className="mt-3 min-h-14 w-full"
+                disabled={startJob.isPending}
+                onClick={() => startJob.mutate(job.id)}
+              >
+                Start this job — check the vehicle in
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                This takes the job and checks the vehicle in, in one tap.
+              </p>
+            </>
+          )}
         </Panel>
+
 
         {/* Inspection */}
         <Panel>
