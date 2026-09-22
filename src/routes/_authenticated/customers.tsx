@@ -293,6 +293,10 @@ function CustomersPage() {
       <CustomerWorkspace
         customerId={openCustomer}
         onClose={() => setOpenCustomer(null)}
+        onAddVehicle={(id) => {
+          setOpenCustomer(null);
+          setVehicleFor(id);
+        }}
         onOpenDeal={(id) => {
           setOpenCustomer(null);
           setOpenDeal(id);

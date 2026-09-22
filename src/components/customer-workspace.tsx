@@ -29,10 +29,12 @@ export function CustomerWorkspace({
   customerId,
   onClose,
   onOpenDeal,
+  onAddVehicle,
 }: {
   customerId: string | null;
   onClose: () => void;
   onOpenDeal?: (dealId: string) => void;
+  onAddVehicle?: (customerId: string) => void;
 }) {
   const [tab, setTab] = useState<TabKey>("vehicles");
   const enabled = Boolean(customerId);
@@ -176,6 +178,11 @@ export function CustomerWorkspace({
                 >
                   <LinkIcon className="mr-1.5 h-3.5 w-3.5" /> Hub link
                 </Button>
+                {onAddVehicle && (
+                  <Button size="sm" variant="secondary" onClick={() => onAddVehicle(customer.id)}>
+                    <Car className="mr-1.5 h-3.5 w-3.5" /> Vehicle
+                  </Button>
+                )}
                 <Button size="sm" variant="ghost" asChild>
                   <Link to="/estimates">New quote</Link>
                 </Button>
