@@ -153,14 +153,6 @@ function SalesPage() {
     refetchInterval: 60_000,
   });
 
-  const { data: customers = [] } = useQuery({
-    queryKey: ["customers-lite"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("id,name").order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const signals = useMemo(() => {
     const byDeal = new Map<string, LeadEvent[]>();
