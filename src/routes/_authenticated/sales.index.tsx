@@ -219,6 +219,7 @@ function SalesPage() {
           value: 0,
           probability: 25,
           notes: String(form.get("notes") || "") || null,
+          service_tags: newTags,
           customer_id: cid,
           vehicle_id: vehicleId,
           organization_id: orgId,
