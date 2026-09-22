@@ -689,7 +689,7 @@ function TechnicianProductionPage() {
             {stages.map((stage, i) => (
               <li key={stage.label} className="relative flex flex-col items-center gap-2 text-center">
                 {i > 0 && (
-                  <span className={cn("absolute left-0 top-4 h-px w-1/2 -translate-x-0", stages[i - 1].done ? "bg-revenue/60" : "bg-elevated")} />
+                  <span className={cn("absolute left-0 top-4 h-px w-1/2 -translate-x-0", stages[i - 1]?.done ? "bg-revenue/60" : "bg-elevated")} />
                 )}
                 {i < stages.length - 1 && (
                   <span className={cn("absolute right-0 top-4 h-px w-1/2", stage.done ? "bg-revenue/60" : "bg-elevated")} />
@@ -712,7 +712,7 @@ function TechnicianProductionPage() {
               </li>
             ))}
           </ol>
-          <p className="mt-4 text-center text-xs text-muted-foreground">{done} of {STEPS.length} milestones complete · step {Math.max(currentIndex + 1, 1)}: {STEPS[Math.max(currentIndex, 0)].label}</p>
+          <p className="mt-4 text-center text-xs text-muted-foreground">{done} of {STEPS.length} milestones complete · next: {STEPS[Math.max(currentIndex, 0)]?.label ?? "Complete"}</p>
         </Panel>
 
         <Panel className="p-5">
