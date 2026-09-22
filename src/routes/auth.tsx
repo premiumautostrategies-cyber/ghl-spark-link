@@ -34,30 +34,35 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  // Demo mode: any password (or none) gets you in. We keep a stable internal
+  // password per email so the account can be created and reused.
+  function demoPassword(addr: string) {
+    return `systemize-demo-${addr.trim().toLowerCase()}`;
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
+      const fallback = demoPassword(email);
+      const tryIn = async (pw: string) =>
+        (await supabase.auth.signInWithPassword({ email, password: pw })).error;
+
       const signUpIfNeeded = async () => {
         const { error } = await supabase.auth.signUp({
           email,
-          password,
+          password: fallback,
           options: { data: { shop_name: shopName || "My shop" } },
         });
-        if (error) throw error;
+        if (error && !/already/i.test(error.message)) throw error;
       };
 
-      if (mode === "signup") {
+      let error = password ? await tryIn(password) : await tryIn(fallback);
+      if (error && password) error = await tryIn(fallback);
+      if (error) {
         await signUpIfNeeded();
-        await supabase.auth.signInWithPassword({ email, password });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          // No account yet — create one on the spot instead of blocking.
-          await signUpIfNeeded();
-          const retry = await supabase.auth.signInWithPassword({ email, password });
-          if (retry.error) throw retry.error;
-        }
+        error = await tryIn(fallback);
+        if (error) throw error;
       }
       // Make sure the shop workspace exists before entering the app.
       await supabase.rpc("bootstrap_user_workspace", {
@@ -70,6 +75,7 @@ function AuthPage() {
       setBusy(false);
     }
   }
+
 
   async function googleSignIn() {
     const result = await lovable.auth.signInWithOAuth("google", {
@@ -117,16 +123,16 @@ function AuthPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Password (optional in demo)</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
+              placeholder="Anything works"
             />
           </div>
+
           <Button type="submit" className="w-full" disabled={busy}>
             {mode === "signin" ? "Sign in" : "Create account"}
           </Button>
