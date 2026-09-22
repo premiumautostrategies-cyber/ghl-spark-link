@@ -634,11 +634,23 @@ function TechnicianProductionPage() {
       setCompletionOpen(true);
     };
 
+    const stages = [
+      { label: "Prep", done: s.prep, active: !s.prep },
+      { label: "Install", done: s.install, active: s.prep && !s.install },
+      { label: "Completion", done: s.qcPassed, active: s.install && !s.qcPassed },
+    ];
+
     return (
       <div className="mx-auto max-w-3xl space-y-4 pb-28">
-        <Button variant="ghost" className="min-h-12" onClick={() => setOpenJob(null)}>
-          <ArrowLeft className="mr-2 h-5 w-5" /> My work
-        </Button>
+        <div className="sticky top-0 z-10 -mx-4 flex items-center gap-2 border-b border-elevated bg-background/95 px-2 py-2 backdrop-blur sm:mx-0 sm:rounded-xl sm:border sm:px-3">
+          <Button variant="ghost" size="icon" className="size-11 shrink-0" onClick={() => setOpenJob(null)} aria-label="Back to my work">
+            <ArrowLeft className="size-5" />
+          </Button>
+          <p className="flex-1 truncate text-center text-sm font-semibold tracking-wide">
+            Job #{job.id.slice(0, 4).toUpperCase()}
+          </p>
+          <span className="size-11 shrink-0" />
+        </div>
 
         {s.qcFailed && (
           <div className="flex items-start gap-3 rounded-xl border border-critical/50 bg-critical/10 p-4">
@@ -651,40 +663,74 @@ function TechnicianProductionPage() {
         )}
 
         <Panel className="p-5 sm:p-6">
-          <p className="micro-label">{clock(job.scheduled_start)} · {job.bay ?? "No bay"}</p>
-          <h1 className="display-title mt-2 text-2xl sm:text-3xl">{vehicle}</h1>
-          <p className="mt-2 text-base font-medium">Work order</p>
-          <dl className="mt-5 grid gap-3 border-t border-elevated pt-4 text-sm sm:grid-cols-2">
-            <div><dt className="text-xs text-muted-foreground">Customer</dt><dd className="mt-1 font-medium">{job.customers?.name ?? "No customer"}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Plate / color</dt><dd className="mt-1 font-medium">{[job.vehicles?.plate, job.vehicles?.color].filter(Boolean).join(" · ") || "—"}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Services / coverage</dt><dd className="mt-1 font-medium">{services.join(" · ")}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Product / film</dt><dd className="mt-1 font-medium">{job.inventory_rolls ? [job.inventory_rolls.product_line, job.inventory_rolls.roll_code].filter(Boolean).join(" · ") : "Not assigned"}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Due</dt><dd className="mt-1 font-medium">{clock(job.scheduled_end ?? job.scheduled_start)}</dd></div>
-            <div><dt className="text-xs text-muted-foreground">Instructions</dt><dd className="mt-1 whitespace-pre-line font-medium">{job.notes || "No special instructions"}</dd></div>
-          </dl>
+          <h1 className="display-title text-2xl sm:text-3xl">{vehicle}</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">{job.customers?.name ?? "No customer"}{job.customers?.phone ? ` · ${job.customers.phone}` : ""}</p>
 
-          <ol className="mt-5 flex flex-wrap gap-2 border-t border-elevated pt-4">
-            {STEPS.map((step, i) => {
-              const complete = [s.accept, s.checkin, s.inspectionDone, s.prep, s.install, s.qc][i];
-              const active = i === currentIndex;
-              return (
-                <li
-                  key={step.key}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {services.map((service) => (
+              <span key={service} className="rounded-lg border border-elevated bg-surface-2 px-3 py-1.5 text-xs font-semibold">
+                {service}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 divide-x divide-elevated rounded-xl border border-elevated bg-surface-2 text-center">
+            <div className="px-3 py-3">
+              <p className="micro-label">Bay</p>
+              <p className="mt-1 text-sm font-semibold">{job.bay || (job.is_mobile ? "Mobile" : "No bay")}</p>
+            </div>
+            <div className="px-3 py-3">
+              <p className="micro-label">Due</p>
+              <p className="mt-1 text-sm font-semibold">{clock(job.scheduled_end ?? job.scheduled_start)}</p>
+            </div>
+          </div>
+
+          <ol className="mt-5 grid grid-cols-3 items-start border-t border-elevated pt-5">
+            {stages.map((stage, i) => (
+              <li key={stage.label} className="relative flex flex-col items-center gap-2 text-center">
+                {i > 0 && (
+                  <span className={cn("absolute left-0 top-4 h-px w-1/2 -translate-x-0", stages[i - 1].done ? "bg-revenue/60" : "bg-elevated")} />
+                )}
+                {i < stages.length - 1 && (
+                  <span className={cn("absolute right-0 top-4 h-px w-1/2", stage.done ? "bg-revenue/60" : "bg-elevated")} />
+                )}
+                <span
                   className={cn(
-                    "rounded-lg border px-2.5 py-1.5 text-xs font-semibold",
-                    complete
-                      ? "border-revenue/40 bg-revenue/10 text-revenue"
-                      : active
-                        ? "border-bronze bg-bronze/10 text-bronze"
-                        : "border-elevated text-muted-foreground",
+                    "relative z-10 flex size-8 items-center justify-center rounded-full border text-xs font-bold tabular-nums",
+                    stage.done
+                      ? "border-revenue bg-revenue/15 text-revenue"
+                      : stage.active
+                        ? "border-bronze bg-bronze/15 text-bronze"
+                        : "border-elevated bg-surface text-muted-foreground",
                   )}
                 >
-                  {i + 1}. {step.label}
-                </li>
-              );
-            })}
+                  {stage.done ? <Check className="size-4" /> : i + 1}
+                </span>
+                <span className={cn("text-xs font-semibold uppercase tracking-wide", stage.active ? "text-bronze" : stage.done ? "text-revenue" : "text-muted-foreground")}>
+                  {stage.label}
+                </span>
+              </li>
+            ))}
           </ol>
-          <p className="mt-3 text-xs text-muted-foreground">{done} of {STEPS.length} milestones complete</p>
+          <p className="mt-4 text-center text-xs text-muted-foreground">{done} of {STEPS.length} milestones complete · step {Math.max(currentIndex + 1, 1)}: {STEPS[Math.max(currentIndex, 0)].label}</p>
+        </Panel>
+
+        <Panel className="p-5">
+          <p className="micro-label">Work order</p>
+          <dl className="mt-3 divide-y divide-elevated text-sm">
+            {[
+              ["Vehicle", vehicle],
+              ["Plate / color", [job.vehicles?.plate, job.vehicles?.color].filter(Boolean).join(" · ") || "—"],
+              ["Services", services.join(", ")],
+              ["Product / film", job.inventory_rolls ? [job.inventory_rolls.product_line, job.inventory_rolls.roll_code].filter(Boolean).join(" · ") : "Not assigned"],
+              ["Instructions", job.notes || "No special instructions"],
+            ].map(([term, value]) => (
+              <div key={term} className="grid grid-cols-[8rem_minmax(0,1fr)] gap-3 py-3">
+                <dt className="text-xs text-muted-foreground">{term}</dt>
+                <dd className="whitespace-pre-line font-medium">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </Panel>
 
         <div className="rounded-xl border border-bronze/40 bg-bronze/5 p-4 sm:p-5">
@@ -693,6 +739,7 @@ function TechnicianProductionPage() {
             Keep this page open for reference, then document everything at the end. Live timers and individual updates are optional.
           </p>
         </div>
+
 
         {/* Step 1–2 */}
         <Panel className="p-5">
