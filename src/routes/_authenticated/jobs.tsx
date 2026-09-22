@@ -833,10 +833,17 @@ function TechnicianProductionPage() {
                       <Tag tone={s.install ? "revenue" : "muted"}>{s.install ? "Complete" : "Open"}</Tag>
                     </div>
                     {!s.install && (
-                      <Button size="lg" className="mt-4 min-h-14 w-full" disabled={!s.prep || completePhaseGroup.isPending} onClick={() => completePhaseGroup.mutate({ jobId: job.id, keys: INSTALL_PHASES, areaLabels: areas })}>
-                        Mark install complete
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="mt-4 min-h-14 w-full"
+                        disabled={!s.prep}
+                        onClick={openCompletion}
+                      >
+                        Finish install &amp; document
                       </Button>
                     )}
+
                   </div>
                 </div>
 
