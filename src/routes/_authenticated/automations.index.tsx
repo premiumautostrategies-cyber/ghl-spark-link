@@ -273,41 +273,35 @@ function WorkflowsTab() {
           body="Start with the two-minute speed-to-lead recipe — it wins the most jobs."
         />
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="divide-y divide-elevated overflow-hidden rounded-xl border border-elevated bg-surface">
           {workflows.map((w) => {
             const graph = (w.graph as unknown as WorkflowGraph) ?? emptyGraph();
             return (
-              <Panel key={w.id} className="p-5">
-                <div className="flex items-start justify-between gap-3">
+              <div key={w.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 hover:bg-surface-2/40">
+                <div className="min-w-[240px] flex-1">
+                  <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <Link
                       to="/automations/$workflowId"
                       params={{ workflowId: w.id }}
-                      className="display-title text-base font-semibold hover:text-bronze"
+                      className="text-sm font-semibold hover:text-bronze"
                     >
                       {w.name}
                     </Link>
                     <p className="mt-1 text-xs text-muted-foreground">{w.description}</p>
                   </div>
-                  <Switch
-                    checked={w.is_active}
-                    onCheckedChange={(v) => toggle.mutate({ id: w.id, is_active: v })}
-                  />
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  </div>
+                <div className="flex flex-wrap items-center gap-2">
                   <Tag tone="bronze">{TRIGGER_LABEL[w.trigger_event] ?? w.trigger_event}</Tag>
                   <Tag tone="muted">{graph.nodes.length - 1} steps</Tag>
                   <Tag tone={w.is_active ? "revenue" : "muted"}>{w.is_active ? "Live" : "Paused"}</Tag>
                   <Tag tone="comms">{w.run_count ?? 0} runs</Tag>
                 </div>
-                <Link
-                  to="/automations/$workflowId"
-                  params={{ workflowId: w.id }}
-                  className="mt-4 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.12em] text-bronze"
-                >
-                  Open builder <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Panel>
+                <div className="flex items-center gap-4">
+                  <Switch checked={w.is_active} onCheckedChange={(v) => toggle.mutate({ id: w.id, is_active: v })} />
+                  <Link to="/automations/$workflowId" params={{ workflowId: w.id }} className="inline-flex items-center gap-1 text-xs font-semibold text-bronze">Open <ArrowRight className="h-3.5 w-3.5" /></Link>
+                </div>
+              </div>
             );
           })}
         </div>
