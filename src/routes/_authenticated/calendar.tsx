@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DayBookingSheet } from "@/components/day-booking-sheet";
 import { PageHeader } from "@/components/page-header";
 
-type View = "day" | "week" | "month";
+type View = "day" | "week" | "agenda";
 
 type JobRow = {
   id: string;
@@ -31,6 +31,8 @@ type JobRow = {
 };
 
 const HOURS = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+const CALENDAR_START = 7;
+const CALENDAR_END = 19;
 
 const STATUS_TONE: Record<string, string> = {
   lead: "border-l-comms",
@@ -176,26 +178,24 @@ function CalendarPage() {
       const s = startOfWeek(anchor);
       return Array.from({ length: 7 }, (_, i) => addDays(s, i));
     }
-    const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-    const gridStart = addDays(first, -first.getDay());
-    return Array.from({ length: 42 }, (_, i) => addDays(gridStart, i));
+    const s = startOfWeek(anchor);
+    return Array.from({ length: 14 }, (_, i) => addDays(s, i));
   }, [view, anchor]);
 
   const step = (dir: number) => {
     if (view === "day") setAnchor((a) => addDays(a, dir));
     else if (view === "week") setAnchor((a) => addDays(a, dir * 7));
-    else setAnchor((a) => new Date(a.getFullYear(), a.getMonth() + dir, 1));
+    else setAnchor((a) => addDays(a, dir * 14));
   };
 
   const heading =
-    view === "month"
-      ? anchor.toLocaleDateString("en-US", { month: "long", year: "numeric" })
-      : view === "week"
+    view === "week"
         ? `${startOfWeek(anchor).toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${addDays(startOfWeek(anchor), 6).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-        : anchor.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+        : view === "day"
+          ? anchor.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
+          : `${range[0]?.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${range[13]?.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
 
-  const scopeDaysList =
-    view === "month" ? range.filter((d) => d.getMonth() === anchor.getMonth()) : range;
+  const scopeDaysList = range;
   const scopeJobs = scopeDaysList.flatMap(jobsOn);
   const scopeHours = scopeJobs.reduce((t, j) => t + hoursOf(j), 0);
   const util = Math.round((scopeHours / Math.max(dailyCapacity * scopeDaysList.length, 1)) * 100);
@@ -205,7 +205,7 @@ function CalendarPage() {
     <div className="space-y-6">
       <PageHeader
         title="Shop calendar"
-        subtitle="Every vehicle on the books — switch between day, week and month with live bay capacity."
+        subtitle="Appointments, technicians and bay capacity in one working schedule."
         action={
           <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" onClick={() => setBookDate(anchor)}>
@@ -213,9 +213,9 @@ function CalendarPage() {
           </Button>
           <FilterPills
             options={[
-              { value: "day", label: "Day" },
               { value: "week", label: "Week" },
-              { value: "month", label: "Month" },
+              { value: "day", label: "Day" },
+              { value: "agenda", label: "Agenda" },
             ]}
             value={view}
             onChange={(v) => setView(v as View)}
@@ -275,7 +275,7 @@ function CalendarPage() {
 
       <Panel className="overflow-hidden">
         <SectionTitle
-          title={view === "day" ? "Day board" : view === "week" ? "Week" : "Month"}
+          title={view === "day" ? "Day board" : view === "week" ? "Week" : "Agenda"}
           hint={heading}
           right={<Tag tone="bronze">{scopeJobs.length} on the books</Tag>}
         />
@@ -291,79 +291,75 @@ function CalendarPage() {
 
         {view === "week" && (
           <div className="overflow-x-auto">
-            <div className="grid min-w-[900px] grid-cols-7 divide-x divide-elevated">
+            <div className="grid min-w-[980px] grid-cols-[52px_repeat(7,minmax(128px,1fr))]">
+              <div className="border-b border-elevated" />
+              {range.map((d) => {
+                const today = sameDay(d, new Date());
+                return (
+                  <button
+                    key={d.toISOString()}
+                    type="button"
+                    onClick={() => setBookDate(d)}
+                    className={cn("border-b border-l border-elevated px-2 py-2 text-left hover:bg-elevated/40", today && "bg-surface-2")}
+                  >
+                    <span className="text-[10px] font-semibold uppercase text-muted-foreground">{d.toLocaleDateString("en-US", { weekday: "short" })}</span>
+                    <span className={cn("ml-2 text-sm font-semibold", today && "text-bronze")}>{d.getDate()}</span>
+                  </button>
+                );
+              })}
+              <div className="relative h-[660px] border-r border-elevated">
+                {HOURS.map((hour) => (
+                  <span key={hour} className="absolute right-2 -translate-y-1/2 text-[10px] tabular-nums text-muted-foreground" style={{ top: `${((hour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100}%` }}>
+                    {hour % 12 || 12}{hour < 12 ? "a" : "p"}
+                  </span>
+                ))}
+              </div>
               {range.map((d) => {
                 const list = jobsOn(d);
-                const hrs = list.reduce((t, j) => t + hoursOf(j), 0);
-                const pct = Math.min((hrs / Math.max(dailyCapacity, 1)) * 100, 100);
                 const today = sameDay(d, new Date());
                 return (
                   <div
                     key={d.toISOString()}
-                    className={cn("min-h-[420px] p-3", today && "bg-surface-2/60")}
+                    onDoubleClick={() => setBookDate(d)}
+                    className={cn("relative h-[660px] border-l border-elevated", today && "bg-surface-2/60")}
                   >
-                    <button
-                      type="button"
-                      onClick={() => setBookDate(d)}
-                      title="Book an appointment"
-                      className="flex w-full items-baseline justify-between rounded-md px-1 py-0.5 text-left transition-colors hover:bg-elevated"
-                    >
-                      <p className="micro-label">
-                        {d.toLocaleDateString("en-US", { weekday: "short" })}
-                      </p>
-                      <p
-                        className={cn(
-                          "display-title text-lg font-semibold",
-                          today && "text-bronze",
-                        )}
-                      >
-                        {d.getDate()}
-                      </p>
-                    </button>
-                    <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-elevated">
-                      <div
-                        className={cn("h-full", hrs > dailyCapacity ? "bg-critical" : "bg-bronze")}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 text-[10px] text-muted-foreground">
-                      {hrs.toFixed(1)} / {dailyCapacity} h
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {list.length === 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setBookDate(d)}
-                          className="w-full rounded-lg border border-dashed border-elevated py-2 text-[11px] text-muted-foreground transition-colors hover:border-bronze/50 hover:text-bronze"
-                        >
-                          Open · book
-                        </button>
-                      )}
-                      {list.map((j) => (
+                    {HOURS.map((hour) => (
+                      <div key={hour} className="absolute inset-x-0 border-t border-elevated/60" style={{ top: `${((hour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100}%` }} />
+                    ))}
+                    {list.map((j) => {
+                      const start = new Date(j.scheduled_start as string);
+                      const end = j.scheduled_end ? new Date(j.scheduled_end) : new Date(start.getTime() + hoursOf(j) * 3600000);
+                      const startHour = start.getHours() + start.getMinutes() / 60;
+                      const duration = Math.max((end.getTime() - start.getTime()) / 3600000, 0.5);
+                      const top = ((startHour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100;
+                      const height = (duration / (CALENDAR_END - CALENDAR_START)) * 100;
+                      return (
                         <button
                           key={j.id}
                           type="button"
                           onClick={() => setSelected(j.id === selected ? null : j.id)}
                           className={cn(
-                            "w-full rounded-lg border border-l-2 border-elevated bg-surface-2 px-2 py-1.5 text-left transition-colors hover:border-bronze/50",
+                            "absolute inset-x-1 z-10 overflow-hidden rounded-md border border-l-2 border-elevated bg-surface-2 px-2 py-1 text-left transition-colors hover:border-bronze/50",
                             STATUS_TONE[j.status] ?? "border-l-elevated",
                             selected === j.id && "border-bronze/70",
                           )}
+                          style={{ top: `${Math.max(top, 0)}%`, height: `${Math.max(height, 5)}%` }}
                         >
-                          <p className="text-[11px] font-semibold tabular-nums text-muted-foreground">
+                          <p className="text-[10px] font-semibold tabular-nums text-muted-foreground">
                             {new Date(j.scheduled_start as string).toLocaleTimeString("en-US", {
                               hour: "numeric",
                               minute: "2-digit",
                             })}
                           </p>
-                          <p className="truncate text-xs font-semibold">{vehicleOf(j) ?? j.title}</p>
+                          <p className="truncate text-[11px] font-semibold">{j.customers?.name ?? "No customer"}</p>
+                          <p className="truncate text-[10px]">{vehicleOf(j) ?? j.title}</p>
                           <p className="truncate text-[10px] text-muted-foreground">
                             {label(j.service_type)} · {j.installer || "Unassigned"}
                           </p>
-                          {j.is_mobile && <p className="text-[10px] text-comms">Mobile</p>}
+                          <p className="truncate text-[10px] text-muted-foreground">{STATUS_LABELS[j.status] ?? label(j.status)}</p>
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
                 );
               })}
@@ -371,86 +367,31 @@ function CalendarPage() {
           </div>
         )}
 
-        {view === "month" && (
-          <div className="overflow-x-auto">
-            <div className="min-w-[840px]">
-              <div className="grid grid-cols-7 border-b border-elevated">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="micro-label px-3 py-2">
-                    {d}
+        {view === "agenda" && (
+          <div className="divide-y divide-elevated">
+            {range.map((d) => {
+              const list = jobsOn(d);
+              if (list.length === 0) return null;
+              return (
+                <section key={d.toISOString()} className="grid gap-3 px-4 py-4 md:grid-cols-[140px_minmax(0,1fr)]">
+                  <button type="button" onClick={() => setBookDate(d)} className="text-left">
+                    <p className="text-sm font-semibold">{d.toLocaleDateString("en-US", { weekday: "long" })}</p>
+                    <p className="text-xs text-muted-foreground">{d.toLocaleDateString("en-US", { month: "long", day: "numeric" })}</p>
+                  </button>
+                  <div className="divide-y divide-elevated border-y border-elevated">
+                    {list.map((j) => (
+                      <button key={j.id} type="button" onClick={() => setSelected(j.id === selected ? null : j.id)} className="grid w-full grid-cols-[76px_minmax(0,1.3fr)_minmax(0,1fr)_auto] items-center gap-3 px-2 py-3 text-left hover:bg-elevated/30">
+                        <span className="text-xs font-semibold tabular-nums">{new Date(j.scheduled_start as string).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
+                        <span className="min-w-0"><span className="block truncate text-sm font-medium">{j.customers?.name ?? "No customer"}</span><span className="block truncate text-xs text-muted-foreground">{vehicleOf(j) ?? j.title}</span></span>
+                        <span className="min-w-0"><span className="block truncate text-xs">{label(j.service_type)}</span><span className="block truncate text-xs text-muted-foreground">{j.installer || "Unassigned"} · {j.bay || (j.is_mobile ? "Mobile" : "No bay")}</span></span>
+                        <span className="text-[11px] text-muted-foreground">{STATUS_LABELS[j.status] ?? label(j.status)}</span>
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7">
-                {range.map((d) => {
-                  const list = jobsOn(d);
-                  const hrs = list.reduce((t, j) => t + hoursOf(j), 0);
-                  const outside = d.getMonth() !== anchor.getMonth();
-                  const today = sameDay(d, new Date());
-                  return (
-                    <div
-                      key={d.toISOString()}
-                      onClick={() => setBookDate(d)}
-                      title="Book an appointment"
-                      className={cn(
-                        "min-h-[112px] cursor-pointer border-b border-l border-elevated p-2 transition-colors hover:bg-elevated/40",
-                        outside && "opacity-40",
-                        today && "bg-surface-2/60",
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <p
-                          className={cn("text-xs font-semibold tabular-nums", today && "text-bronze")}
-                        >
-                          {d.getDate()}
-                        </p>
-                        {hrs > 0 && (
-                          <span
-                            className={cn(
-                              "text-[10px] font-semibold tabular-nums",
-                              hrs > dailyCapacity ? "text-critical" : "text-muted-foreground",
-                            )}
-                          >
-                            {hrs.toFixed(0)}h
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1.5 space-y-1">
-                        {list.slice(0, 3).map((j) => (
-                          <button
-                            key={j.id}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelected(j.id === selected ? null : j.id);
-                            }}
-                            className={cn(
-                              "block w-full truncate rounded border-l-2 bg-surface-2 px-1.5 py-1 text-left text-[10px] font-medium",
-                              STATUS_TONE[j.status] ?? "border-l-elevated",
-                            )}
-                          >
-                            {vehicleOf(j) ?? j.title}
-                          </button>
-                        ))}
-                        {list.length > 3 && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAnchor(d);
-                              setView("day");
-                            }}
-                            className="text-[10px] text-bronze"
-                          >
-                            +{list.length - 3} more
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                </section>
+              );
+            })}
+            {scopeJobs.length === 0 && <p className="px-5 py-10 text-center text-sm text-muted-foreground">No appointments in this two-week range.</p>}
           </div>
         )}
       </Panel>
