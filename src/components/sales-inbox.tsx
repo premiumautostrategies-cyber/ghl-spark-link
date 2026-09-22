@@ -5,6 +5,7 @@ import { Car, Clock3, ExternalLink, Mail, Phone, Search, UserRound } from "lucid
 import { supabase } from "@/integrations/supabase/client";
 import { DealComms } from "@/components/deal-comms";
 import { InboxQuoteBuilder } from "@/components/inbox-quote-builder";
+import { ConversationSummaryButton, type SummaryTurn } from "@/components/conversation-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { money, shortDate } from "@/lib/format";
