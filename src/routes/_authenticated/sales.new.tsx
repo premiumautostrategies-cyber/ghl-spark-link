@@ -87,9 +87,10 @@ function NewLeadDesk() {
     mutationFn: async (form: FormData) => {
       if (!orgId) throw new Error("No workspace selected");
       let cid = String(form.get("customer_id") || "") || null;
-      const newName = String(form.get("new_customer_name") || "").trim();
-      const newPhone = String(form.get("new_customer_phone") || "").trim();
-      const newEmail = String(form.get("new_customer_email") || "").trim();
+      const formName = String(form.get("new_customer_name") || "").trim();
+      const formPhone = String(form.get("new_customer_phone") || "").trim();
+      const formEmail = String(form.get("new_customer_email") || "").trim();
+
 
       if (!cid && newName) {
         const { data: cust, error: custErr } = await supabase
