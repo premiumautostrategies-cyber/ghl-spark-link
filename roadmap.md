@@ -69,6 +69,7 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 ## Core product upgrade (SYSTEMIZE spec)
 - [x] P1 Dynamic Pipeline: stage + new-lead state + activity temperature + live activity + focus priority
 - [x] P1 Lead Workspace drawer (activity timeline, conversation, quote, notes, stage moves)
+- [x] Professional three-panel Sales Inbox and unified customer/opportunity record workspace
 - [x] Customer-activity event log (lead_events) seeded with realistic restyling activity
 - [x] Workspace bootstrap RPC (remix DB lost the auth signup trigger); demo seed double-run guard
 - [x] P2 Customer workspace drawer (vehicles → projects → quotes → money → documents, opens deal drawer)
