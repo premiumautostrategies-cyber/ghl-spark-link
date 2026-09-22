@@ -860,6 +860,67 @@ function TechnicianProductionPage() {
           </Panel>
         </div>
 
+        <Panel>
+          <SectionTitle title="Job photos" hint="Add photos any time — or all at once when you finish" />
+          <div className="space-y-4 border-t border-elevated p-4 sm:p-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button asChild size="lg" variant="outline" className="min-h-14" disabled={uploadPhotos.isPending}>
+                <label>
+                  <Camera className="mr-2 h-5 w-5" /> Take photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => {
+                      const files = Array.from(event.target.files ?? []);
+                      event.target.value = "";
+                      if (files.length) uploadPhotos.mutate({ jobId: job.id, files });
+                    }}
+                  />
+                </label>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="min-h-14" disabled={uploadPhotos.isPending}>
+                <label>
+                  <Images className="mr-2 h-5 w-5" /> Upload from library
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => {
+                      const files = Array.from(event.target.files ?? []);
+                      event.target.value = "";
+                      if (files.length) uploadPhotos.mutate({ jobId: job.id, files });
+                    }}
+                  />
+                </label>
+              </Button>
+            </div>
+            {uploadPhotos.isPending && <p className="text-sm text-muted-foreground">Uploading…</p>}
+            {documents.filter((d) => d.doc_type === "installer_photo").length === 0 ? (
+              <p className="text-sm text-muted-foreground">No photos on this job yet.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {documents
+                  .filter((d) => d.doc_type === "installer_photo")
+                  .map((d) => {
+                    const url = d.file_url ? photoUrls[d.file_url] : undefined;
+                    return url ? (
+                      <a key={d.id} href={url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-elevated">
+                        <img src={url} alt={d.name ?? "Job photo"} className="aspect-square w-full object-cover" loading="lazy" />
+                      </a>
+                    ) : (
+                      <div key={d.id} className="aspect-square rounded-lg border border-elevated bg-surface-2" />
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        </Panel>
+
+
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-elevated bg-background/95 p-3 backdrop-blur">
           {s.qcPassed ? (
         <Button size="lg" className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold" disabled>
