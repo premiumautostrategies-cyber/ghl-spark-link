@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ACCENT_PRESETS, DEFAULT_ACCENT, applyAccent } from "@/components/accent-theme";
+import { SalesSettings } from "@/components/sales-settings";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
