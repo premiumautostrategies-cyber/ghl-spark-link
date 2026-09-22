@@ -137,8 +137,9 @@ const PRODUCTION: NavSection = {
 
 const STANDALONE_ITEMS: NavItem[] = [
   { to: "/calendar", label: "Schedule", icon: CalendarDays, searchTerms: "appointments bays" },
-  { to: "/customers", label: "Customers", icon: Users, searchTerms: "vehicles history" },
 ];
+
+const CUSTOMER_ITEM: NavItem = { to: "/customers", label: "Customers", icon: Users, searchTerms: "vehicles history" };
 
 const ADMIN_ITEMS: NavItem[] = [
   { to: "/integrations", label: "Integrations", icon: Plug },
@@ -150,6 +151,7 @@ const SEARCH_ITEMS = [
   ...SALES.items,
   ...STANDALONE_ITEMS,
   ...PRODUCTION.items,
+  CUSTOMER_ITEM,
   ...OPERATIONS.items,
   ...SYSTEMIZE.items,
   ...ADMIN_ITEMS,
@@ -258,6 +260,14 @@ function AppShellContent({ children }: { children: ReactNode }) {
             active={sectionActive(PRODUCTION)}
             isActive={isActive}
           />
+
+          <SidebarGroup className="p-0 pt-1">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <PrimaryNavItem item={CUSTOMER_ITEM} active={isActive(CUSTOMER_ITEM.to)} />
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
 
           <NavigationSection
             section={OPERATIONS}
