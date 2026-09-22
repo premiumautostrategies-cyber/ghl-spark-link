@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
 import { Panel, SectionTitle, Tag } from "@/components/os-ui";
@@ -11,6 +11,7 @@ import { PRODUCTION_PHASES } from "@/lib/shop";
 import { toast } from "sonner";
 import { ArrowLeft, Pause, Play, Check } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/kiosk")({
   head: () => ({
@@ -41,6 +42,7 @@ function KioskPage() {
   const qc = useQueryClient();
   const { orgId } = useOrg();
   const [openJob, setOpenJob] = useState<string | null>(null);
+  const [installer, setInstaller] = useState("");
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["kiosk-jobs"],
@@ -150,6 +152,14 @@ function KioskPage() {
   const job = jobs.find((j) => j.id === openJob) ?? null;
   const jobPhases = phases.filter((p) => p.job_id === openJob) as Phase[];
   const inspection = inspections.find((i) => i.job_id === openJob);
+  const installers = useMemo(
+    () => Array.from(new Set(jobs.map((item) => item.installer).filter(Boolean))) as string[],
+    [jobs],
+  );
+  useEffect(() => {
+    if (!installer && installers[0]) setInstaller(installers[0]);
+  }, [installer, installers]);
+  const installerJobs = installer ? jobs.filter((item) => item.installer === installer) : [];
 
   if (job) {
     const done = jobPhases.filter((p) => p.status === "complete").length;
@@ -296,16 +306,26 @@ function KioskPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
         title="My Day"
-        subtitle="Today’s assigned vehicles and work steps."
+        subtitle={installer ? `${installer}’s assigned vehicles and work steps.` : "Choose an installer to see today’s work."}
+        action={
+          <Select value={installer} onValueChange={(value) => { setInstaller(value); setOpenJob(null); }}>
+            <SelectTrigger className="min-h-12 w-full sm:w-56">
+              <SelectValue placeholder="Choose installer" />
+            </SelectTrigger>
+            <SelectContent>
+              {installers.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        }
       />
 
-      {jobs.length === 0 ? (
+      {installerJobs.length === 0 ? (
         <Panel className="p-10 text-center">
-          <p className="text-sm text-muted-foreground">Nothing is booked in today.</p>
+          <p className="text-sm text-muted-foreground">{installer ? `Nothing is assigned to ${installer} today.` : "No installers have assigned work today."}</p>
         </Panel>
       ) : (
         <div className="space-y-3">
-          {jobs.map((j) => {
+          {installerJobs.map((j) => {
             const mine = phases.filter((p) => p.job_id === j.id);
             const done = mine.filter((p) => p.status === "complete").length;
             const active = mine.some((p) => p.status === "active");

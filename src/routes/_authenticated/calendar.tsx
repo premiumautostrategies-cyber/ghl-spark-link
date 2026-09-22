@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DayBookingSheet } from "@/components/day-booking-sheet";
 import { PageHeader } from "@/components/page-header";
 
-type View = "day" | "week" | "agenda";
+type View = "day" | "week" | "month";
 
 type JobRow = {
   id: string;
@@ -79,6 +79,11 @@ function addDays(d: Date, n: number) {
 function startOfWeek(d: Date) {
   const x = startOfDay(d);
   return addDays(x, -x.getDay());
+}
+function startOfMonth(d: Date) {
+  const x = startOfDay(d);
+  x.setDate(1);
+  return x;
 }
 function sameDay(a: Date, b: Date) {
   return (
@@ -178,14 +183,18 @@ function CalendarPage() {
       const s = startOfWeek(anchor);
       return Array.from({ length: 7 }, (_, i) => addDays(s, i));
     }
-    const s = startOfWeek(anchor);
-    return Array.from({ length: 14 }, (_, i) => addDays(s, i));
+    const s = startOfWeek(startOfMonth(anchor));
+    return Array.from({ length: 42 }, (_, i) => addDays(s, i));
   }, [view, anchor]);
 
   const step = (dir: number) => {
     if (view === "day") setAnchor((a) => addDays(a, dir));
     else if (view === "week") setAnchor((a) => addDays(a, dir * 7));
-    else setAnchor((a) => addDays(a, dir * 14));
+    else setAnchor((a) => {
+      const next = new Date(a);
+      next.setMonth(next.getMonth() + dir);
+      return next;
+    });
   };
 
   const heading =
@@ -193,7 +202,7 @@ function CalendarPage() {
         ? `${startOfWeek(anchor).toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${addDays(startOfWeek(anchor), 6).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
         : view === "day"
           ? anchor.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
-          : `${range[0]?.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${range[13]?.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+          : anchor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   const scopeDaysList = range;
   const scopeJobs = scopeDaysList.flatMap(jobsOn);
@@ -215,7 +224,7 @@ function CalendarPage() {
             options={[
               { value: "week", label: "Week" },
               { value: "day", label: "Day" },
-              { value: "agenda", label: "Agenda" },
+              { value: "month", label: "Month" },
             ]}
             value={view}
             onChange={(v) => setView(v as View)}
@@ -275,7 +284,7 @@ function CalendarPage() {
 
       <Panel className="overflow-hidden">
         <SectionTitle
-          title={view === "day" ? "Day board" : view === "week" ? "Week" : "Agenda"}
+          title={view === "day" ? "Day board" : view === "week" ? "Week" : "Month"}
           hint={heading}
           right={<Tag tone="bronze">{scopeJobs.length} on the books</Tag>}
         />
@@ -367,31 +376,37 @@ function CalendarPage() {
           </div>
         )}
 
-        {view === "agenda" && (
-          <div className="divide-y divide-elevated">
-            {range.map((d) => {
-              const list = jobsOn(d);
-              if (list.length === 0) return null;
-              return (
-                <section key={d.toISOString()} className="grid gap-3 px-4 py-4 md:grid-cols-[140px_minmax(0,1fr)]">
-                  <button type="button" onClick={() => setBookDate(d)} className="text-left">
-                    <p className="text-sm font-semibold">{d.toLocaleDateString("en-US", { weekday: "long" })}</p>
-                    <p className="text-xs text-muted-foreground">{d.toLocaleDateString("en-US", { month: "long", day: "numeric" })}</p>
-                  </button>
-                  <div className="divide-y divide-elevated border-y border-elevated">
-                    {list.map((j) => (
-                      <button key={j.id} type="button" onClick={() => setSelected(j.id === selected ? null : j.id)} className="grid w-full grid-cols-[76px_minmax(0,1.3fr)_minmax(0,1fr)_auto] items-center gap-3 px-2 py-3 text-left hover:bg-elevated/30">
-                        <span className="text-xs font-semibold tabular-nums">{new Date(j.scheduled_start as string).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</span>
-                        <span className="min-w-0"><span className="block truncate text-sm font-medium">{j.customers?.name ?? "No customer"}</span><span className="block truncate text-xs text-muted-foreground">{vehicleOf(j) ?? j.title}</span></span>
-                        <span className="min-w-0"><span className="block truncate text-xs">{label(j.service_type)}</span><span className="block truncate text-xs text-muted-foreground">{j.installer || "Unassigned"} · {j.bay || (j.is_mobile ? "Mobile" : "No bay")}</span></span>
-                        <span className="text-[11px] text-muted-foreground">{STATUS_LABELS[j.status] ?? label(j.status)}</span>
+        {view === "month" && (
+          <div className="overflow-x-auto">
+            <div className="min-w-[820px]">
+              <div className="grid grid-cols-7 border-b border-elevated">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                  <div key={day} className="micro-label border-l border-elevated px-3 py-2 first:border-l-0">{day}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7">
+                {range.map((d) => {
+                  const list = jobsOn(d);
+                  const outside = d.getMonth() !== anchor.getMonth();
+                  return (
+                    <div key={d.toISOString()} className={cn("min-h-28 border-b border-l border-elevated p-2 first:border-l-0", outside && "bg-surface-2/30")}>
+                      <button type="button" onClick={() => setBookDate(d)} className={cn("mb-2 flex size-7 items-center justify-center rounded-md text-xs font-semibold hover:bg-elevated", sameDay(d, new Date()) && "bg-bronze text-primary-foreground", outside && "text-muted-foreground")}>
+                        {d.getDate()}
                       </button>
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-            {scopeJobs.length === 0 && <p className="px-5 py-10 text-center text-sm text-muted-foreground">No appointments in this two-week range.</p>}
+                      <div className="space-y-1">
+                        {list.slice(0, 3).map((j) => (
+                          <button key={j.id} type="button" onClick={() => setSelected(j.id === selected ? null : j.id)} className={cn("w-full overflow-hidden rounded-md border border-l-2 border-elevated bg-surface-2 px-2 py-1.5 text-left hover:border-bronze/50", STATUS_TONE[j.status] ?? "border-l-elevated")}>
+                            <span className="block truncate text-[10px] font-semibold tabular-nums">{new Date(j.scheduled_start as string).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} · {j.customers?.name ?? "No customer"}</span>
+                            <span className="block truncate text-[10px] text-muted-foreground">{vehicleOf(j) ?? j.title} · {label(j.service_type)}</span>
+                          </button>
+                        ))}
+                        {list.length > 3 && <p className="px-1 text-[10px] font-medium text-muted-foreground">+{list.length - 3} more</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </Panel>

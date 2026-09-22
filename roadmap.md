@@ -75,6 +75,7 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 - [x] P2 Customer workspace drawer (vehicles → projects → quotes → money → documents, opens deal drawer)
 - [ ] P2 Scheduling continuity (appointment ↔ quote/deposit/installer/location)
 - [x] P3 Production board + technician My Day mobile experience
+- [x] Replace Schedule Agenda with Month and restore installer Shop Floor navigation
 - [x] P4 Command Center redesigned around sales execution and immediate attention
 - [x] P5 Visual consistency pass across modules
 - [ ] P6 Automation recipes, document/SOP attachment, integration presentation
