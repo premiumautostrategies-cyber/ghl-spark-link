@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ACCENT_PRESETS, DEFAULT_ACCENT, applyAccent } from "@/components/accent-theme";
+import { SalesSettings } from "@/components/sales-settings";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -125,6 +126,8 @@ function SettingsPage() {
         </form>
         <p className="mt-3 text-xs text-muted-foreground">Signed in as {user?.email}</p>
       </div>
+
+      <SalesSettings />
 
       <div className="rounded-xl border border-elevated bg-surface p-4">
         <h2 className="text-sm font-semibold">Brand colour</h2>

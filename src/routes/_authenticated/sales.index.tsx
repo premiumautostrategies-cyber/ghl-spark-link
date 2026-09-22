@@ -50,6 +50,9 @@ import {
   type LeadSignal,
 } from "@/lib/pipeline";
 
+import { useSalesConfig } from "@/lib/sales-mode";
+import { DynamicActivity } from "@/components/dynamic-activity";
+
 const SPEED_TO_LEAD_BODY = DEFAULT_MESSAGE_TEMPLATES[0].body;
 
 type Deal = {
@@ -97,8 +100,16 @@ export const Route = createFileRoute("/_authenticated/sales/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: SalesPage,
+  component: SalesRoute,
 });
+
+/** The selected Sales Workspace decides what the Sales nav item shows. */
+function SalesRoute() {
+  const { config, ready } = useSalesConfig();
+  if (!ready) return null;
+  if (config.workspace === "activity") return <DynamicActivity config={config} />;
+  return <SalesPage />;
+}
 
 function SalesPage() {
   const qc = useQueryClient();
