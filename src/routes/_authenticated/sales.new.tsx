@@ -230,18 +230,66 @@ function NewLeadDesk() {
                 <>
                   <div className="space-y-1.5">
                     <Label htmlFor="c-name" className="text-xs">Name</Label>
-                    <Input id="c-name" name="new_customer_name" placeholder="Customer name" required />
+                    <Input
+                      id="c-name"
+                      name="new_customer_name"
+                      placeholder="Customer name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      required
+                    />
                   </div>
                   <div className="grid gap-2.5 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="c-phone" className="text-xs">Phone</Label>
-                      <Input id="c-phone" name="new_customer_phone" placeholder="(555) 555-0142" />
+                      <Input
+                        id="c-phone"
+                        name="new_customer_phone"
+                        placeholder="(555) 555-0142"
+                        value={newPhone}
+                        onChange={(e) => setNewPhone(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="c-email" className="text-xs">Email</Label>
-                      <Input id="c-email" name="new_customer_email" placeholder="name@email.com" />
+                      <Input
+                        id="c-email"
+                        name="new_customer_email"
+                        placeholder="name@email.com"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                      />
                     </div>
                   </div>
+
+                  {matches.length > 0 && (
+                    <div className="space-y-2 rounded-xl border border-urgent/40 bg-urgent/10 p-3">
+                      <p className="text-xs font-semibold text-urgent">
+                        Already in the shop database — don't create a duplicate
+                      </p>
+                      {matches.map((c) => (
+                        <div key={c.id} className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm">
+                            {c.name}
+                            {c.phone ? ` · ${c.phone}` : ""}
+                            {c.email ? ` · ${c.email}` : ""}
+                          </span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setCustomerId(c.id);
+                              setAddingCustomer(false);
+                            }}
+                          >
+                            Use this customer
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     className="text-[11px] text-muted-foreground underline"
@@ -251,6 +299,7 @@ function NewLeadDesk() {
                   </button>
                 </>
               ) : (
+
                 <>
                   <input type="hidden" name="customer_id" value={customerId} />
                   <div className="space-y-1.5">
