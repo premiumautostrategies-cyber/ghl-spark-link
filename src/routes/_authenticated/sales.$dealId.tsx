@@ -416,6 +416,58 @@ function DealDesk() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  /* ---------- delivery handoff ---------- */
+
+  const DELIVERY_TEXT: Record<string, string> = {
+    ready: "Your vehicle is finished and looks great — it's ready for pickup whenever you are.",
+    delivered: "Thanks for trusting us with your vehicle. Care instructions are in your client hub.",
+    review: "It was a pleasure working with you — would you mind leaving us a quick review?",
+  };
+
+  const deliver = useMutation({
+    mutationFn: async (kind: "ready" | "delivered" | "review") => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error: msgErr } = await supabase.from("messages").insert({
+        organization_id: orgId,
+        location_id: locId,
+        deal_id: dealId,
+        customer_id: deal?.customer_id ?? null,
+        channel: "sms",
+        direction: "out",
+        body: DELIVERY_TEXT[kind],
+      });
+      if (msgErr) throw msgErr;
+      if (kind === "delivered" && job?.id) {
+        const { error } = await supabase
+          .from("jobs")
+          .update({ status: "completed", key_released: true })
+          .eq("id", job.id);
+        if (error) throw error;
+      }
+      await supabase.from("lead_events").insert({
+        organization_id: orgId,
+        deal_id: dealId,
+        actor: "shop",
+        kind: "sms_out",
+        detail:
+          kind === "ready"
+            ? "Customer notified vehicle is ready"
+            : kind === "delivered"
+              ? "Vehicle delivered"
+              : "Review request sent",
+      });
+    },
+    onSuccess: (_d, kind) => {
+      toast.success(
+        kind === "ready" ? "Customer notified" : kind === "delivered" ? "Marked delivered" : "Review request sent",
+      );
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
+
   /* ---------- scheduling ---------- */
 
   const schedule = useMutation({
