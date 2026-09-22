@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DayBookingSheet } from "@/components/day-booking-sheet";
 import { PageHeader } from "@/components/page-header";
+import { laneLayout, minutesOfDay } from "@/lib/overlap";
 
 type View = "day" | "week" | "month";
 
