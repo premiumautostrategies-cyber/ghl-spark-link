@@ -115,10 +115,8 @@ function SalesPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { orgId, locId } = useOrg();
-  const [open, setOpen] = useState(false);
-  const [addingCustomer, setAddingCustomer] = useState(false);
-  const [customerId, setCustomerId] = useState("");
-  const [newTags, setNewTags] = useState<string[]>([]);
+  const [filter, setFilter] = useState<FilterKey>("all");
+
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
