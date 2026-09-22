@@ -28,12 +28,18 @@ export const Route = createFileRoute("/demo")({
   component: DemoEntry,
 });
 
+// Guards against a double-invoked effect seeding the demo shop twice.
+let demoRunStarted = false;
+
 function DemoEntry() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("Opening the demo shop…");
 
   useEffect(() => {
     let cancelled = false;
+    if (demoRunStarted) return;
+    demoRunStarted = true;
+
 
     async function run() {
       try {
