@@ -79,8 +79,8 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const vehicle = deal?.vehicles ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ") : "No vehicle on file";
 
   return (
-    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface 2xl:h-[calc(100vh-12rem)] 2xl:grid-cols-[300px_minmax(390px,1fr)_360px]">
-      <aside className="flex min-h-0 flex-col border-b border-elevated bg-background/25 2xl:border-b-0 2xl:border-r">
+    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[260px_minmax(360px,1fr)_320px]">
+      <aside className="flex min-h-0 flex-col border-b border-elevated bg-background/25 xl:border-b-0 xl:border-r">
         <div className="space-y-3 border-b border-elevated p-4">
           <div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Customer</h2><span className="text-xs text-muted-foreground">{rows.length} conversations</span></div>
           <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find customer" className="pl-9" /></div>
@@ -108,11 +108,11 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
         </div> : <p className="p-5 text-sm text-muted-foreground">No conversations found.</p>}
       </aside>
 
-      <section className="flex min-h-[620px] min-w-0 flex-col border-b border-elevated 2xl:min-h-0 2xl:border-b-0 2xl:border-r">
+      <section className="flex min-h-[620px] min-w-0 flex-col border-b border-elevated xl:min-h-0 xl:border-b-0 xl:border-r">
         {deal ? <><header className="border-b border-elevated px-5 py-3"><h2 className="text-sm font-semibold">Conversation</h2><p className="truncate text-xs text-muted-foreground">Text and email with {deal.customers?.name}</p></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name ?? null} variant="inbox" channels={["sms", "email"]} /></> : <div className="grid flex-1 place-items-center text-sm text-muted-foreground">Select a customer.</div>}
       </section>
 
-      <aside className="min-h-[680px] bg-background/15 2xl:min-h-0">{deal ? <InboxQuoteBuilder key={deal.id} deal={deal} /> : null}</aside>
+      <aside className="min-h-[680px] bg-background/15 xl:min-h-0">{deal ? <InboxQuoteBuilder key={deal.id} deal={deal} /> : null}</aside>
     </div>
   );
 }
