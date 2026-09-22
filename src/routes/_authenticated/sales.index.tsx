@@ -97,8 +97,16 @@ export const Route = createFileRoute("/_authenticated/sales/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: SalesPage,
+  component: SalesRoute,
 });
+
+/** The selected Sales Workspace decides what the Sales nav item shows. */
+function SalesRoute() {
+  const { config, ready } = useSalesConfig();
+  if (!ready) return null;
+  if (config.workspace === "activity") return <DynamicActivity config={config} />;
+  return <SalesPage />;
+}
 
 function SalesPage() {
   const qc = useQueryClient();
