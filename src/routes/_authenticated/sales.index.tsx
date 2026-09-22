@@ -169,6 +169,7 @@ function SalesPage() {
       let cid = String(form.get("customer_id") || "") || null;
       const newName = String(form.get("new_customer_name") || "").trim();
       const newPhone = String(form.get("new_customer_phone") || "").trim();
+      const newEmail = String(form.get("new_customer_email") || "").trim();
 
       if (!cid && newName) {
         const { data: cust, error: custErr } = await supabase
@@ -176,6 +177,7 @@ function SalesPage() {
           .insert({
             name: newName,
             phone: newPhone || null,
+            email: newEmail || null,
             organization_id: orgId,
             location_id: locId,
           })
