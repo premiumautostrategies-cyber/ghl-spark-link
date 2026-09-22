@@ -14,9 +14,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Car, ChevronDown, ChevronUp, Link as LinkIcon, MessageSquare, Phone, Plus } from "lucide-react";
+import { Car, ChevronRight, Link as LinkIcon, MessageSquare, Phone, Plus } from "lucide-react";
 import { useEmitEvent } from "@/lib/integrations/emit";
-import { label, money, shortDate } from "@/lib/format";
+import { money } from "@/lib/format";
+import { CustomerWorkspace } from "@/components/customer-workspace";
+import { LeadWorkspace } from "@/components/lead-workspace";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({
@@ -38,7 +40,8 @@ function CustomersPage() {
   const [open, setOpen] = useState(false);
   const [vehicleFor, setVehicleFor] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [openCustomer, setOpenCustomer] = useState<string | null>(null);
+  const [openDeal, setOpenDeal] = useState<string | null>(null);
   const { organization, location } = useRouteContext({ from: "/_authenticated" });
   const orgId = organization?.id;
   const locId = location?.id ?? null;
@@ -141,13 +144,6 @@ function CustomersPage() {
       .includes(search.toLowerCase()),
   );
 
-  const toggle = (id: string) => {
-    const next = new Set(expanded);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setExpanded(next);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -227,10 +223,12 @@ function CustomersPage() {
             const primary = c.vehicles?.[0];
             const extra = (c.vehicles?.length ?? 0) - 1;
             const phone = c.phone?.trim();
-            const isOpen = expanded.has(c.id);
             return (
               <li key={c.id} className="border-b border-border last:border-b-0">
-                <div className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 items-center px-4 py-3 hover:bg-muted/20 transition-colors">
+                <div
+                  className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 items-center px-4 py-3 hover:bg-muted/20 transition-colors cursor-pointer"
+                  onClick={() => setOpenCustomer(c.id)}
+                >
                   <div className="min-w-0">
                     <p className="font-medium truncate">{c.name}</p>
                     {c.email && <p className="text-xs text-muted-foreground truncate">{c.email}</p>}
@@ -258,7 +256,7 @@ function CustomersPage() {
                     )}
                   </div>
                   <div className="text-right font-medium">{money(ltv)}</div>
-                  <div className="flex justify-center gap-1">
+                  <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
                     {phone ? (
                       <>
                         <Button size="icon" variant="ghost" className="size-8" asChild>
@@ -291,6 +289,16 @@ function CustomersPage() {
           })}
         </ul>
       </div>
+
+      <CustomerWorkspace
+        customerId={openCustomer}
+        onClose={() => setOpenCustomer(null)}
+        onOpenDeal={(id) => {
+          setOpenCustomer(null);
+          setOpenDeal(id);
+        }}
+      />
+      <LeadWorkspace dealId={openDeal} onClose={() => setOpenDeal(null)} />
 
       <Dialog open={vehicleFor !== null} onOpenChange={(v) => !v && setVehicleFor(null)}>
         <DialogContent>
