@@ -92,13 +92,14 @@ function NewLeadDesk() {
       const formEmail = String(form.get("new_customer_email") || "").trim();
 
 
-      if (!cid && newName) {
+      if (!cid && formName) {
         const { data: cust, error: custErr } = await supabase
           .from("customers")
           .insert({
-            name: newName,
-            phone: newPhone || null,
-            email: newEmail || null,
+            name: formName,
+            phone: formPhone || null,
+            email: formEmail || null,
+
             organization_id: orgId,
             location_id: locId,
           })
