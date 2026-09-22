@@ -609,6 +609,9 @@ function SchedulePage() {
                             onClick={() => setInspect(j.id === inspect ? null : j.id)}
                             className={cn(
                               "absolute top-2 h-[62px] overflow-hidden rounded-xl border px-3 py-2 text-left transition-colors",
+                              // while a drag is in flight, let drops fall through to the hour cells
+                              dragJob && "pointer-events-none",
+                              dragJob === j.id && "opacity-60",
                               clash
                                 ? "border-critical/60 bg-critical/15"
                                 : "border-elevated bg-surface-2 hover:border-bronze/50",
