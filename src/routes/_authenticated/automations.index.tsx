@@ -436,10 +436,10 @@ function QuickRulesTab() {
       {rules.length === 0 ? (
         <EmptyState title="No quick rules yet" body="Add a reminder that fires on one event." />
       ) : (
-        <div className="space-y-3">
+        <div className="overflow-hidden rounded-xl border border-elevated bg-surface">
           {rules.map((r) => (
-            <Panel key={r.id} className="p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <div key={r.id} className="border-b border-elevated px-4 py-3 last:border-b-0">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold">{r.name}</p>
                   <p className="text-xs text-muted-foreground">
@@ -458,11 +458,11 @@ function QuickRulesTab() {
                 </div>
               </div>
               {r.template && (
-                <p className="mt-3 rounded-lg bg-surface-2 p-3 text-sm text-muted-foreground">
+                <p className="mt-2 truncate text-sm text-muted-foreground">
                   {r.template}
                 </p>
               )}
-            </Panel>
+            </div>
           ))}
         </div>
       )}
@@ -496,11 +496,11 @@ function ActivityTab() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="overflow-hidden rounded-xl border border-elevated bg-surface">
       {runs.map((run) => {
         const steps = (run.steps as unknown as { label: string; detail: string }[]) ?? [];
         return (
-          <Panel key={run.id} className="p-5">
+          <div key={run.id} className="border-b border-elevated px-4 py-3 last:border-b-0">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <WorkflowIcon className="h-4 w-4 text-bronze" />
@@ -527,7 +527,7 @@ function ActivityTab() {
                 </li>
               ))}
             </ol>
-          </Panel>
+          </div>
         );
       })}
     </div>

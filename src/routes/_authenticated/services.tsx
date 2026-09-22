@@ -823,17 +823,19 @@ function ServicesPage() {
                   </button>
                 )}
                 {!isCollapsed && (
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="overflow-hidden rounded-xl border border-elevated bg-surface">
+                    <div className="grid grid-cols-[minmax(0,1fr)_120px_110px_92px] gap-4 border-b border-elevated bg-surface-2/60 px-4 py-2 text-xs uppercase text-muted-foreground">
+                      <span>Service</span><span>Price</span><span>Duration</span><span>Status</span>
+                    </div>
                     {g.items.map((s) => {
             return (
-              <Panel
+              <div
                 key={s.id}
-                className="flex cursor-pointer flex-col gap-3 self-start p-5 transition-colors hover:border-bronze/40"
+                className="grid cursor-pointer grid-cols-[minmax(0,1fr)_120px_110px_92px] items-center gap-4 border-b border-elevated px-4 py-3 transition-colors last:border-b-0 hover:bg-surface-2/40"
                 onClick={() => openEdit(s)}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="min-w-0 truncate font-semibold">{s.name}</p>
-                  <div className="flex shrink-0 items-center gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2"><p className="truncate font-semibold">{s.name}</p>
                     {s.pricing_mode === "tiered" && (
                       <span className="rounded-full border border-hairline/60 bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
                         Size varies
@@ -844,19 +846,12 @@ function ServicesPage() {
                         {(s.tags ?? [])[0]}
                       </span>
                     )}
-                    <span onClick={(e) => e.stopPropagation()}>
-                      <Switch
-                        checked={s.is_active}
-                        onCheckedChange={(v) => toggleActive.mutate({ id: s.id, is_active: v })}
-                      />
-                    </span>
                   </div>
-                </div>
-                <p className="line-clamp-2 min-h-8 text-xs text-muted-foreground">
+                  <p className="truncate text-xs text-muted-foreground">
                   {s.customer_description || s.description || "No description yet."}
-                </p>
-                <div className="mt-auto flex items-center justify-between gap-2 border-t border-elevated pt-3">
-                  <span className="font-display text-lg font-bold tabular-nums text-bronze">
+                  </p>
+                </div>
+                  <span className="font-semibold tabular-nums text-bronze">
                     {money(priceFor(s))}
                     {s.pricing_mode === "tiered" && vehClass === "any" && (
                       <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.1em] text-muted-foreground">
@@ -864,12 +859,14 @@ function ServicesPage() {
                       </span>
                     )}
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Clock className="h-3.5 w-3.5" />
                     {fmtDuration(s.duration_minutes)}
                   </span>
-                </div>
-              </Panel>
+                  <span onClick={(e) => e.stopPropagation()} className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
+                    {s.is_active ? "Active" : "Inactive"}<Switch checked={s.is_active} onCheckedChange={(v) => toggleActive.mutate({ id: s.id, is_active: v })} />
+                  </span>
+              </div>
                     );
                     })}
                   </div>

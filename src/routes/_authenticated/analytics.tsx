@@ -138,14 +138,14 @@ function AnalyticsPage() {
         <>
           <div className="rounded-xl border border-elevated bg-surface p-4">
             <h2 className="text-sm font-semibold">Shop health</h2>
-            <ul className="mt-3 space-y-2 text-sm">
+            <ul className="mt-3 divide-y divide-border text-sm">
               {health.length === 0 && (
                 <li className="text-muted-foreground">
                   Nothing needs attention — stock, pipeline and payments are clean.
                 </li>
               )}
               {health.map((h) => (
-                <li key={h} className="rounded-lg bg-muted/30 px-3 py-2">
+                <li key={h} className="py-3">
                   {h}
                 </li>
               ))}
@@ -157,36 +157,22 @@ function AnalyticsPage() {
               <h2 className="text-sm font-semibold">
                 Revenue by service
               </h2>
-              <div className="mt-4 space-y-3">
-                {byService.map(([svc, total]) => (
-                  <div key={svc} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>{label(svc)}</span>
-                      <span className="font-medium">{money(total)}</span>
-                    </div>
-                    <Bar value={total} max={maxService} />
-                  </div>
-                ))}
-              </div>
+              <table className="mt-3 w-full text-sm"><thead className="border-b border-border text-left text-xs uppercase text-muted-foreground"><tr><th className="py-2">Service</th><th className="py-2">Share</th><th className="py-2 text-right">Revenue</th></tr></thead>
+                <tbody className="divide-y divide-border">{byService.map(([svc, total]) => <tr key={svc}><td className="py-3 pr-4">{label(svc)}</td><td className="w-1/2 py-3 pr-4"><Bar value={total} max={maxService} /></td><td className="py-3 text-right font-medium">{money(total)}</td></tr>)}</tbody>
+              </table>
             </div>
 
             <div className="rounded-xl border border-elevated bg-surface p-4">
               <h2 className="text-sm font-semibold">
                 Production by installer
               </h2>
-              <div className="mt-4 space-y-3">
+              <div className="mt-3">
                 {byInstaller.length === 0 && (
                   <p className="text-sm text-muted-foreground">No jobs assigned yet.</p>
                 )}
-                {byInstaller.map(([name, total]) => (
-                  <div key={name} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>{name}</span>
-                      <span className="font-medium">{money(total)}</span>
-                    </div>
-                    <Bar value={total} max={maxInstaller} />
-                  </div>
-                ))}
+                {byInstaller.length > 0 && <table className="w-full text-sm"><thead className="border-b border-border text-left text-xs uppercase text-muted-foreground"><tr><th className="py-2">Installer</th><th className="py-2">Share</th><th className="py-2 text-right">Value</th></tr></thead><tbody className="divide-y divide-border">
+                  {byInstaller.map(([name, total]) => <tr key={name}><td className="py-3 pr-4">{name}</td><td className="w-1/2 py-3 pr-4"><Bar value={total} max={maxInstaller} /></td><td className="py-3 text-right font-medium">{money(total)}</td></tr>)}
+                </tbody></table>}
               </div>
             </div>
 
@@ -194,14 +180,9 @@ function AnalyticsPage() {
               <h2 className="text-sm font-semibold">
                 Lead sources
               </h2>
-              <div className="mt-4 flex flex-wrap gap-4">
-                {bySource.map(([src, count]) => (
-                  <div key={src} className="rounded-lg border border-border px-4 py-3">
-                    <p className="text-xs uppercase text-muted-foreground">{src}</p>
-                    <p className="text-xl font-semibold">{count}</p>
-                  </div>
-                ))}
-              </div>
+              <table className="mt-3 w-full text-sm"><thead className="border-b border-border text-left text-xs uppercase text-muted-foreground"><tr><th className="py-2">Source</th><th className="py-2 text-right">Opportunities</th></tr></thead><tbody className="divide-y divide-border">
+                {bySource.map(([src, count]) => <tr key={src}><td className="py-3">{label(src)}</td><td className="py-3 text-right font-semibold">{count}</td></tr>)}
+              </tbody></table>
             </div>
           </div>
         </>
