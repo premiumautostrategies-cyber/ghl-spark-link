@@ -14,9 +14,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Car, ChevronDown, ChevronUp, Link as LinkIcon, MessageSquare, Phone, Plus } from "lucide-react";
+import { Car, ChevronRight, Link as LinkIcon, MessageSquare, Phone, Plus } from "lucide-react";
 import { useEmitEvent } from "@/lib/integrations/emit";
-import { label, money, shortDate } from "@/lib/format";
+import { money } from "@/lib/format";
+import { CustomerWorkspace } from "@/components/customer-workspace";
+import { LeadWorkspace } from "@/components/lead-workspace";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({
@@ -38,7 +40,8 @@ function CustomersPage() {
   const [open, setOpen] = useState(false);
   const [vehicleFor, setVehicleFor] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [openCustomer, setOpenCustomer] = useState<string | null>(null);
+  const [openDeal, setOpenDeal] = useState<string | null>(null);
   const { organization, location } = useRouteContext({ from: "/_authenticated" });
   const orgId = organization?.id;
   const locId = location?.id ?? null;
@@ -141,13 +144,6 @@ function CustomersPage() {
       .includes(search.toLowerCase()),
   );
 
-  const toggle = (id: string) => {
-    const next = new Set(expanded);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setExpanded(next);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -227,10 +223,12 @@ function CustomersPage() {
             const primary = c.vehicles?.[0];
             const extra = (c.vehicles?.length ?? 0) - 1;
             const phone = c.phone?.trim();
-            const isOpen = expanded.has(c.id);
             return (
               <li key={c.id} className="border-b border-border last:border-b-0">
-                <div className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 items-center px-4 py-3 hover:bg-muted/20 transition-colors">
+                <div
+                  className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 items-center px-4 py-3 hover:bg-muted/20 transition-colors cursor-pointer"
+                  onClick={() => setOpenCustomer(c.id)}
+                >
                   <div className="min-w-0">
                     <p className="font-medium truncate">{c.name}</p>
                     {c.email && <p className="text-xs text-muted-foreground truncate">{c.email}</p>}
@@ -258,7 +256,7 @@ function CustomersPage() {
                     )}
                   </div>
                   <div className="text-right font-medium">{money(ltv)}</div>
-                  <div className="flex justify-center gap-1">
+                  <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
                     {phone ? (
                       <>
                         <Button size="icon" variant="ghost" className="size-8" asChild>
@@ -280,91 +278,31 @@ function CustomersPage() {
                     size="icon"
                     variant="ghost"
                     className="size-8"
-                    onClick={() => toggle(c.id)}
-                    aria-label={isOpen ? "Collapse" : "Expand"}
+                    onClick={() => setOpenCustomer(c.id)}
+                    aria-label="Open customer workspace"
                   >
-                    {isOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                    <ChevronRight className="size-4" />
                   </Button>
                 </div>
-
-                {isOpen && (
-                  <div className="px-4 pb-4">
-                    <div className="rounded-lg border border-border bg-background p-3 space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Vehicles & history
-                        </span>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={!c.portal_token}
-                            onClick={() => {
-                              void navigator.clipboard?.writeText(
-                                `${window.location.origin}/p/portal/${c.portal_token}`,
-                              );
-                              toast.success("Customer hub link copied");
-                            }}
-                          >
-                            <LinkIcon className="size-3.5" /> Hub link
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setVehicleFor(c.id)}>
-                            <Plus className="size-3.5" /> Vehicle
-                          </Button>
-                        </div>
-                      </div>
-
-                      {c.vehicles.length === 0 && (
-                        <p className="text-sm text-muted-foreground">No vehicles on file.</p>
-                      )}
-                      {c.vehicles.map((v) => {
-                        const history = jobs.filter((j) => j.vehicle_id === v.id);
-                        const spend = history.reduce((t, j) => t + Number(j.price ?? 0), 0);
-                        return (
-                          <div key={v.id} className="rounded-md border border-border px-3 py-2 text-sm">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Car className="size-4 text-primary" />
-                              <span className="font-medium">
-                                {[v.year, v.make, v.model, v.color].filter(Boolean).join(" ") || "Vehicle"}
-                              </span>
-                              <span className="ml-auto whitespace-nowrap text-xs text-muted-foreground">
-                                {[v.plate, history.length ? `${history.length} jobs · ${money(spend)}` : "No work yet"]
-                                  .filter(Boolean)
-                                  .join(" · ")}
-                              </span>
-                            </div>
-                            {history.length > 0 && (
-                              <div className="mt-2 space-y-1 border-t border-border/60 pt-2">
-                                {history.map((j) => (
-                                  <div
-                                    key={j.id}
-                                    className="flex items-center justify-between gap-3 text-xs text-muted-foreground"
-                                  >
-                                    <span className="min-w-0 truncate">
-                                      {j.title} · {label(j.status)}
-                                    </span>
-                                    <span className="whitespace-nowrap">
-                                      {shortDate(j.scheduled_start)} · {money(j.price ?? 0)}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {v.vin && (
-                              <p className="mt-2 text-[11px] text-muted-foreground">VIN {v.vin}</p>
-                            )}
-                          </div>
-                        );
-                      })}
-                      {c.notes && <p className="text-sm text-muted-foreground">{c.notes}</p>}
-                    </div>
-                  </div>
-                )}
               </li>
             );
           })}
         </ul>
       </div>
+
+      <CustomerWorkspace
+        customerId={openCustomer}
+        onClose={() => setOpenCustomer(null)}
+        onAddVehicle={(id) => {
+          setOpenCustomer(null);
+          setVehicleFor(id);
+        }}
+        onOpenDeal={(id) => {
+          setOpenCustomer(null);
+          setOpenDeal(id);
+        }}
+      />
+      <LeadWorkspace dealId={openDeal} onClose={() => setOpenDeal(null)} />
 
       <Dialog open={vehicleFor !== null} onOpenChange={(v) => !v && setVehicleFor(null)}>
         <DialogContent>

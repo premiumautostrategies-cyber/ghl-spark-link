@@ -70,7 +70,8 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 - [x] P1 Lead Workspace drawer (activity timeline, conversation, quote, notes, stage moves)
 - [x] Customer-activity event log (lead_events) seeded with realistic restyling activity
 - [x] Workspace bootstrap RPC (remix DB lost the auth signup trigger); demo seed double-run guard
-- [ ] P2 Customer / vehicle / quote / schedule continuity
+- [x] P2 Customer workspace drawer (vehicles → projects → quotes → money → documents, opens deal drawer)
+- [ ] P2 Scheduling continuity (appointment ↔ quote/deposit/installer/location)
 - [ ] P3 Production board + technician My Day mobile experience
 - [ ] P4 Command Center (sales execution) vs Operations/Owner split
 - [ ] P5 Visual consistency pass across modules
