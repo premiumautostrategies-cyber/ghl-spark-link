@@ -166,7 +166,8 @@ function AppShellContent({ children }: { children: ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
-  const sectionActive = (section: NavSection) => section.items.some((item) => isActive(item.to));
+  const sectionActive = (section: NavSection) =>
+    section.items.some((item) => item.label !== "Owner" && isActive(item.to));
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
