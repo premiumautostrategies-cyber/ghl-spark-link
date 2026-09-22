@@ -831,12 +831,39 @@ function TechnicianProductionPage() {
                   <Input id="mileage" name="mileage" type="number" inputMode="numeric" className="min-h-12" defaultValue={s.inspection.mileage ?? ""} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="notes" className="text-xs">Condition notes & pre-existing damage</Label>
+                  <Label htmlFor="notes" className="text-xs">Condition notes &amp; pre-existing damage</Label>
                   <Textarea id="notes" name="notes" rows={3} defaultValue={s.inspection.notes ?? ""} placeholder="Rock chips on hood, swirls on driver door…" />
+                </div>
+                <div className="rounded-xl border border-elevated bg-elevated/40 p-3">
+                  <p className="text-xs font-semibold">Before you close this out</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Shoot the whole vehicle plus a close-up of every mark you noted. Photos protect you later.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {photoPaths.length > 0
+                      ? `${photoPaths.length} photo${photoPaths.length === 1 ? "" : "s"} on this job.`
+                      : "No intake photos yet."}
+                  </p>
+                  <label className="mt-2 inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border border-elevated px-4 text-sm font-semibold">
+                    Add intake photos
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files ?? []);
+                        if (files.length) uploadPhotos.mutate(files);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
                 </div>
                 <Button type="submit" size="lg" className="min-h-14 w-full" disabled={completeInspection.isPending}>
                   Complete inspection
                 </Button>
+
               </form>
             )}
           </div>
