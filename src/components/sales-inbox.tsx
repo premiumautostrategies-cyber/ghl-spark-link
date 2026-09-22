@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Car, ChevronDown, Clock3, ExternalLink, Mail, Phone, Search, UserRound } from "lucide-react";
+import { Car, Clock3, ExternalLink, Mail, Phone, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DealComms } from "@/components/deal-comms";
 import { InboxQuoteBuilder } from "@/components/inbox-quote-builder";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { money, shortDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -37,7 +36,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const { data: deals = [] } = useQuery({
     queryKey: ["sales-inbox-deals"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("deals").select("id,customer_id,vehicle_id,estimate_id,title,stage,value,service_tags,created_at,speed_to_lead_at,last_activity_at,customers(id,name,phone,email,company,notes,created_at),vehicles(id,year,make,model,color,plate)").not("stage", "in", "(won,lost)").order("last_activity_at", { ascending: false, nullsFirst: false });
+      const { data, error } = await supabase.from("deals").select("id,customer_id,vehicle_id,estimate_id,title,stage,value,service_tags,created_at,speed_to_lead_at,last_activity_at,customers(id,name,phone,email,company,notes,created_at),vehicles(id,year,make,model,color,plate)").order("last_activity_at", { ascending: false, nullsFirst: false });
       if (error) throw error;
       return data as unknown as InboxDeal[];
     },
@@ -79,18 +78,33 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const vehicle = deal?.vehicles ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ") : "No vehicle on file";
 
   return (
-    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[250px_minmax(320px,1fr)_380px]">
+    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[272px_minmax(300px,1fr)_360px]">
       <aside className="flex min-h-0 flex-col border-b border-elevated bg-background/25 xl:border-b-0 xl:border-r">
         <div className="space-y-3 border-b border-elevated p-4">
-          <div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Customer</h2><span className="text-xs text-muted-foreground">{rows.length} conversations</span></div>
-          <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find customer" className="pl-9" /></div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild><Button variant="secondary" className="w-full justify-between"><span className="truncate">{deal?.customers?.name ?? "Select a conversation"}</span><ChevronDown className="size-4" /></Button></DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="max-h-80 w-[268px] overflow-y-auto">
-              {rows.map((row) => <DropdownMenuItem key={row.deal.id} onSelect={() => setSelectedId(row.deal.id)} className="items-start gap-2 py-2.5"><span className={cn("mt-1.5 size-2 shrink-0 rounded-full", TEMP_META[row.signal.temperature].dot)} /><span className="min-w-0"><span className="block truncate text-sm font-medium">{row.deal.customers?.name ?? "No customer"}</span><span className="block truncate text-xs text-muted-foreground">{row.preview} · {sinceLabel(row.latestAt)}</span></span></DropdownMenuItem>)}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Conversations</h2><span className="text-xs text-muted-foreground">{rows.length}</span></div>
+          <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search all messages" className="pl-9" /></div>
         </div>
+
+        <div className="max-h-[340px] min-h-[220px] flex-1 overflow-y-auto border-b border-elevated xl:max-h-[45%]">
+          {rows.length ? rows.map((row) => (
+            <button
+              key={row.deal.id}
+              type="button"
+              onClick={() => setSelectedId(row.deal.id)}
+              className={cn("flex w-full items-start gap-2 border-b border-elevated/60 px-4 py-3 text-left transition-colors hover:bg-surface-2", row.deal.id === deal?.id && "bg-surface-2")}
+            >
+              <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", TEMP_META[row.signal.temperature].dot)} />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-baseline justify-between gap-2">
+                  <span className="truncate text-sm font-medium">{row.deal.customers?.name ?? "No customer"}</span>
+                  <span className="shrink-0 text-[10px] text-muted-foreground">{sinceLabel(row.latestAt)}</span>
+                </span>
+                <span className="mt-0.5 block truncate text-xs text-muted-foreground">{row.preview}</span>
+              </span>
+            </button>
+          )) : <p className="p-4 text-xs text-muted-foreground">No conversations match that search.</p>}
+        </div>
+
 
         {deal ? <div className="min-h-0 flex-1 overflow-y-auto">
           <section className="space-y-3 border-b border-elevated p-4">
