@@ -134,6 +134,8 @@ const PRODUCTION: NavSection = {
   ],
 };
 
+const TECHNICIAN_ITEM: NavItem = { to: "/jobs", label: "My Work", icon: Wrench, searchTerms: "technician installer schedule work orders" };
+
 const STANDALONE_ITEMS: NavItem[] = [
   { to: "/calendar", label: "Schedule", icon: CalendarDays, searchTerms: "appointments bays" },
 ];
@@ -239,7 +241,7 @@ function AppShellContent({ children }: { children: ReactNode }) {
             <SidebarGroup className="p-0">
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <PrimaryNavItem item={PRODUCTION.items[0]} active={isActive("/jobs")} />
+                  <PrimaryNavItem item={TECHNICIAN_ITEM} active={isActive("/jobs")} />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
