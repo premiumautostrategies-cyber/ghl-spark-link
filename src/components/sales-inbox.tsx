@@ -79,7 +79,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const vehicle = deal?.vehicles ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ") : "No vehicle on file";
 
   return (
-    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[260px_minmax(360px,1fr)_320px]">
+    <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[250px_minmax(320px,1fr)_380px]">
       <aside className="flex min-h-0 flex-col border-b border-elevated bg-background/25 xl:border-b-0 xl:border-r">
         <div className="space-y-3 border-b border-elevated p-4">
           <div className="flex items-center justify-between"><h2 className="text-sm font-semibold">Customer</h2><span className="text-xs text-muted-foreground">{rows.length} conversations</span></div>

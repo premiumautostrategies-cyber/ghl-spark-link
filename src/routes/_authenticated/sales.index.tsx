@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { money } from "@/lib/format";
+import { money, SERVICE_TYPES, SERVICE_TYPE_LABELS } from "@/lib/format";
 import { toast } from "sonner";
 import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/shop";
 import {
@@ -107,6 +107,7 @@ function SalesPage() {
   const [open, setOpen] = useState(false);
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [customerId, setCustomerId] = useState("");
+  const [newTags, setNewTags] = useState<string[]>([]);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
@@ -168,6 +169,7 @@ function SalesPage() {
       let cid = String(form.get("customer_id") || "") || null;
       const newName = String(form.get("new_customer_name") || "").trim();
       const newPhone = String(form.get("new_customer_phone") || "").trim();
+      const newEmail = String(form.get("new_customer_email") || "").trim();
 
       if (!cid && newName) {
         const { data: cust, error: custErr } = await supabase
@@ -175,6 +177,7 @@ function SalesPage() {
           .insert({
             name: newName,
             phone: newPhone || null,
+            email: newEmail || null,
             organization_id: orgId,
             location_id: locId,
           })
@@ -216,6 +219,7 @@ function SalesPage() {
           value: 0,
           probability: 25,
           notes: String(form.get("notes") || "") || null,
+          service_tags: newTags,
           customer_id: cid,
           vehicle_id: vehicleId,
           organization_id: orgId,
@@ -254,6 +258,7 @@ function SalesPage() {
       toast.success("Lead added — first text sent");
       setOpen(false);
       setAddingCustomer(false);
+      setNewTags([]);
       qc.invalidateQueries({ queryKey: ["deals"] });
       qc.invalidateQueries({ queryKey: ["pipeline-events"] });
       qc.invalidateQueries({ queryKey: ["customers"] });
@@ -363,6 +368,7 @@ function SalesPage() {
                 setOpen(v);
                 if (!v) {
                   setAddingCustomer(false);
+                  setNewTags([]);
                   setCustomerId("");
                 }
               }}
@@ -370,76 +376,121 @@ function SalesPage() {
               <DialogTrigger asChild>
                 <Button>New lead</Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>New lead</DialogTitle>
                 </DialogHeader>
                 <form
-                  className="space-y-4"
+                  className="space-y-3"
                   onSubmit={(e) => {
                     e.preventDefault();
                     addDeal.mutate(new FormData(e.currentTarget));
                   }}
                 >
-                  <div className="space-y-2">
-                    <Label>Customer</Label>
-                    {addingCustomer ? (
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <Input name="new_customer_name" placeholder="Name" required autoFocus />
-                        <Input name="new_customer_phone" placeholder="Phone" />
-                        <button
-                          type="button"
-                          className="justify-self-start text-xs text-muted-foreground underline sm:col-span-2"
-                          onClick={() => setAddingCustomer(false)}
-                        >
-                          Pick an existing customer instead
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <input type="hidden" name="customer_id" value={customerId} />
-                        <Select value={customerId} onValueChange={setCustomerId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose a customer" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {customers.map((c) => (
-                              <SelectItem key={c.id} value={c.id}>
-                                {c.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <button
-                          type="button"
-                          className="text-xs text-muted-foreground underline"
-                          onClick={() => {
-                            setAddingCustomer(true);
-                            setCustomerId("");
-                          }}
-                        >
-                          + New customer
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <div className="relative overflow-hidden rounded-xl border border-elevated bg-surface-2 p-3">
+                    <span className={cn("absolute inset-y-0 left-0 w-[3px]", TEMP_META.new.dot)} />
 
-                  <div className="space-y-2">
-                    <Label>Vehicle (optional)</Label>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <Input name="vehicle_year" type="number" placeholder="Year" />
-                      <Input name="vehicle_make" placeholder="Make" />
-                      <Input name="vehicle_model" placeholder="Model" />
+                    <div className="space-y-2">
+                      <p className="micro-label">Customer</p>
+                      {addingCustomer ? (
+                        <div className="space-y-2">
+                          <Input name="new_customer_name" placeholder="Customer name" required autoFocus />
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <Input name="new_customer_phone" placeholder="Phone" />
+                            <Input name="new_customer_email" placeholder="Email" />
+                          </div>
+                          <button
+                            type="button"
+                            className="text-[11px] text-muted-foreground underline"
+                            onClick={() => setAddingCustomer(false)}
+                          >
+                            Pick an existing customer instead
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <input type="hidden" name="customer_id" value={customerId} />
+                          <Select value={customerId} onValueChange={setCustomerId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Choose a customer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {customers.map((c) => (
+                                <SelectItem key={c.id} value={c.id}>
+                                  {c.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <button
+                            type="button"
+                            className="text-[11px] text-muted-foreground underline"
+                            onClick={() => {
+                              setAddingCustomer(true);
+                              setCustomerId("");
+                            }}
+                          >
+                            + New customer
+                          </button>
+                        </div>
+                      )}
                     </div>
+
+                    <div className="mt-3 space-y-2 border-t border-elevated pt-3">
+                      <Label htmlFor="title" className="micro-label">What do they want?</Label>
+                      <Input
+                        id="title"
+                        name="title"
+                        placeholder="Full front PPF + ceramic tint"
+                        className="text-sm font-semibold"
+                        required
+                      />
+                    </div>
+
+                    <div className="mt-3 space-y-2">
+                      <p className="micro-label">Vehicle</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Input name="vehicle_year" type="number" placeholder="Year" />
+                        <Input name="vehicle_make" placeholder="Make" />
+                        <Input name="vehicle_model" placeholder="Model" />
+                      </div>
+                    </div>
+
+                    <div className="mt-3 space-y-2">
+                      <p className="micro-label">Services</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {SERVICE_TYPES.map((t) => {
+                          const on = newTags.includes(t);
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() =>
+                                setNewTags((list) =>
+                                  on ? list.filter((x) => x !== t) : [...list, t],
+                                )
+                              }
+                              className={cn(
+                                "rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors",
+                                on
+                                  ? "border-bronze bg-bronze/15 text-bronze"
+                                  : "border-elevated bg-surface text-muted-foreground hover:text-foreground",
+                              )}
+                            >
+                              {SERVICE_TYPE_LABELS[t] ?? t}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <p className={cn("mt-3 text-[11px]", TEMP_META.new.text)}>
+                      Untouched — the first text goes out as soon as you save
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="title">What do they want?</Label>
-                    <Input id="title" name="title" placeholder="Full front PPF + ceramic tint" required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Notes (optional)</Label>
+                    <Label htmlFor="notes" className="micro-label">Notes (optional)</Label>
                     <Textarea id="notes" name="notes" rows={2} />
                   </div>
 
