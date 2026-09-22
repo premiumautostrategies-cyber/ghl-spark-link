@@ -734,14 +734,20 @@ function DealDesk() {
               <Row label="Suggested deposit (30%)" value={money(total * 0.3)} />
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={() => sendProposal.mutate()} disabled={sendProposal.isPending}>
-                Send proposal to client hub
-              </Button>
-              <Button variant="outline" onClick={() => winDeal.mutate()} disabled={winDeal.isPending}>
-                Mark approved &amp; won
-              </Button>
+            <div className="mt-4 space-y-2 border-t border-elevated pt-3">
+              <p className="text-xs text-muted-foreground">
+                This is the internal working quote. The customer sees the interactive proposal below — send that.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => sendProposal.mutate()} disabled={sendProposal.isPending}>
+                  Share this quote as a plain document
+                </Button>
+                <Button variant="ghost" onClick={() => winDeal.mutate()} disabled={winDeal.isPending}>
+                  Mark approved &amp; won
+                </Button>
+              </div>
             </div>
+
           </div>
         </Panel>
 
