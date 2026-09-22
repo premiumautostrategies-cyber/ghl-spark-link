@@ -19,6 +19,7 @@ import { useEmitEvent } from "@/lib/integrations/emit";
 import { money } from "@/lib/format";
 import { CustomerWorkspace } from "@/components/customer-workspace";
 import { LeadWorkspace } from "@/components/lead-workspace";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/customers")({
   head: () => ({
@@ -146,12 +147,11 @@ function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold uppercase tracking-tight">Customers</h1>
-          <p className="text-sm text-muted-foreground">Contacts, vehicles and shop history.</p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Customers"
+        subtitle="Contacts, vehicles and shop history."
+        action={
+          <div className="flex gap-2">
           <Input
             placeholder="Search…"
             value={search}
@@ -201,11 +201,12 @@ function CustomersPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/30">
+        <div className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 border-b border-border bg-muted/30 px-4 py-2 text-xs font-semibold uppercase text-muted-foreground">
           <span>Name</span>
           <span>Number</span>
           <span>Vehicle</span>

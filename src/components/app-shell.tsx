@@ -110,7 +110,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.to}
                 to={item.to as never}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
+                   "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                   isActive(item.to)
                     ? "bg-surface-2 font-semibold text-foreground"
                     : "text-muted-foreground hover:bg-surface/70 hover:text-foreground",
@@ -149,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             System<span className="text-primary">ize</span>
           </Link>
           {/* Section switcher */}
-          <div className="hidden items-center gap-1 rounded-full border border-border/60 bg-secondary/40 p-1 md:flex">
+           <div className="hidden items-center gap-1 rounded-lg border border-border/60 bg-secondary/40 p-1 md:flex">
             {NAV_GROUPS.map((g) => {
               const active = g.group === activeGroup?.group;
               const first = g.items[0]!;
@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={g.group}
                   to={first.to as never}
                   className={cn(
-                    "rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors",
+                     "rounded-md px-3.5 py-1.5 text-xs font-semibold uppercase transition-colors",
                     active
                       ? "bg-surface-2 text-bronze shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
@@ -180,7 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Input
               readOnly
               placeholder="Search customers, vehicles, jobs…"
-              className="h-9 w-full rounded-full border-border/60 bg-secondary/50 pl-9 text-sm"
+               className="h-9 w-full border-border/60 bg-secondary/50 pl-9 text-sm"
             />
             <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-border bg-card px-1.5 py-0.5 text-[10px] text-muted-foreground md:block">
               ⌘K

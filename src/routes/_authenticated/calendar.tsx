@@ -8,6 +8,7 @@ import { label, money, STATUS_LABELS } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DayBookingSheet } from "@/components/day-booking-sheet";
+import { PageHeader } from "@/components/page-header";
 
 type View = "day" | "week" | "month";
 
@@ -202,15 +203,11 @@ function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-elevated pb-5">
-        <div>
-          <p className="micro-label">Sales</p>
-          <h1 className="display-title mt-1 text-3xl font-semibold">Shop calendar</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Every vehicle on the books — switch between day, week and month with live bay capacity.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="Shop calendar"
+        subtitle="Every vehicle on the books — switch between day, week and month with live bay capacity."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" onClick={() => setBookDate(anchor)}>
             <Plus className="mr-1.5 size-3.5" /> New appointment
           </Button>
@@ -223,7 +220,7 @@ function CalendarPage() {
             value={view}
             onChange={(v) => setView(v as View)}
           />
-          <div className="flex items-center gap-1 rounded-full border border-elevated bg-surface p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-elevated bg-surface p-1">
             <Button
               variant="ghost"
               size="icon"
@@ -251,8 +248,9 @@ function CalendarPage() {
               <ChevronRight className="size-4" />
             </Button>
           </div>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Vehicles booked" value={String(scopeJobs.length)} />
