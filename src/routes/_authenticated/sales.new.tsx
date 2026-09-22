@@ -397,6 +397,24 @@ function NewLeadDesk() {
             </div>
           </Panel>
 
+          <Panel className="min-w-0">
+            <SectionTitle title="First contact" hint="Speed to lead, on your terms." />
+            <label className="flex cursor-pointer items-start gap-3 border-t border-elevated p-4">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-current"
+                checked={sendFirstText}
+                onChange={(e) => setSendFirstText(e.target.checked)}
+              />
+              <span className="text-sm">
+                Text this customer right away when I save
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  "{SPEED_TO_LEAD_BODY}"
+                </span>
+              </span>
+            </label>
+          </Panel>
+
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={addDeal.isPending}>
               {addDeal.isPending ? "Saving…" : "Save lead"}
@@ -405,6 +423,7 @@ function NewLeadDesk() {
               Cancel
             </Button>
           </div>
+
         </div>
       </form>
     </div>
