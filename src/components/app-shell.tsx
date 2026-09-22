@@ -22,6 +22,7 @@ import {
   Plug,
   Search,
   Settings,
+  Tablet,
   Users,
   Wrench,
 } from "lucide-react";
@@ -124,11 +125,21 @@ const SYSTEMIZE: NavSection = {
   ],
 };
 
+const PRODUCTION: NavSection = {
+  label: "Production",
+  icon: Wrench,
+  items: [
+    { to: "/jobs", label: "Production Board", icon: Wrench },
+    { to: "/kiosk", label: "Shop Floor", icon: Tablet, searchTerms: "technician installer my day" },
+    { to: "/qc", label: "Quality Control", icon: ClipboardCheck, searchTerms: "qc inspection" },
+  ],
+};
+
 const STANDALONE_ITEMS: NavItem[] = [
   { to: "/calendar", label: "Schedule", icon: CalendarDays, searchTerms: "appointments bays" },
-  { to: "/jobs", label: "Production", icon: Wrench, searchTerms: "installation jobs qc" },
-  { to: "/customers", label: "Customers", icon: Users, searchTerms: "vehicles history" },
 ];
+
+const CUSTOMER_ITEM: NavItem = { to: "/customers", label: "Customers", icon: Users, searchTerms: "vehicles history" };
 
 const ADMIN_ITEMS: NavItem[] = [
   { to: "/integrations", label: "Integrations", icon: Plug },
@@ -139,6 +150,8 @@ const SEARCH_ITEMS = [
   ...PRIMARY_ITEMS,
   ...SALES.items,
   ...STANDALONE_ITEMS,
+  ...PRODUCTION.items,
+  CUSTOMER_ITEM,
   ...OPERATIONS.items,
   ...SYSTEMIZE.items,
   ...ADMIN_ITEMS,
@@ -238,6 +251,20 @@ function AppShellContent({ children }: { children: ReactNode }) {
                 {STANDALONE_ITEMS.map((item) => (
                   <PrimaryNavItem key={item.label} item={item} active={isActive(item.to)} />
                 ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <NavigationSection
+            section={PRODUCTION}
+            active={sectionActive(PRODUCTION)}
+            isActive={isActive}
+          />
+
+          <SidebarGroup className="p-0 pt-1">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <PrimaryNavItem item={CUSTOMER_ITEM} active={isActive(CUSTOMER_ITEM.to)} />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
