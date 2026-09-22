@@ -134,6 +134,13 @@
       "when": 1790044160343,
       "tag": "0018_installer_work_center",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790077926473,
+      "tag": "0019_installer_bundle_completion",
+      "breakpoints": true
     }
   ]
 }

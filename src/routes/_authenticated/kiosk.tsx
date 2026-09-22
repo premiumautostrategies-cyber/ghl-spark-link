@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { label } from "@/lib/format";
 import { PRODUCTION_PHASES, QC_TEMPLATE } from "@/lib/shop";
 import { logOpsAlert, OPS_ALERTS_KEY } from "@/lib/ops-alerts";
 import { toast } from "sonner";
-import { ArrowLeft, Pause, Play, Check, ClipboardCheck, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Camera, Check, ChevronDown, ClipboardCheck, Images, Pause, Play, ShieldAlert } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -51,8 +53,32 @@ type Inspection = {
   notes: string | null;
 };
 
+type CompletionItem = {
+  id: string;
+  job_id: string;
+  phase: string;
+  label: string;
+  item_kind: string;
+  is_required: boolean;
+  is_complete: boolean;
+};
+
 const PREP_PHASES = ["wash_prep", "plot_cut"];
 const INSTALL_PHASES = ["install", "reassembly"];
+
+function installAreas(serviceType: string) {
+  const service = serviceType.toLowerCase();
+  if (service.includes("full front") || service.includes("ppf")) {
+    return ["Hood", "Left fender", "Right fender", "Front bumper", "Mirrors"];
+  }
+  if (service.includes("tint")) {
+    return ["Windshield", "Driver front", "Passenger front", "Driver rear", "Passenger rear", "Rear glass"];
+  }
+  if (service.includes("wrap")) {
+    return ["Front", "Driver side", "Passenger side", "Roof", "Rear"];
+  }
+  return [serviceType || "Primary service"];
+}
 
 const STEPS = [
   { key: "accept", label: "Accept" },
@@ -72,6 +98,13 @@ function KioskPage() {
   const { orgId, locId } = useOrg();
   const [openJob, setOpenJob] = useState<string | null>(null);
   const [tech, setTech] = useState("");
+  const [liveOpen, setLiveOpen] = useState(false);
+  const [completionOpen, setCompletionOpen] = useState(false);
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+  const [completionNotes, setCompletionNotes] = useState("");
+  const [issueNotes, setIssueNotes] = useState("");
+  const [completionFiles, setCompletionFiles] = useState<File[]>([]);
+  const [finalConfirmed, setFinalConfirmed] = useState(false);
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["floor-jobs"],
@@ -79,7 +112,7 @@ function KioskPage() {
       const { data, error } = await supabase
         .from("jobs")
         .select(
-          "*, customers(name,phone), vehicles(year,make,model,color,plate), inventory_rolls(roll_code,lot_number,product_line)",
+          "*, customers(name,phone), vehicles(year,make,model,color,plate), inventory_rolls(roll_code,lot_number,product_line), job_services(description,quantity)",
         )
         .in("status", ["scheduled", "in_progress", "ready_for_pickup"])
         .is("deleted_at", null)
@@ -134,11 +167,39 @@ function KioskPage() {
     },
   });
 
+  const { data: completionItems = [] } = useQuery({
+    queryKey: ["installer-completion-items"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("installer_completion_items")
+        .select("id,job_id,phase,label,item_kind,is_required,is_complete")
+        .order("sort_order");
+      if (error) throw error;
+      return data as CompletionItem[];
+    },
+  });
+
+  const { data: jobDocuments = [] } = useQuery({
+    queryKey: ["installer-job-documents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("id,job_id,name,doc_type,file_url,body,created_at")
+        .in("doc_type", ["installer_photo", "installer_completion", "installer_issue"])
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["floor-jobs"] });
     qc.invalidateQueries({ queryKey: ["job-phases"] });
     qc.invalidateQueries({ queryKey: ["floor-inspections"] });
     qc.invalidateQueries({ queryKey: ["floor-qc"] });
+    qc.invalidateQueries({ queryKey: ["installer-completion-items"] });
+    qc.invalidateQueries({ queryKey: ["installer-job-documents"] });
     qc.invalidateQueries({ queryKey: OPS_ALERTS_KEY });
   };
 
@@ -283,6 +344,129 @@ function KioskPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const completePhaseGroup = useMutation({
+    mutationFn: async ({ jobId, keys, areaLabels = [] }: { jobId: string; keys: string[]; areaLabels?: string[] }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      const jobRow = jobs.find((item) => item.id === jobId);
+      let rows = phases.filter((phase) => phase.job_id === jobId);
+      if (rows.length === 0) {
+        const total = Number(jobRow?.estimated_hours) || 6;
+        const { data, error } = await supabase.from("job_phases").insert(
+          PRODUCTION_PHASES.map((phase, index) => ({
+            organization_id: orgId,
+            job_id: jobId,
+            phase: phase.key,
+            sequence: index,
+            estimated_hours: Math.round((total * (phase.hours / 7.5)) * 10) / 10 || phase.hours,
+            assigned_to: jobRow?.installer ?? tech ?? null,
+          })),
+        ).select("id,job_id,phase,sequence,status,estimated_hours,actual_minutes,assigned_to,started_at");
+        if (error) throw error;
+        rows = data as Phase[];
+      }
+      const targetIds = rows.filter((phase) => keys.includes(phase.phase)).map((phase) => phase.id);
+      if (targetIds.length) {
+        const { error } = await supabase
+          .from("job_phases")
+          .update({ status: "complete", started_at: null, completed_at: new Date().toISOString() })
+          .in("id", targetIds);
+        if (error) throw error;
+      }
+      if (areaLabels.length) {
+        const { error } = await supabase.from("installer_completion_items").upsert(
+          areaLabels.map((area, index) => ({
+            organization_id: orgId,
+            job_id: jobId,
+            phase: "install",
+            label: area,
+            item_kind: "install_area",
+            is_complete: true,
+            completed_at: new Date().toISOString(),
+            completed_by: tech || null,
+            sort_order: index,
+          })),
+          { onConflict: "job_id,phase,item_kind,label" },
+        );
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
+      toast.success(variables.keys.includes("install") ? "Install marked complete" : "Prep marked complete");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const saveCompletion = useMutation({
+    mutationFn: async ({ jobId }: { jobId: string }) => {
+      if (!orgId || !finalConfirmed) throw new Error("Confirm the final checklist before submitting");
+      const jobRow = jobs.find((item) => item.id === jobId);
+      const areas = installAreas(jobRow?.service_type ?? "Service");
+      const now = new Date().toISOString();
+      const { error: itemError } = await supabase.from("installer_completion_items").upsert(
+        areas.map((area, index) => ({
+          organization_id: orgId,
+          job_id: jobId,
+          phase: "install",
+          label: area,
+          item_kind: "install_area",
+          is_complete: selectedAreas.includes(area),
+          completed_at: selectedAreas.includes(area) ? now : null,
+          completed_by: selectedAreas.includes(area) ? tech || null : null,
+          sort_order: index,
+        })),
+        { onConflict: "job_id,phase,item_kind,label" },
+      );
+      if (itemError) throw itemError;
+      if (selectedAreas.length !== areas.length) throw new Error("Finish or select every install area before submitting to QC");
+
+      for (const file of completionFiles) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+        const path = `${orgId}/${jobId}/${crypto.randomUUID()}-${safeName}`;
+        const { error: uploadError } = await supabase.storage.from("job-documentation").upload(path, file);
+        if (uploadError) throw uploadError;
+        const { error: docError } = await supabase.from("documents").insert({
+          organization_id: orgId,
+          location_id: locId,
+          customer_id: jobRow?.customer_id ?? null,
+          vehicle_id: jobRow?.vehicle_id ?? null,
+          job_id: jobId,
+          name: file.name,
+          doc_type: "installer_photo",
+          status: "complete",
+          file_url: path,
+        });
+        if (docError) throw docError;
+      }
+      const documentation = [
+        completionNotes.trim() ? { name: "Installer completion notes", doc_type: "installer_completion", body: completionNotes.trim() } : null,
+        issueNotes.trim() ? { name: "Installer reported issue", doc_type: "installer_issue", body: issueNotes.trim() } : null,
+      ].filter((row): row is { name: string; doc_type: string; body: string } => Boolean(row));
+      if (documentation.length) {
+        const { error } = await supabase.from("documents").insert(documentation.map((row) => ({
+          ...row,
+          organization_id: orgId,
+          location_id: locId,
+          customer_id: jobRow?.customer_id ?? null,
+          vehicle_id: jobRow?.vehicle_id ?? null,
+          job_id: jobId,
+          status: "complete",
+        })));
+        if (error) throw error;
+      }
+      await completePhaseGroup.mutateAsync({ jobId, keys: INSTALL_PHASES, areaLabels: areas });
+    },
+    onSuccess: (_, variables) => {
+      setCompletionOpen(false);
+      setCompletionFiles([]);
+      setCompletionNotes("");
+      setIssueNotes("");
+      setFinalConfirmed(false);
+      requestQc.mutate(variables.jobId);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const requestQc = useMutation({
     mutationFn: async (jobId: string) => {
       if (!orgId) throw new Error("No workspace selected");
@@ -342,7 +526,7 @@ function KioskPage() {
       inspection,
       accept: Boolean(jobRow.accepted_at),
       checkin: Boolean(jobRow.checked_in_at),
-      inspectionDone: inspection?.status === "completed",
+      inspectionDone: ["completed", "signed"].includes(inspection?.status ?? ""),
       prep: phaseDone(PREP_PHASES),
       install: phaseDone(INSTALL_PHASES),
       qc: ["in_review", "passed", "failed"].includes(jobRow.qc_status ?? ""),
@@ -356,6 +540,17 @@ function KioskPage() {
     const done = [s.accept, s.checkin, s.inspectionDone, s.prep, s.install, s.qc].filter(Boolean).length;
     const currentIndex = [s.accept, s.checkin, s.inspectionDone, s.prep, s.install, s.qc].findIndex((v) => !v);
     const vehicle = [job.vehicles?.year, job.vehicles?.make, job.vehicles?.model].filter(Boolean).join(" ") || job.title;
+    const areas = installAreas(job.service_type);
+    const savedAreas = completionItems.filter((item) => item.job_id === job.id && item.phase === "install");
+    const completedAreaNames = savedAreas.filter((item) => item.is_complete).map((item) => item.label);
+    const documents = jobDocuments.filter((document) => document.job_id === job.id);
+    const services = job.job_services?.length
+      ? job.job_services.map((service) => service.description)
+      : [label(job.service_type)];
+    const openCompletion = () => {
+      setSelectedAreas(completedAreaNames.length ? completedAreaNames : []);
+      setCompletionOpen(true);
+    };
 
     return (
       <div className="mx-auto max-w-3xl space-y-4 pb-28">
@@ -376,10 +571,14 @@ function KioskPage() {
         <Panel className="p-5 sm:p-6">
           <p className="micro-label">{clock(job.scheduled_start)} · {job.bay ?? "No bay"}</p>
           <h1 className="display-title mt-2 text-2xl sm:text-3xl">{vehicle}</h1>
-          <p className="mt-2 text-base font-medium">{label(job.service_type)}</p>
+          <p className="mt-2 text-base font-medium">Work order</p>
           <dl className="mt-5 grid gap-3 border-t border-elevated pt-4 text-sm sm:grid-cols-2">
             <div><dt className="text-xs text-muted-foreground">Customer</dt><dd className="mt-1 font-medium">{job.customers?.name ?? "No customer"}</dd></div>
             <div><dt className="text-xs text-muted-foreground">Plate / color</dt><dd className="mt-1 font-medium">{[job.vehicles?.plate, job.vehicles?.color].filter(Boolean).join(" · ") || "—"}</dd></div>
+            <div><dt className="text-xs text-muted-foreground">Services / coverage</dt><dd className="mt-1 font-medium">{services.join(" · ")}</dd></div>
+            <div><dt className="text-xs text-muted-foreground">Product / film</dt><dd className="mt-1 font-medium">{job.inventory_rolls ? [job.inventory_rolls.product_line, job.inventory_rolls.roll_code].filter(Boolean).join(" · ") : "Not assigned"}</dd></div>
+            <div><dt className="text-xs text-muted-foreground">Due</dt><dd className="mt-1 font-medium">{clock(job.scheduled_end ?? job.scheduled_start)}</dd></div>
+            <div><dt className="text-xs text-muted-foreground">Instructions</dt><dd className="mt-1 whitespace-pre-line font-medium">{job.notes || "No special instructions"}</dd></div>
           </dl>
 
           <ol className="mt-5 flex flex-wrap gap-2 border-t border-elevated pt-4">
@@ -403,8 +602,15 @@ function KioskPage() {
               );
             })}
           </ol>
-          <p className="mt-3 text-xs text-muted-foreground">{done} of {STEPS.length} steps complete</p>
+          <p className="mt-3 text-xs text-muted-foreground">{done} of {STEPS.length} milestones complete</p>
         </Panel>
+
+        <div className="rounded-xl border border-bronze/40 bg-bronze/5 p-4 sm:p-5">
+          <p className="text-base font-semibold">Work your way</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep this page open for reference, then document everything at the end. Live timers and individual updates are optional.
+          </p>
+        </div>
 
         {/* Step 1–2 */}
         <Panel className="p-5">
@@ -467,58 +673,70 @@ function KioskPage() {
 
         {/* Prep & install */}
         <Panel>
-          <SectionTitle title="Prep & install" hint="Work the steps in order" />
+          <SectionTitle title="Prep & install" hint="Complete each phase at the end, or optionally track it live" />
           <div className="space-y-3 border-t border-elevated p-4 sm:p-5">
             {!s.inspectionDone ? (
               <p className="text-sm text-muted-foreground">Finish the inspection to open production steps.</p>
             ) : s.phases.length === 0 ? (
-              <Button size="lg" className="min-h-14 w-full" disabled={seedPhases.isPending} onClick={() => seedPhases.mutate(job.id)}>
-                Start production steps
-              </Button>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Set up the work order once. You do not need to keep this screen open while working.</p>
+                <Button size="lg" className="min-h-14 w-full" disabled={seedPhases.isPending} onClick={() => seedPhases.mutate(job.id)}>
+                  Begin work
+                </Button>
+              </div>
             ) : (
-              s.phases.map((p) => {
-                const est = Number(p.estimated_hours) * 60;
-                const actual = Number(p.actual_minutes);
-                const over = actual > est && est > 0;
-                return (
-                  <div
-                    key={p.id}
-                    className={cn(
-                      "rounded-xl border p-4 sm:p-5",
-                      p.status === "active" ? "border-bronze bg-bronze/10" : "border-elevated bg-surface-2",
+              <>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-elevated bg-surface-2 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div><p className="font-semibold">Prep</p><p className="text-xs text-muted-foreground">Wash, prep, plot and cut</p></div>
+                      <Tag tone={s.prep ? "revenue" : "muted"}>{s.prep ? "Complete" : "Open"}</Tag>
+                    </div>
+                    {!s.prep && (
+                      <Button size="lg" className="mt-4 min-h-14 w-full" disabled={completePhaseGroup.isPending} onClick={() => completePhaseGroup.mutate({ jobId: job.id, keys: PREP_PHASES })}>
+                        Mark prep complete
+                      </Button>
                     )}
-                  >
-                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                      <div className="min-w-0">
-                        <p className="text-lg font-semibold">
-                          {PRODUCTION_PHASES.find((x) => x.key === p.phase)?.label ?? label(p.phase)}
-                        </p>
-                        <p className={cn("text-sm", over ? "text-critical" : "text-muted-foreground")}>
-                          {Math.round(actual)} min logged · {Math.round(est)} min estimated
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 gap-2">
-                        {p.status !== "complete" && p.status !== "active" && (
-                          <Button size="lg" className="min-h-12 flex-1" onClick={() => setPhase.mutate({ phase: p, action: "start" })}>
-                            <Play className="mr-1.5 h-5 w-5" /> Start
-                          </Button>
-                        )}
-                        {p.status === "active" && (
-                          <Button size="lg" variant="outline" className="min-h-12 flex-1" onClick={() => setPhase.mutate({ phase: p, action: "pause" })}>
-                            <Pause className="mr-1.5 h-5 w-5" /> Pause
-                          </Button>
-                        )}
-                        {p.status !== "complete" && (
-                          <Button size="lg" variant="outline" className="min-h-12 flex-1" onClick={() => setPhase.mutate({ phase: p, action: "complete" })}>
-                            <Check className="mr-1.5 h-5 w-5" /> Done
-                          </Button>
-                        )}
-                        {p.status === "complete" && <Tag tone="revenue">Complete</Tag>}
+                  </div>
+                  <div className="rounded-xl border border-elevated bg-surface-2 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div><p className="font-semibold">Install</p><p className="text-xs text-muted-foreground">{areas.join(" · ")}</p></div>
+                      <Tag tone={s.install ? "revenue" : "muted"}>{s.install ? "Complete" : "Open"}</Tag>
+                    </div>
+                    {!s.install && (
+                      <Button size="lg" className="mt-4 min-h-14 w-full" disabled={!s.prep || completePhaseGroup.isPending} onClick={() => completePhaseGroup.mutate({ jobId: job.id, keys: INSTALL_PHASES, areaLabels: areas })}>
+                        Mark install complete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <button type="button" className="flex min-h-12 w-full items-center justify-between rounded-lg border border-elevated px-4 text-left text-sm font-medium" onClick={() => setLiveOpen((value) => !value)}>
+                  Optional live progress
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", liveOpen && "rotate-180")} />
+                </button>
+                {liveOpen && s.phases.map((p) => {
+                  const est = Number(p.estimated_hours) * 60;
+                  const actual = Number(p.actual_minutes);
+                  const over = actual > est && est > 0;
+                  return (
+                    <div key={p.id} className={cn("rounded-xl border p-4", p.status === "active" ? "border-bronze bg-bronze/10" : "border-elevated bg-surface-2")}>
+                      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                        <div className="min-w-0">
+                          <p className="font-semibold">{PRODUCTION_PHASES.find((x) => x.key === p.phase)?.label ?? label(p.phase)}</p>
+                          <p className={cn("text-xs", over ? "text-critical" : "text-muted-foreground")}>{Math.round(actual)} min logged · {Math.round(est)} min estimated</p>
+                        </div>
+                        <div className="flex shrink-0 gap-2">
+                          {p.status !== "complete" && p.status !== "active" && <Button onClick={() => setPhase.mutate({ phase: p, action: "start" })}><Play className="mr-1.5 h-4 w-4" /> Start</Button>}
+                          {p.status === "active" && <Button variant="outline" onClick={() => setPhase.mutate({ phase: p, action: "pause" })}><Pause className="mr-1.5 h-4 w-4" /> Pause</Button>}
+                          {p.status !== "complete" && <Button variant="outline" onClick={() => setPhase.mutate({ phase: p, action: "complete" })}><Check className="mr-1.5 h-4 w-4" /> Done</Button>}
+                          {p.status === "complete" && <Tag tone="revenue">Complete</Tag>}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })}
+              </>
             )}
           </div>
         </Panel>
@@ -566,17 +784,70 @@ function KioskPage() {
               <Link to="/qc">QC passed — vehicle ready</Link>
             </Button>
           ) : (
-            <Button
-              size="lg"
-              className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold"
-              disabled={!s.install || requestQc.isPending || job.qc_status === "in_review"}
-              onClick={() => requestQc.mutate(job.id)}
-            >
+            <Button size="lg" className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold" disabled={!s.inspectionDone || job.qc_status === "in_review"} onClick={openCompletion}>
               <ClipboardCheck className="mr-2 h-5 w-5" />
-              {job.qc_status === "in_review" ? "QC requested — awaiting review" : s.install ? "Request QC" : "Finish install to request QC"}
+              {job.qc_status === "in_review" ? "QC requested — awaiting review" : "Complete documentation"}
             </Button>
           )}
         </div>
+
+        <Dialog open={completionOpen} onOpenChange={setCompletionOpen}>
+          <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Complete documentation</DialogTitle>
+              <DialogDescription>Review the finished work once, add all documentation, then submit it to QC.</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-5">
+              <section>
+                <div className="flex items-center justify-between gap-3">
+                  <div><p className="text-sm font-semibold">Install areas</p><p className="text-xs text-muted-foreground">Uncheck anything that still needs work.</p></div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setSelectedAreas(selectedAreas.length === areas.length ? [] : areas)}>
+                    {selectedAreas.length === areas.length ? "Clear all" : "Mark all complete"}
+                  </Button>
+                </div>
+                <div className="mt-3 divide-y divide-elevated rounded-xl border border-elevated">
+                  {areas.map((area) => (
+                    <label key={area} className="flex min-h-12 cursor-pointer items-center gap-3 px-4 py-3">
+                      <Checkbox checked={selectedAreas.includes(area)} onCheckedChange={(checked) => setSelectedAreas((current) => checked ? [...new Set([...current, area])] : current.filter((item) => item !== area))} />
+                      <span className="text-sm font-medium">{area}</span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              <section className="space-y-3">
+                <div><p className="text-sm font-semibold">Photos</p><p className="text-xs text-muted-foreground">Add all job photos together. {documents.filter((document) => document.doc_type === "installer_photo").length} already saved.</p></div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Button asChild type="button" variant="outline" className="min-h-12">
+                    <label><Camera className="mr-2 h-4 w-4" /> Camera<input type="file" accept="image/*" capture="environment" multiple className="hidden" onChange={(event) => setCompletionFiles((current) => [...current, ...Array.from(event.target.files ?? [])])} /></label>
+                  </Button>
+                  <Button asChild type="button" variant="outline" className="min-h-12">
+                    <label><Images className="mr-2 h-4 w-4" /> Photo library<input type="file" accept="image/*" multiple className="hidden" onChange={(event) => setCompletionFiles((current) => [...current, ...Array.from(event.target.files ?? [])])} /></label>
+                  </Button>
+                </div>
+                {completionFiles.length > 0 && <p className="text-xs text-revenue">{completionFiles.length} photo{completionFiles.length === 1 ? "" : "s"} ready to upload together.</p>}
+              </section>
+
+              <section className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5"><Label htmlFor="completion-notes">Completion notes</Label><Textarea id="completion-notes" rows={3} value={completionNotes} onChange={(event) => setCompletionNotes(event.target.value)} placeholder="Optional notes for the completed work" /></div>
+                <div className="space-y-1.5"><Label htmlFor="issue-notes">Report an issue</Label><Textarea id="issue-notes" rows={3} value={issueNotes} onChange={(event) => setIssueNotes(event.target.value)} placeholder="Leave blank when there are no issues" /></div>
+              </section>
+
+              {issueNotes.trim() && <div className="flex items-start gap-2 rounded-lg border border-urgent/40 bg-urgent/10 p-3 text-sm"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-urgent" /><span>This issue will be attached to the work order for QC review.</span></div>}
+
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-elevated bg-surface-2 p-4">
+                <Checkbox checked={finalConfirmed} onCheckedChange={(checked) => setFinalConfirmed(checked === true)} />
+                <span className="text-sm">I reviewed the completed services, install areas, required documentation, and reported issues.</span>
+              </label>
+
+              <Button size="lg" className="min-h-14 w-full" disabled={saveCompletion.isPending || !finalConfirmed || selectedAreas.length !== areas.length} onClick={() => saveCompletion.mutate({ jobId: job.id })}>
+                <ClipboardCheck className="mr-2 h-5 w-5" /> Submit for QC
+              </Button>
+              {selectedAreas.length !== areas.length && <p className="text-center text-xs text-muted-foreground">Complete every install area before submitting. You can close this review and return later.</p>}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

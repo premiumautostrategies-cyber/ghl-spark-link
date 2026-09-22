@@ -1186,6 +1186,72 @@ export type Database = {
           },
         ]
       }
+      installer_completion_items: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          is_complete: boolean
+          is_required: boolean
+          item_kind: string
+          job_id: string
+          label: string
+          notes: string | null
+          organization_id: string
+          phase: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          is_required?: boolean
+          item_kind?: string
+          job_id: string
+          label: string
+          notes?: string | null
+          organization_id: string
+          phase?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          is_required?: boolean
+          item_kind?: string
+          job_id?: string
+          label?: string
+          notes?: string | null
+          organization_id?: string
+          phase?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installer_completion_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installer_completion_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_connections: {
         Row: {
           account_label: string | null
