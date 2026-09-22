@@ -258,6 +258,7 @@ function SalesPage() {
       toast.success("Lead added — first text sent");
       setOpen(false);
       setAddingCustomer(false);
+      setNewTags([]);
       qc.invalidateQueries({ queryKey: ["deals"] });
       qc.invalidateQueries({ queryKey: ["pipeline-events"] });
       qc.invalidateQueries({ queryKey: ["customers"] });
@@ -367,6 +368,7 @@ function SalesPage() {
                 setOpen(v);
                 if (!v) {
                   setAddingCustomer(false);
+                  setNewTags([]);
                   setCustomerId("");
                 }
               }}
