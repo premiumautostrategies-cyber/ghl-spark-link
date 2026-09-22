@@ -257,7 +257,7 @@ function SchedulePage() {
   };
 
   const bayLoad = (bay: Bay) =>
-    dayJobs.filter((j) => (j.bay || "Unassigned") === bay.name).reduce((t, j) => t + hoursFor(j), 0);
+    dayJobs.filter((j) => bayNameFor(j.bay) === bay.name).reduce((t, j) => t + hoursFor(j), 0);
 
   const certifiedFor = (cert: string | null) =>
     !cert
@@ -301,7 +301,7 @@ function SchedulePage() {
     }
   }
   for (const j of dayJobs) {
-    const bay = bays.find((b) => b.name === (j.bay || ""));
+    const bay = bays.find((b) => b.name === bayNameFor(j.bay));
     const cert = bay?.required_certification ?? certForService(j.service_type);
     if (!cert || !j.installer) continue;
     const ok = certifiedFor(cert).some((t) => t.full_name === j.installer);
@@ -603,7 +603,7 @@ function SchedulePage() {
                       ))}
                     </div>
                     {dayJobs
-                      .filter((j) => (j.bay || "Unassigned") === bay.name)
+                      .filter((j) => bayNameFor(j.bay) === bay.name)
                       .map((j) => {
                         const start = new Date(j.scheduled_start as string);
                         const end = j.scheduled_end ? new Date(j.scheduled_end) : null;
