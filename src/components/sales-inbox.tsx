@@ -109,7 +109,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
       </aside>
 
       <section className="flex min-h-[620px] min-w-0 flex-col border-b border-elevated 2xl:min-h-0 2xl:border-b-0 2xl:border-r">
-        {deal ? <><header className="border-b border-elevated px-5 py-3"><h2 className="text-sm font-semibold">Conversation</h2><p className="truncate text-xs text-muted-foreground">Text and email with {deal.customers?.name}</p></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name} variant="inbox" channels={["sms", "email"]} /></> : <div className="grid flex-1 place-items-center text-sm text-muted-foreground">Select a customer.</div>}
+        {deal ? <><header className="border-b border-elevated px-5 py-3"><h2 className="text-sm font-semibold">Conversation</h2><p className="truncate text-xs text-muted-foreground">Text and email with {deal.customers?.name}</p></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name ?? null} variant="inbox" channels={["sms", "email"]} /></> : <div className="grid flex-1 place-items-center text-sm text-muted-foreground">Select a customer.</div>}
       </section>
 
       <aside className="min-h-[680px] bg-background/15 2xl:min-h-0">{deal ? <InboxQuoteBuilder key={deal.id} deal={deal} /> : null}</aside>
