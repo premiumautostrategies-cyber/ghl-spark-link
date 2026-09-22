@@ -77,6 +77,18 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const deal = selected?.deal ?? null;
   const history = deal ? [...events.filter((event) => event.deal_id === deal.id), ...messages.filter((message) => message.deal_id === deal.id).map((message) => ({ id: message.id, deal_id: message.deal_id, actor: message.direction === "in" ? "customer" : "shop", kind: message.channel, detail: message.body, created_at: message.sent_at }))].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) : [];
   const vehicle = deal?.vehicles ? [deal.vehicles.year, deal.vehicles.make, deal.vehicles.model].filter(Boolean).join(" ") : "No vehicle on file";
+  const summaryTurns: SummaryTurn[] = deal
+    ? messages
+        .filter((message) => message.deal_id === deal.id)
+        .slice()
+        .sort((a, b) => new Date(a.sent_at).getTime() - new Date(b.sent_at).getTime())
+        .map((message) => ({
+          speaker: message.direction === "in" ? (deal.customers?.name ?? "Customer") : "Shop",
+          channel: message.channel,
+          at: clockTime(message.sent_at),
+          text: message.body,
+        }))
+    : [];
 
   return (
     <div className="grid min-h-[720px] overflow-hidden rounded-xl border border-elevated bg-surface xl:h-[calc(100vh-12rem)] xl:grid-cols-[272px_minmax(300px,1fr)_360px]">
