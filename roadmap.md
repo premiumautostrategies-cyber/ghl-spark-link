@@ -83,3 +83,5 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 - [x] Installer work center: Shop Floor accept/claim, check-in, inspection, prep/install timers, QC request; QC-requested and QC-passed shop alerts in bell + Command Center
 - [x] Reshape Inbox into customer context/history, text-email conversation, and quote builder columns.
 - [x] New lead card mirrors the pipeline sales card, with customer fields entered at the top.
+
+- [ ] Normalize repeated records across Customers, Quotes, Payments, Team, Inventory, Reports, Activity, and Tasks into tables or compact lists without changing behavior.
