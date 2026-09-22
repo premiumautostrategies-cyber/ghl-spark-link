@@ -22,7 +22,6 @@ import {
   Plug,
   Search,
   Settings,
-  Tablet,
   Users,
   Wrench,
 } from "lucide-react";
@@ -130,11 +129,12 @@ const PRODUCTION: NavSection = {
   label: "Production",
   icon: Wrench,
   items: [
-    { to: "/jobs", label: "Production Board", icon: Wrench },
-    { to: "/kiosk", label: "Shop Floor", icon: Tablet, searchTerms: "technician installer my day" },
+    { to: "/jobs", label: "My Work", icon: Wrench, searchTerms: "technician installer schedule work orders" },
     { to: "/qc", label: "Quality Control", icon: ClipboardCheck, searchTerms: "qc inspection" },
   ],
 };
+
+const TECHNICIAN_ITEM: NavItem = { to: "/jobs", label: "My Work", icon: Wrench, searchTerms: "technician installer schedule work orders" };
 
 const STANDALONE_ITEMS: NavItem[] = [
   { to: "/calendar", label: "Schedule", icon: CalendarDays, searchTerms: "appointments bays" },
@@ -175,12 +175,13 @@ function AppShellContent({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { user, organization, location } = useRouteContext({ from: "/_authenticated" });
+  const { user, organization, location, roleNames } = useRouteContext({ from: "/_authenticated" });
   const { isMobile, setOpenMobile } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: alerts = [] } = useOpsAlerts();
   const markRead = useMarkAlertRead();
   const unreadAlerts = alerts.filter((alert) => !alert.is_read).length;
+  const isTechnician = roleNames.some((name) => /technician|installer/i.test(name));
 
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
@@ -236,6 +237,16 @@ function AppShellContent({ children }: { children: ReactNode }) {
         </SidebarHeader>
 
         <SidebarContent className="gap-0 px-2 py-3">
+          {isTechnician ? (
+            <SidebarGroup className="p-0">
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <PrimaryNavItem item={TECHNICIAN_ITEM} active={isActive("/jobs")} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : (
+          <>
           <SidebarGroup className="p-0">
             <SidebarGroupContent>
               <SidebarMenu>
@@ -245,6 +256,8 @@ function AppShellContent({ children }: { children: ReactNode }) {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+          </>
+          )}
 
           <SidebarSeparator className="my-3" />
 
@@ -317,7 +330,7 @@ function AppShellContent({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-elevated bg-background/95 px-3 backdrop-blur md:px-4">
           <SidebarTrigger className="size-8" />
 
-          <Button
+          {!isTechnician && <Button
             variant="outline"
             className="h-9 min-w-0 flex-1 justify-start gap-2 border-border/70 bg-secondary/35 px-3 text-muted-foreground sm:max-w-md"
             onClick={() => setSearchOpen(true)}
@@ -328,10 +341,10 @@ function AppShellContent({ children }: { children: ReactNode }) {
             <kbd className="ml-auto hidden rounded border border-border bg-background px-1.5 py-0.5 text-[10px] md:inline-flex">
               ⌘K
             </kbd>
-          </Button>
+          </Button>}
 
           <div className="ml-auto flex items-center gap-1">
-            <DropdownMenu>
+            {!isTechnician && <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="hidden h-9 gap-2 px-2.5 sm:flex">
                   <Building2 className="size-4 text-muted-foreground" />
@@ -350,7 +363,7 @@ function AppShellContent({ children }: { children: ReactNode }) {
                   <Settings /> Manage shop settings
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu>}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
