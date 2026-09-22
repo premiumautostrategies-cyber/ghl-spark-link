@@ -1051,6 +1051,10 @@ function TechnicianProductionPage() {
     return scheduled ? scheduled.getTime() > Date.now() && scheduled.toDateString() !== todayKey : false;
   });
 
+  const currentJob = scheduleView === "today" ? visibleJobs.find((item) => item.status === "in_progress") ?? visibleJobs[0] ?? null : null;
+  const queuedJobs = visibleJobs.filter((item) => item.id !== currentJob?.id);
+
+
   const JobRow = ({ item }: { item: (typeof jobs)[number] }) => {
     const s = stepsFor(item.id, item);
     const stepDone = [s.accept, s.checkin, s.inspectionDone, s.prep, s.install, s.qc].filter(Boolean).length;
@@ -1096,16 +1100,68 @@ function TechnicianProductionPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 rounded-lg border border-elevated bg-surface p-1">
+      <div className="grid grid-cols-3 border-b border-elevated">
         {(["today", "upcoming", "completed"] as const).map((view) => (
-          <Button key={view} variant={scheduleView === view ? "default" : "ghost"} className="min-h-11 capitalize" onClick={() => setScheduleView(view)}>{view}</Button>
+          <button
+            key={view}
+            type="button"
+            onClick={() => setScheduleView(view)}
+            className={cn(
+              "-mb-px min-h-12 border-b-2 text-sm font-semibold capitalize transition-colors",
+              scheduleView === view ? "border-bronze text-bronze" : "border-transparent text-muted-foreground",
+            )}
+          >
+            {view}
+          </button>
         ))}
       </div>
 
-      <section className="overflow-hidden rounded-xl border border-elevated bg-surface px-4 sm:px-5">
-        {visibleJobs.length ? visibleJobs.map((item) => <JobRow key={item.id} item={item} />) : (
-          <div className="py-14 text-center"><p className="font-semibold">No {scheduleView} work</p><p className="mt-1 text-sm text-muted-foreground">Your assigned schedule will appear here.</p></div>
-        )}
+      {currentJob && (
+        <section className="space-y-2">
+          <p className="micro-label">Current job</p>
+          <button
+            type="button"
+            onClick={() => setOpenJob(currentJob.id)}
+            className="w-full rounded-xl border border-bronze/40 bg-surface p-4 text-left sm:p-5"
+          >
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-lg font-semibold">{[currentJob.vehicles?.year, currentJob.vehicles?.make, currentJob.vehicles?.model].filter(Boolean).join(" ") || currentJob.title}</p>
+                <p className="mt-1 truncate text-sm text-muted-foreground">{currentJob.customers?.name ?? "No customer"}</p>
+                <p className="mt-1 truncate text-sm">{label(currentJob.service_type)}</p>
+              </div>
+              <ChevronDown className="size-5 -rotate-90 shrink-0 text-muted-foreground" />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+              <span className="rounded-md border border-elevated bg-surface-2 px-2 py-1 font-semibold">{currentJob.bay || (currentJob.is_mobile ? "Mobile" : "No bay")}</span>
+              <span>Due {clock(currentJob.scheduled_end ?? currentJob.scheduled_start)}</span>
+            </div>
+            {(() => {
+              const cs = stepsFor(currentJob.id, currentJob);
+              const doneCount = [cs.accept, cs.checkin, cs.inspectionDone, cs.prep, cs.install, cs.qc].filter(Boolean).length;
+              return (
+                <>
+                  <p className="mt-4 text-xs text-muted-foreground">{doneCount} of {STEPS.length} steps</p>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-elevated">
+                    <div className="h-full bg-revenue" style={{ width: `${(doneCount / STEPS.length) * 100}%` }} />
+                  </div>
+                </>
+              );
+            })()}
+            <div className="mt-4 flex min-h-12 items-center justify-center rounded-lg bg-bronze px-4 text-sm font-semibold text-bronze-foreground">
+              Continue job
+            </div>
+          </button>
+        </section>
+      )}
+
+      <section className="space-y-2">
+        {currentJob && queuedJobs.length > 0 && <p className="micro-label">Next up</p>}
+        <div className="overflow-hidden rounded-xl border border-elevated bg-surface px-4 sm:px-5">
+          {queuedJobs.length ? queuedJobs.map((item) => <JobRow key={item.id} item={item} />) : (
+            <div className="py-14 text-center"><p className="font-semibold">{currentJob ? "Nothing else queued" : `No ${scheduleView} work`}</p><p className="mt-1 text-sm text-muted-foreground">Your assigned schedule will appear here.</p></div>
+          )}
+        </div>
       </section>
     </div>
   );
