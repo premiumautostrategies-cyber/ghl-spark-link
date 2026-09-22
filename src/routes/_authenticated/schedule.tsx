@@ -213,19 +213,28 @@ function SchedulePage() {
     (j) => !j.scheduled_start && !["completed", "invoiced"].includes(j.status),
   );
 
-  const bays: Bay[] = bayRows.length
+  const virtualBay = (name: string, i: number): Bay => ({
+    id: `virtual-${name}`,
+    name,
+    discipline: "flex",
+    daily_hours_cap: 9,
+    required_certification: null,
+    sort_order: 100 + i,
+    is_active: true,
+  });
+
+  const baseBays: Bay[] = bayRows.length
     ? bayRows
     : Array.from(new Set([...dayJobs.map((j) => j.bay || "Unassigned"), "Bay 1", "Bay 2", "Bay 3"]))
         .sort()
-        .map((name, i) => ({
-          id: `virtual-${name}`,
-          name,
-          discipline: "flex",
-          daily_hours_cap: 9,
-          required_certification: null,
-          sort_order: i,
-          is_active: true,
-        }));
+        .map(virtualBay);
+
+  // Any job sitting on a bay name that no longer exists (or none at all) still needs a row,
+  // otherwise it silently disappears from the board.
+  const orphanNames = Array.from(
+    new Set(dayJobs.map((j) => j.bay || "Unassigned").filter((n) => !baseBays.some((b) => b.name === n))),
+  ).sort();
+  const bays: Bay[] = [...baseBays, ...orphanNames.map(virtualBay)];
 
   const hoursFor = (j: { scheduled_start: string | null; scheduled_end: string | null }) => {
     if (!j.scheduled_start) return 0;
