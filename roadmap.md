@@ -1,5 +1,5 @@
 # Roadmap
 
-- [ ] Redesign Production Board around an installer roster and operational handoffs
-- [ ] Redesign Shop Floor around installer focus and passive work
+- [ ] Replace Production with the signed-in technician workspace: clock-in, schedule, work orders, checklists, completion, and QC handoff
+- [ ] Remove the separate Shop Floor experience from technician navigation to avoid duplication
 - [ ] Verify both workflows on desktop and mobile
