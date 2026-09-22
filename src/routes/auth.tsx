@@ -123,16 +123,16 @@ function AuthPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Password (optional in demo)</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
+              placeholder="Anything works"
             />
           </div>
+
           <Button type="submit" className="w-full" disabled={busy}>
             {mode === "signin" ? "Sign in" : "Create account"}
           </Button>
