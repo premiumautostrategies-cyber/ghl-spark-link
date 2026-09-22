@@ -434,7 +434,7 @@ function DealDesk() {
         customer_id: deal?.customer_id ?? null,
         channel: "sms",
         direction: "out",
-        body: DELIVERY_TEXT[kind],
+        body: DELIVERY_TEXT[kind] ?? "",
       });
       if (msgErr) throw msgErr;
       if (kind === "delivered" && job?.id) {
