@@ -40,10 +40,17 @@ type Item = {
   sort_order: number;
 };
 
+const FILM_SERVICES = ["ppf", "wrap", "color_change", "tint"];
+const needsHeatCheck = (serviceType: string | null | undefined) =>
+  FILM_SERVICES.includes((serviceType ?? "").toLowerCase());
+
 function QcPage() {
   const qc = useQueryClient();
   const { orgId } = useOrg();
   const [selected, setSelected] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [correction, setCorrection] = useState("");
+
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["qc-jobs"],
@@ -125,6 +132,7 @@ function QcPage() {
       temp,
       notes,
       items,
+      requireTemp,
     }: {
       checklistId: string;
       jobId: string;
@@ -132,17 +140,20 @@ function QcPage() {
       temp: number;
       notes: string;
       items: Item[];
+      requireTemp: boolean;
     }) => {
       const missing = items.filter((i) => i.is_required && !i.passed);
       if (missing.length) throw new Error(`${missing.length} required check(s) still open`);
       if (!inspector.trim()) throw new Error("Enter the lead installer or foreman name");
-      if (!(temp >= 190 && temp <= 200)) throw new Error("Log a post-heat edge temp between 190°F and 200°F");
+      if (requireTemp && !(temp >= 190 && temp <= 200)) {
+        throw new Error("Log a post-heat edge temp between 190°F and 200°F for film work");
+      }
       const { error } = await supabase
         .from("qc_checklists")
         .update({
           status: "passed",
           inspector: inspector.trim(),
-          edge_temp_f: temp,
+          ...(requireTemp ? { edge_temp_f: temp } : {}),
           notes: notes || null,
           signed_at: new Date().toISOString(),
         })
@@ -172,17 +183,50 @@ function QcPage() {
   });
 
   const failQc = useMutation({
-    mutationFn: async ({ checklistId, jobId }: { checklistId: string; jobId: string }) => {
-      await supabase.from("qc_checklists").update({ status: "failed" }).eq("id", checklistId);
+    mutationFn: async ({
+      checklistId,
+      jobId,
+      reason,
+      existingNotes,
+    }: {
+      checklistId: string;
+      jobId: string;
+      reason: string;
+      existingNotes: string | null;
+    }) => {
+      if (reason.trim().length < 5) {
+        throw new Error("Tell the installer exactly what to correct before sending it back");
+      }
+      const stamped = `QC correction (${new Date().toLocaleString("en-US")}): ${reason.trim()}`;
+      await supabase
+        .from("qc_checklists")
+        .update({
+          status: "failed",
+          notes: existingNotes ? `${existingNotes}\n${stamped}` : stamped,
+        })
+        .eq("id", checklistId);
       await supabase
         .from("jobs")
         .update({ qc_status: "failed", key_released: false, status: "in_progress" })
         .eq("id", jobId);
+      if (orgId) {
+        const job = jobs.find((j) => j.id === jobId);
+        await logOpsAlert({
+          organizationId: orgId,
+          jobId,
+          kind: "qc_failed",
+          title: `QC returned — ${job?.title ?? "vehicle"}`,
+          body: reason.trim(),
+          actor: job?.installer ?? null,
+        });
+      }
     },
     onSuccess: () => {
-      toast.warning("Sent back to the installer for correction");
+      toast.warning("Sent back to the installer with correction notes");
+      setCorrection("");
       invalidate();
     },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const checklistFor = (jobId: string) => checklists.find((c) => c.job_id === jobId) ?? null;
@@ -192,8 +236,11 @@ function QcPage() {
     (a, b) => a.sort_order - b.sort_order,
   );
 
-  const awaiting = jobs.filter((j) => j.qc_status !== "passed");
+  const submitted = jobs.filter((j) => ["in_review", "failed", "passed"].includes(j.qc_status ?? ""));
+  const visibleJobs = showAll ? jobs : submitted;
+  const awaiting = jobs.filter((j) => j.qc_status === "in_review" || j.qc_status === "failed");
   const passed = jobs.filter((j) => j.qc_status === "passed");
+
 
   return (
     <div className="space-y-5">
@@ -214,12 +261,22 @@ function QcPage() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,340px)_1fr]">
         <Panel>
-          <SectionTitle title="Vehicles in production" />
+          <SectionTitle
+            title={showAll ? "All vehicles in production" : "Submitted for QC"}
+            hint={showAll ? "Everything on the floor" : "Installers have finished these"}
+            right={
+              <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
+                {showAll ? "Show submitted only" : "Show all in production"}
+              </Button>
+            }
+          />
           <div className="divide-y divide-elevated">
-            {jobs.length === 0 && (
-              <p className="px-4 py-8 text-center text-xs text-muted-foreground">Nothing in production.</p>
+            {visibleJobs.length === 0 && (
+              <p className="px-4 py-8 text-center text-xs text-muted-foreground">
+                {showAll ? "Nothing in production." : "No vehicles waiting on QC right now."}
+              </p>
             )}
-            {jobs.map((j) => {
+            {visibleJobs.map((j) => {
               const list = checklistFor(j.id);
               return (
                 <button
@@ -284,6 +341,7 @@ function QcPage() {
                       temp: Number(f.get("temp") || 0),
                       notes: String(f.get("notes") || ""),
                       items: currentItems,
+                      requireTemp: needsHeatCheck(current.service_type),
                     });
                   }}
                 >
@@ -309,17 +367,24 @@ function QcPage() {
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="temp" className="text-xs">Post-heat edge temp (°F)</Label>
-                      <Input
-                        id="temp"
-                        name="temp"
-                        type="number"
-                        step="1"
-                        defaultValue={currentList.edge_temp_f ?? 195}
-                      />
-                    </div>
-                    <div className="space-y-1.5 sm:col-span-2">
+                    {needsHeatCheck(current.service_type) && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="temp" className="text-xs">Post-heat edge temp (°F)</Label>
+                        <Input
+                          id="temp"
+                          name="temp"
+                          type="number"
+                          step="1"
+                          defaultValue={currentList.edge_temp_f ?? 195}
+                        />
+                      </div>
+                    )}
+                    <div
+                      className={cn(
+                        "space-y-1.5",
+                        needsHeatCheck(current.service_type) ? "sm:col-span-2" : "sm:col-span-3",
+                      )}
+                    >
                       <Label htmlFor="inspector" className="text-xs">Signed off by</Label>
                       <Input
                         id="inspector"
@@ -329,7 +394,25 @@ function QcPage() {
                       />
                     </div>
                   </div>
+                  {!needsHeatCheck(current.service_type) && (
+                    <p className="text-xs text-muted-foreground">
+                      {label(current.service_type ?? "this service")} does not use a post-heat temperature check.
+                    </p>
+                  )}
                   <Textarea name="notes" rows={2} placeholder="Notes for the file" defaultValue={currentList.notes ?? ""} />
+
+                  <div className="space-y-2 rounded-xl border border-elevated bg-surface-2 p-3">
+                    <Label htmlFor="correction" className="text-xs">
+                      If something needs redoing, tell the installer what to correct
+                    </Label>
+                    <Textarea
+                      id="correction"
+                      rows={2}
+                      value={correction}
+                      onChange={(e) => setCorrection(e.target.value)}
+                      placeholder="Lifted edge on the driver fender — re-tuck and post-heat."
+                    />
+                  </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button type="submit" disabled={signOff.isPending || currentList.status === "passed"}>
@@ -338,17 +421,27 @@ function QcPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => failQc.mutate({ checklistId: currentList.id, jobId: current.id })}
+                      disabled={failQc.isPending || correction.trim().length < 5}
+                      onClick={() =>
+                        failQc.mutate({
+                          checklistId: currentList.id,
+                          jobId: current.id,
+                          reason: correction,
+                          existingNotes: currentList.notes ?? null,
+                        })
+                      }
                     >
                       Fail — send back to installer
                     </Button>
                   </div>
                   {currentList.status === "passed" && (
                     <p className="text-xs text-revenue">
-                      Passed by {currentList.inspector} at {Number(currentList.edge_temp_f)}°F — invoicing unlocked.
+                      Passed by {currentList.inspector}
+                      {currentList.edge_temp_f ? ` at ${Number(currentList.edge_temp_f)}°F` : ""} — invoicing unlocked.
                     </p>
                   )}
                 </form>
+
               )}
             </div>
           </Panel>

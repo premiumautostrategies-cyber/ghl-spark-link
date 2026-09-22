@@ -161,7 +161,7 @@ function TechnicianProductionPage() {
   const { data: checklists = [] } = useQuery({
     queryKey: ["floor-qc"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("qc_checklists").select("id,job_id,status");
+      const { data, error } = await supabase.from("qc_checklists").select("id,job_id,status,notes");
       if (error) throw error;
       return data;
     },
@@ -279,6 +279,30 @@ function TechnicianProductionPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const startJob = useMutation({
+    mutationFn: async (jobId: string) => {
+      if (!tech) throw new Error("Pick your name first");
+      const jobRow = jobs.find((item) => item.id === jobId);
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("jobs")
+        .update({
+          installer: jobRow?.installer ?? tech,
+          accepted_by: jobRow?.accepted_by ?? tech,
+          accepted_at: jobRow?.accepted_at ?? now,
+          checked_in_at: now,
+          status: "in_progress",
+        })
+        .eq("id", jobId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Job started — vehicle checked in");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const checkIn = useMutation({
     mutationFn: async (jobId: string) => {
       const { error } = await supabase
@@ -293,6 +317,7 @@ function TechnicianProductionPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const startInspection = useMutation({
     mutationFn: async (jobId: string) => {
@@ -657,10 +682,14 @@ function TechnicianProductionPage() {
             <ShieldAlert className="mt-0.5 h-5 w-5 text-critical" />
             <div>
               <p className="text-sm font-semibold text-critical">QC sent this vehicle back</p>
-              <p className="mt-1 text-sm text-muted-foreground">Correct the flagged work, then request QC again.</p>
+              <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                {checklists.find((c) => c.job_id === job.id)?.notes ||
+                  "Correct the flagged work, then request QC again."}
+              </p>
             </div>
           </div>
         )}
+
 
         <Panel className="p-5 sm:p-6">
           <h1 className="display-title text-2xl sm:text-3xl">{vehicle}</h1>
@@ -741,18 +770,31 @@ function TechnicianProductionPage() {
         </div>
 
 
-        {/* Step 1–2 */}
+        {/* Start of day */}
         <Panel className="p-5">
           <p className="micro-label">Start of day</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Button size="lg" className="min-h-14" disabled={s.accept || acceptJob.isPending} onClick={() => acceptJob.mutate(job.id)}>
-              {s.accept ? `Accepted${job.accepted_by ? ` by ${job.accepted_by}` : ""}` : "Accept this job"}
-            </Button>
-            <Button size="lg" variant={s.accept && !s.checkin ? "default" : "outline"} className="min-h-14" disabled={!s.accept || s.checkin || checkIn.isPending} onClick={() => checkIn.mutate(job.id)}>
-              {s.checkin ? `Checked in ${clock(job.checked_in_at)}` : "Check in vehicle"}
-            </Button>
-          </div>
+          {s.checkin ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Checked in {clock(job.checked_in_at)}
+              {job.accepted_by ? ` · ${job.accepted_by}` : ""}
+            </p>
+          ) : (
+            <>
+              <Button
+                size="lg"
+                className="mt-3 min-h-14 w-full"
+                disabled={startJob.isPending}
+                onClick={() => startJob.mutate(job.id)}
+              >
+                Start this job — check the vehicle in
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                This takes the job and checks the vehicle in, in one tap.
+              </p>
+            </>
+          )}
         </Panel>
+
 
         {/* Inspection */}
         <Panel>
@@ -789,12 +831,39 @@ function TechnicianProductionPage() {
                   <Input id="mileage" name="mileage" type="number" inputMode="numeric" className="min-h-12" defaultValue={s.inspection.mileage ?? ""} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="notes" className="text-xs">Condition notes & pre-existing damage</Label>
+                  <Label htmlFor="notes" className="text-xs">Condition notes &amp; pre-existing damage</Label>
                   <Textarea id="notes" name="notes" rows={3} defaultValue={s.inspection.notes ?? ""} placeholder="Rock chips on hood, swirls on driver door…" />
+                </div>
+                <div className="rounded-xl border border-elevated bg-elevated/40 p-3">
+                  <p className="text-xs font-semibold">Before you close this out</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Shoot the whole vehicle plus a close-up of every mark you noted. Photos protect you later.
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {photoPaths.length > 0
+                      ? `${photoPaths.length} photo${photoPaths.length === 1 ? "" : "s"} on this job.`
+                      : "No intake photos yet."}
+                  </p>
+                  <label className="mt-2 inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border border-elevated px-4 text-sm font-semibold">
+                    Add intake photos
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files ?? []);
+                        if (files.length) uploadPhotos.mutate({ jobId: job.id, files });
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
                 </div>
                 <Button type="submit" size="lg" className="min-h-14 w-full" disabled={completeInspection.isPending}>
                   Complete inspection
                 </Button>
+
               </form>
             )}
           </div>
@@ -833,10 +902,17 @@ function TechnicianProductionPage() {
                       <Tag tone={s.install ? "revenue" : "muted"}>{s.install ? "Complete" : "Open"}</Tag>
                     </div>
                     {!s.install && (
-                      <Button size="lg" className="mt-4 min-h-14 w-full" disabled={!s.prep || completePhaseGroup.isPending} onClick={() => completePhaseGroup.mutate({ jobId: job.id, keys: INSTALL_PHASES, areaLabels: areas })}>
-                        Mark install complete
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="mt-4 min-h-14 w-full"
+                        disabled={!s.prep}
+                        onClick={openCompletion}
+                      >
+                        Finish install &amp; document
                       </Button>
                     )}
+
                   </div>
                 </div>
 

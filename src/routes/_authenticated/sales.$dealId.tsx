@@ -416,6 +416,58 @@ function DealDesk() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  /* ---------- delivery handoff ---------- */
+
+  const DELIVERY_TEXT: Record<string, string> = {
+    ready: "Your vehicle is finished and looks great — it's ready for pickup whenever you are.",
+    delivered: "Thanks for trusting us with your vehicle. Care instructions are in your client hub.",
+    review: "It was a pleasure working with you — would you mind leaving us a quick review?",
+  };
+
+  const deliver = useMutation({
+    mutationFn: async (kind: "ready" | "delivered" | "review") => {
+      if (!orgId) throw new Error("No workspace selected");
+      const { error: msgErr } = await supabase.from("messages").insert({
+        organization_id: orgId,
+        location_id: locId,
+        deal_id: dealId,
+        customer_id: deal?.customer_id ?? null,
+        channel: "sms",
+        direction: "out",
+        body: DELIVERY_TEXT[kind] ?? "",
+      });
+      if (msgErr) throw msgErr;
+      if (kind === "delivered" && job?.id) {
+        const { error } = await supabase
+          .from("jobs")
+          .update({ status: "completed", key_released: true })
+          .eq("id", job.id);
+        if (error) throw error;
+      }
+      await supabase.from("lead_events").insert({
+        organization_id: orgId,
+        deal_id: dealId,
+        actor: "shop",
+        kind: "sms_out",
+        detail:
+          kind === "ready"
+            ? "Customer notified vehicle is ready"
+            : kind === "delivered"
+              ? "Vehicle delivered"
+              : "Review request sent",
+      });
+    },
+    onSuccess: (_d, kind) => {
+      toast.success(
+        kind === "ready" ? "Customer notified" : kind === "delivered" ? "Marked delivered" : "Review request sent",
+      );
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
+
   /* ---------- scheduling ---------- */
 
   const schedule = useMutation({
@@ -682,14 +734,20 @@ function DealDesk() {
               <Row label="Suggested deposit (30%)" value={money(total * 0.3)} />
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={() => sendProposal.mutate()} disabled={sendProposal.isPending}>
-                Send proposal to client hub
-              </Button>
-              <Button variant="outline" onClick={() => winDeal.mutate()} disabled={winDeal.isPending}>
-                Mark approved &amp; won
-              </Button>
+            <div className="mt-4 space-y-2 border-t border-elevated pt-3">
+              <p className="text-xs text-muted-foreground">
+                This is the internal working quote. The customer sees the interactive proposal below — send that.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => sendProposal.mutate()} disabled={sendProposal.isPending}>
+                  Share this quote as a plain document
+                </Button>
+                <Button variant="ghost" onClick={() => winDeal.mutate()} disabled={winDeal.isPending}>
+                  Mark approved &amp; won
+                </Button>
+              </div>
             </div>
+
           </div>
         </Panel>
 
@@ -708,7 +766,56 @@ function DealDesk() {
         </div>
 
         <div className="min-w-0 space-y-4">
+          {/* Readiness */}
+          <Panel>
+            <SectionTitle title="Where this sale stands" hint="Each step unlocks the next." />
+            <div className="divide-y divide-elevated border-t border-elevated">
+              {[
+                { label: "Quote built", done: total > 0, detail: total > 0 ? money(total) : "Add services" },
+                {
+                  label: "Sent to customer",
+                  done: ["sent", "approved", "viewed"].includes(estimate?.status ?? ""),
+                  detail: label(estimate?.status ?? "not sent"),
+                },
+                {
+                  label: "Approved",
+                  done: ["won", "scheduled"].includes(deal.stage ?? "") || estimate?.status === "approved",
+                  detail: label(deal.stage ?? ""),
+                },
+                {
+                  label: "Deposit collected",
+                  done: collected > 0,
+                  detail: collected > 0 ? `${money(collected)} in` : "Nothing collected",
+                },
+                {
+                  label: "Scheduled",
+                  done: Boolean(job?.scheduled_start),
+                  detail: job?.scheduled_start ? shortDate(job.scheduled_start) : "Not booked",
+                },
+                {
+                  label: "QC passed",
+                  done: job?.qc_status === "passed",
+                  detail: job?.qc_status ? label(job.qc_status) : "Not started",
+                },
+              ].map((step) => (
+                <div key={step.label} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        step.done ? "bg-revenue" : "bg-muted-foreground/40",
+                      )}
+                    />
+                    <span className={step.done ? "text-foreground" : "text-muted-foreground"}>{step.label}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground">{step.detail}</span>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
           {/* Scheduling */}
+
           <Panel>
             <SectionTitle
               title="Book the bay"
@@ -810,9 +917,10 @@ function DealDesk() {
           {/* Payments */}
           <Panel>
             <SectionTitle
-              title="Collect payment"
-              hint={`${money(collected)} collected of ${money(total)}`}
+              title="Log a payment"
+              hint={`${money(collected)} logged of ${money(total)} · ${money(balance)} outstanding`}
             />
+
             <form
               className="grid gap-2.5 border-t border-elevated p-4 sm:grid-cols-2"
               onSubmit={(e) => {
@@ -857,9 +965,14 @@ function DealDesk() {
                 <Label htmlFor="p-ref" className="text-xs">Reference</Label>
                 <Input id="p-ref" name="reference" placeholder="Auth code" />
               </div>
-              <Button type="submit" className="sm:col-span-2" disabled={takePayment.isPending}>
-                Record payment
-              </Button>
+              <div className="sm:col-span-2 space-y-2">
+                <Button type="submit" className="w-full" disabled={takePayment.isPending}>
+                  Record money already received
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  This records a payment you've already taken — nothing is charged here.
+                </p>
+              </div>
             </form>
             {payments.length > 0 && (
               <div className="space-y-1.5 border-t border-elevated p-4 pt-3">
@@ -874,6 +987,45 @@ function DealDesk() {
               </div>
             )}
           </Panel>
+
+          {/* Delivery handoff */}
+          <Panel>
+            <SectionTitle
+              title="Delivery handoff"
+              hint={
+                job?.qc_status === "passed"
+                  ? `QC passed · ${money(balance)} outstanding`
+                  : "Available once QC passes the vehicle."
+              }
+            />
+            <div className="space-y-2 border-t border-elevated p-4">
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={job?.qc_status !== "passed" || deliver.isPending}
+                onClick={() => deliver.mutate("ready")}
+              >
+                Tell the customer it's ready
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={job?.qc_status !== "passed" || deliver.isPending}
+                onClick={() => deliver.mutate("delivered")}
+              >
+                {balance > 0 ? `Mark delivered (${money(balance)} due)` : "Mark delivered"}
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                disabled={job?.qc_status !== "passed" || deliver.isPending}
+                onClick={() => deliver.mutate("review")}
+              >
+                Send review request
+              </Button>
+            </div>
+          </Panel>
+
 
           {/* Client hub documents */}
           <Panel>

@@ -17,7 +17,7 @@ export const OPS_ALERTS_KEY = ["ops-alerts"] as const;
 export async function logOpsAlert(input: {
   organizationId: string;
   jobId?: string | null;
-  kind: "qc_requested" | "qc_passed";
+  kind: "qc_requested" | "qc_passed" | "qc_failed" | "vehicle_ready" | "delivered";
   title: string;
   body?: string | null;
   actor?: string | null;

@@ -44,6 +44,8 @@ export const Route = createFileRoute("/_authenticated/sales/new")({
   component: NewLeadDesk,
 });
 
+const digits = (value: string) => value.replace(/\D/g, "");
+
 function NewLeadDesk() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -52,31 +54,52 @@ function NewLeadDesk() {
   const [customerId, setCustomerId] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [title, setTitle] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [sendFirstText, setSendFirstText] = useState(true);
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers-lite"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("id,name").order("name");
+      const { data, error } = await supabase.from("customers").select("id,name,phone,email").order("name");
       if (error) throw error;
       return data;
     },
   });
 
+  const phoneDigits = digits(newPhone);
+  const emailKey = newEmail.trim().toLowerCase();
+  const nameKey = newName.trim().toLowerCase();
+  const matches = addingCustomer
+    ? customers
+        .filter((c) => {
+          const byPhone = phoneDigits.length >= 7 && digits(c.phone ?? "").endsWith(phoneDigits.slice(-7));
+          const byEmail = emailKey.length > 4 && (c.email ?? "").toLowerCase() === emailKey;
+          const byName = nameKey.length > 2 && (c.name ?? "").toLowerCase() === nameKey;
+          return byPhone || byEmail || byName;
+        })
+        .slice(0, 3)
+    : [];
+
+
   const addDeal = useMutation({
     mutationFn: async (form: FormData) => {
       if (!orgId) throw new Error("No workspace selected");
       let cid = String(form.get("customer_id") || "") || null;
-      const newName = String(form.get("new_customer_name") || "").trim();
-      const newPhone = String(form.get("new_customer_phone") || "").trim();
-      const newEmail = String(form.get("new_customer_email") || "").trim();
+      const formName = String(form.get("new_customer_name") || "").trim();
+      const formPhone = String(form.get("new_customer_phone") || "").trim();
+      const formEmail = String(form.get("new_customer_email") || "").trim();
 
-      if (!cid && newName) {
+
+      if (!cid && formName) {
         const { data: cust, error: custErr } = await supabase
           .from("customers")
           .insert({
-            name: newName,
-            phone: newPhone || null,
-            email: newEmail || null,
+            name: formName,
+            phone: formPhone || null,
+            email: formEmail || null,
+
             organization_id: orgId,
             location_id: locId,
           })
@@ -128,8 +151,8 @@ function NewLeadDesk() {
         .single();
       if (error) throw error;
 
-      // Speed to lead: fire the first text automatically on brand-new leads.
-      if (created?.stage === "new_lead") {
+      // Speed to lead: the first text goes out only when the rep leaves it switched on.
+      if (created?.stage === "new_lead" && sendFirstText) {
         await supabase.from("messages").insert({
           organization_id: orgId,
           location_id: locId,
@@ -155,7 +178,8 @@ function NewLeadDesk() {
       return created.id as string;
     },
     onSuccess: (dealId) => {
-      toast.success("Lead added — first text sent");
+      toast.success(sendFirstText ? "Lead added — first text sent" : "Lead added");
+
       qc.invalidateQueries({ queryKey: ["deals"] });
       qc.invalidateQueries({ queryKey: ["pipeline-events"] });
       qc.invalidateQueries({ queryKey: ["customers"] });
@@ -179,8 +203,9 @@ function NewLeadDesk() {
             <p className="micro-label">Sales desk</p>
             <h1 className="display-title mt-1 text-3xl">{title.trim() || "New lead"}</h1>
             <p className={cn("mt-1.5 text-sm", TEMP_META.new.text)}>
-              Untouched — the first text goes out as soon as you save
+              {sendFirstText ? "Untouched — the first text goes out when you save" : "Untouched — no automatic text will be sent"}
             </p>
+
           </div>
           <div className="text-right">
             <p className="micro-label">Quote total</p>
@@ -206,18 +231,66 @@ function NewLeadDesk() {
                 <>
                   <div className="space-y-1.5">
                     <Label htmlFor="c-name" className="text-xs">Name</Label>
-                    <Input id="c-name" name="new_customer_name" placeholder="Customer name" required />
+                    <Input
+                      id="c-name"
+                      name="new_customer_name"
+                      placeholder="Customer name"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      required
+                    />
                   </div>
                   <div className="grid gap-2.5 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="c-phone" className="text-xs">Phone</Label>
-                      <Input id="c-phone" name="new_customer_phone" placeholder="(555) 555-0142" />
+                      <Input
+                        id="c-phone"
+                        name="new_customer_phone"
+                        placeholder="(555) 555-0142"
+                        value={newPhone}
+                        onChange={(e) => setNewPhone(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="c-email" className="text-xs">Email</Label>
-                      <Input id="c-email" name="new_customer_email" placeholder="name@email.com" />
+                      <Input
+                        id="c-email"
+                        name="new_customer_email"
+                        placeholder="name@email.com"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                      />
                     </div>
                   </div>
+
+                  {matches.length > 0 && (
+                    <div className="space-y-2 rounded-xl border border-urgent/40 bg-urgent/10 p-3">
+                      <p className="text-xs font-semibold text-urgent">
+                        Already in the shop database — don't create a duplicate
+                      </p>
+                      {matches.map((c) => (
+                        <div key={c.id} className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-sm">
+                            {c.name}
+                            {c.phone ? ` · ${c.phone}` : ""}
+                            {c.email ? ` · ${c.email}` : ""}
+                          </span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setCustomerId(c.id);
+                              setAddingCustomer(false);
+                            }}
+                          >
+                            Use this customer
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     className="text-[11px] text-muted-foreground underline"
@@ -227,6 +300,7 @@ function NewLeadDesk() {
                   </button>
                 </>
               ) : (
+
                 <>
                   <input type="hidden" name="customer_id" value={customerId} />
                   <div className="space-y-1.5">
@@ -324,6 +398,24 @@ function NewLeadDesk() {
             </div>
           </Panel>
 
+          <Panel className="min-w-0">
+            <SectionTitle title="First contact" hint="Speed to lead, on your terms." />
+            <label className="flex cursor-pointer items-start gap-3 border-t border-elevated p-4">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-current"
+                checked={sendFirstText}
+                onChange={(e) => setSendFirstText(e.target.checked)}
+              />
+              <span className="text-sm">
+                Text this customer right away when I save
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  "{SPEED_TO_LEAD_BODY}"
+                </span>
+              </span>
+            </label>
+          </Panel>
+
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={addDeal.isPending}>
               {addDeal.isPending ? "Saving…" : "Save lead"}
@@ -332,6 +424,7 @@ function NewLeadDesk() {
               Cancel
             </Button>
           </div>
+
         </div>
       </form>
     </div>
