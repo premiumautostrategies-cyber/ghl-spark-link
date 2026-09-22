@@ -85,7 +85,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
           <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search all messages" className="pl-9" /></div>
         </div>
 
-        <div className="min-h-[220px] flex-1 overflow-y-auto border-b border-elevated xl:max-h-[45%]">
+        <div className="max-h-[340px] min-h-[220px] flex-1 overflow-y-auto border-b border-elevated xl:max-h-[45%]">
           {rows.length ? rows.map((row) => (
             <button
               key={row.deal.id}
