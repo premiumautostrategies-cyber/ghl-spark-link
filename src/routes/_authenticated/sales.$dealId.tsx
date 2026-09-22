@@ -795,7 +795,7 @@ function DealDesk() {
                 {
                   label: "QC passed",
                   done: job?.qc_status === "passed",
-                  detail: job?.qc_status ? label(job.qc_status) : "Not started",
+                  detail: job?.qc_status ? label(job.qc_status.replace(/_/g, " ")) : "Not started",
                 },
               ].map((step) => (
                 <div key={step.label} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
