@@ -81,4 +81,4 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 - [ ] P6 Automation recipes, document/SOP attachment, integration presentation
 
 - [x] Installer work center: Shop Floor accept/claim, check-in, inspection, prep/install timers, QC request; QC-requested and QC-passed shop alerts in bell + Command Center
-- [ ] Reshape Inbox into customer context/history, text-email conversation, and quote builder columns.
+- [x] Reshape Inbox into customer context/history, text-email conversation, and quote builder columns.
