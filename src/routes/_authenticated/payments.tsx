@@ -47,7 +47,7 @@ function PaymentsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("payments")
-        .select("*, customers(name), jobs(title)")
+        .select("*, customers(name), jobs(title), estimates(number,estimate_items(quantity,unit_price))")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -250,38 +250,41 @@ function PaymentsPage() {
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="border-b border-border text-left text-xs uppercase tracking-widest text-muted-foreground">
+          <table className="w-full min-w-[920px] text-sm">
+            <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-2">Customer</th>
-                <th className="px-4 py-2">Job</th>
-                <th className="px-4 py-2">Type</th>
-                <th className="px-4 py-2">Method</th>
-                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2">Invoice</th>
                 <th className="px-4 py-2 text-right">Amount</th>
+                <th className="px-4 py-2 text-right">Paid</th>
+                <th className="px-4 py-2 text-right">Balance</th>
+                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {payments.map((p) => (
-                <tr key={p.id}>
+              {payments.map((p) => {
+                const invoiceTotal = p.estimates?.estimate_items?.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unit_price), 0);
+                const paidAmount = p.status === "paid" ? Number(p.amount) : 0;
+                const balance = Math.max(0, (invoiceTotal ?? Number(p.amount)) - paidAmount);
+                return <tr key={p.id}>
                   <td className="px-4 py-3 font-medium">{p.customers?.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.jobs?.title ?? "—"}</td>
-                  <td className="px-4 py-3 capitalize">{p.kind}</td>
-                  <td className="px-4 py-3">{label(p.method)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{dayDate(p.paid_at)}</td>
+                  <td className="px-4 py-3"><p>{p.estimates ? `#${p.estimates.number}` : p.reference ?? "—"}</p><p className="text-xs text-muted-foreground">{p.jobs?.title ?? label(p.kind)}</p></td>
                   <td className="px-4 py-3 text-right font-semibold">{money(p.amount)}</td>
+                  <td className="px-4 py-3 text-right">{money(paidAmount)}</td>
+                  <td className="px-4 py-3 text-right">{money(balance)}</td>
+                  <td className="px-4 py-3"><Badge variant={p.status === "paid" ? "secondary" : "outline"}>{label(p.status)}</Badge></td>
+                  <td className="px-4 py-3 text-muted-foreground">{dayDate(p.paid_at ?? p.created_at)}</td>
                   <td className="px-4 py-3 text-right">
                     {p.status === "pending" ? (
                       <Button size="sm" variant="outline" onClick={() => markPaid.mutate(p.id)}>
                         Mark paid
                       </Button>
-                    ) : (
-                      <Badge variant="secondary">{label(p.status)}</Badge>
-                    )}
+                    ) : null}
                   </td>
-                </tr>
-              ))}
+                </tr>;
+              })}
             </tbody>
           </table>
         </div>

@@ -14,9 +14,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Car, ChevronRight, Link as LinkIcon, MessageSquare, Phone, Plus } from "lucide-react";
+import { ChevronRight, MessageSquare, Phone } from "lucide-react";
 import { useEmitEvent } from "@/lib/integrations/emit";
-import { money } from "@/lib/format";
+import { dayDate, money } from "@/lib/format";
 import { CustomerWorkspace } from "@/components/customer-workspace";
 import { LeadWorkspace } from "@/components/lead-workspace";
 import { PageHeader } from "@/components/page-header";
@@ -205,29 +205,32 @@ function CustomersPage() {
         }
       />
 
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 border-b border-border bg-muted/30 px-4 py-2 text-xs font-semibold uppercase text-muted-foreground">
-          <span>Name</span>
-          <span>Number</span>
-          <span>Vehicle</span>
-          <span className="text-right">LTV</span>
-          <span className="text-center">Reach</span>
-          <span />
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
+        <div className="grid min-w-[1120px] grid-cols-[1.2fr_1.3fr_150px_110px_120px_140px_100px_80px] gap-4 border-b border-border bg-muted/30 px-4 py-2 text-xs font-semibold uppercase text-muted-foreground">
+          <span>Customer</span><span>Vehicles</span><span>Phone</span>
+          <span className="text-right">Lifetime value</span><span>Last visit</span>
+          <span>Next appointment</span><span>Status</span><span className="text-right">Actions</span>
         </div>
         {filtered.length === 0 && (
           <div className="px-4 py-8 text-sm text-muted-foreground text-center">No customers yet.</div>
         )}
-        <ul>
+        <ul className="min-w-[1120px]">
           {filtered.map((c) => {
             const customerJobs = jobs.filter((j) => j.customer_id === c.id);
             const ltv = customerJobs.reduce((t, j) => t + Number(j.price ?? 0), 0);
             const primary = c.vehicles?.[0];
             const extra = (c.vehicles?.length ?? 0) - 1;
             const phone = c.phone?.trim();
+            const now = Date.now();
+            const pastJobs = customerJobs.filter((j) => j.scheduled_start && new Date(j.scheduled_start).getTime() < now);
+            const upcomingJobs = customerJobs.filter((j) => j.scheduled_start && new Date(j.scheduled_start).getTime() >= now).sort((a, b) => new Date(a.scheduled_start ?? 0).getTime() - new Date(b.scheduled_start ?? 0).getTime());
+            const lastVisit = pastJobs[0]?.scheduled_start;
+            const nextAppointment = upcomingJobs[0]?.scheduled_start;
+            const status = nextAppointment ? "Scheduled" : pastJobs.length ? "Returning" : "New";
             return (
               <li key={c.id} className="border-b border-border last:border-b-0">
                 <div
-                  className="grid grid-cols-[1fr_140px_1fr_100px_140px_48px] gap-4 items-center px-4 py-3 hover:bg-muted/20 transition-colors cursor-pointer"
+                  className="grid grid-cols-[1.2fr_1.3fr_150px_110px_120px_140px_100px_80px] items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/20 cursor-pointer"
                   onClick={() => setOpenCustomer(c.id)}
                 >
                   <div className="min-w-0">
@@ -245,8 +248,7 @@ function CustomersPage() {
                   </div>
                   <div className="min-w-0 text-sm">
                     {primary ? (
-                      <div className="flex items-center gap-2 truncate">
-                        <Car className="size-4 text-primary shrink-0" />
+                      <div className="truncate">
                         <span className="truncate">
                           {[primary.year, primary.make, primary.model, primary.color].filter(Boolean).join(" ")}
                           {extra > 0 && <span className="text-muted-foreground"> +{extra} more</span>}
@@ -257,7 +259,10 @@ function CustomersPage() {
                     )}
                   </div>
                   <div className="text-right font-medium">{money(ltv)}</div>
-                  <div className="flex justify-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <div className="text-sm text-muted-foreground">{dayDate(lastVisit)}</div>
+                  <div className="text-sm text-muted-foreground">{dayDate(nextAppointment)}</div>
+                  <span className="text-sm font-medium">{status}</span>
+                  <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                     {phone ? (
                       <>
                         <Button size="icon" variant="ghost" className="size-8" asChild>
@@ -271,19 +276,11 @@ function CustomersPage() {
                           </a>
                         </Button>
                       </>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">No number</span>
-                    )}
+                    ) : null}
+                    <Button size="icon" variant="ghost" className="size-8" onClick={() => setOpenCustomer(c.id)} aria-label="Open customer workspace">
+                      <ChevronRight className="size-4" />
+                    </Button>
                   </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="size-8"
-                    onClick={() => setOpenCustomer(c.id)}
-                    aria-label="Open customer workspace"
-                  >
-                    <ChevronRight className="size-4" />
-                  </Button>
                 </div>
               </li>
             );

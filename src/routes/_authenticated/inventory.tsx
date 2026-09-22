@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { INVENTORY_CATEGORIES, label, money } from "@/lib/format";
+import { dayDate, INVENTORY_CATEGORIES, label, money } from "@/lib/format";
 import { toast } from "sonner";
 import { FilmRolls } from "@/components/film-rolls";
 
@@ -187,14 +187,15 @@ function InventoryPage() {
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border bg-card">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead className="border-b border-border text-left text-xs uppercase tracking-widest text-muted-foreground">
+          <table className="w-full min-w-[820px] text-sm">
+            <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-2">Item</th>
                 <th className="px-4 py-2">Category</th>
-                <th className="px-4 py-2">On hand</th>
-                <th className="px-4 py-2">Value</th>
-                <th className="px-4 py-2">Supplier</th>
+                <th className="px-4 py-2">Quantity</th>
+                <th className="px-4 py-2">Minimum</th>
+                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Updated</th>
                 <th className="px-4 py-2" />
               </tr>
             </thead>
@@ -214,16 +215,10 @@ function InventoryPage() {
                       <span className="font-medium">
                         {Number(i.quantity_on_hand)} {i.unit}
                       </span>
-                      {isLow && (
-                        <Badge variant="destructive" className="ml-2">
-                          Reorder
-                        </Badge>
-                      )}
                     </td>
-                    <td className="px-4 py-3">
-                      {money(Number(i.quantity_on_hand) * Number(i.unit_cost))}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{i.supplier || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{Number(i.reorder_point)} {i.unit}</td>
+                    <td className="px-4 py-3"><Badge variant={isLow ? "destructive" : "secondary"}>{isLow ? "Reorder" : "In stock"}</Badge></td>
+                    <td className="px-4 py-3 text-muted-foreground">{dayDate(i.updated_at)}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
                         <Button
