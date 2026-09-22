@@ -10,6 +10,24 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type View = "day" | "week" | "month";
 
+type JobRow = {
+  id: string;
+  title: string;
+  status: string;
+  service_type: string | null;
+  bay: string | null;
+  installer: string | null;
+  price: number | null;
+  scheduled_start: string | null;
+  scheduled_end: string | null;
+  estimated_hours: number | null;
+  is_mobile: boolean | null;
+  service_address: string | null;
+  service_city: string | null;
+  customers: { name: string | null } | null;
+  vehicles: { year: number | null; make: string | null; model: string | null } | null;
+};
+
 const HOURS = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 
 const STATUS_TONE: Record<string, string> = {
@@ -60,8 +78,24 @@ function startOfWeek(d: Date) {
 }
 function sameDay(a: Date, b: Date) {
   return (
-    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
   );
+}
+
+function hoursOf(j: JobRow) {
+  if (Number(j.estimated_hours) > 0) return Number(j.estimated_hours);
+  if (j.scheduled_start && j.scheduled_end) {
+    return (new Date(j.scheduled_end).getTime() - new Date(j.scheduled_start).getTime()) / 3600000;
+  }
+  return 3;
+}
+
+function vehicleOf(j: JobRow) {
+  const v = j.vehicles;
+  if (!v) return null;
+  return [v.year, v.make, v.model].filter(Boolean).join(" ") || null;
 }
 
 function CalendarPage() {
@@ -75,12 +109,12 @@ function CalendarPage() {
       const { data, error } = await supabase
         .from("jobs")
         .select(
-          "id,title,status,service_type,bay,installer,price,scheduled_start,scheduled_end,estimated_hours,is_mobile,address,customers(name),vehicles(year,make,model)",
+          "id,title,status,service_type,bay,installer,price,scheduled_start,scheduled_end,estimated_hours,is_mobile,service_address,service_city,customers(name),vehicles(year,make,model)",
         )
         .not("scheduled_start", "is", null)
         .order("scheduled_start");
       if (error) throw error;
-      return data;
+      return (data ?? []) as unknown as JobRow[];
     },
   });
 
@@ -93,7 +127,7 @@ function CalendarPage() {
         .eq("is_active", true)
         .order("sort_order");
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
 
@@ -102,27 +136,18 @@ function CalendarPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("team_members")
-        .select("id,full_name,role")
+        .select("id,full_name")
         .eq("is_active", true)
         .order("full_name");
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
 
   const dailyCapacity = bays.reduce((t, b) => t + Number(b.daily_hours_cap ?? 0), 0) || 27;
 
-  const hoursOf = (j: (typeof jobs)[number]) => {
-    if (Number(j.estimated_hours) > 0) return Number(j.estimated_hours);
-    if (j.scheduled_start && j.scheduled_end) {
-      return (
-        (new Date(j.scheduled_end).getTime() - new Date(j.scheduled_start).getTime()) / 3600000
-      );
-    }
-    return 3;
-  };
-
-  const jobsOn = (d: Date) => jobs.filter((j) => sameDay(new Date(j.scheduled_start as string), d));
+  const jobsOn = (d: Date) =>
+    jobs.filter((j) => j.scheduled_start && sameDay(new Date(j.scheduled_start), d));
 
   const range = useMemo(() => {
     if (view === "day") return [anchor];
@@ -146,23 +171,14 @@ function CalendarPage() {
       ? anchor.toLocaleDateString("en-US", { month: "long", year: "numeric" })
       : view === "week"
         ? `${startOfWeek(anchor).toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${addDays(startOfWeek(anchor), 6).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
-        : anchor.toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          });
+        : anchor.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
-  const scopeJobs = view === "month" ? range.filter((d) => d.getMonth() === anchor.getMonth()).flatMap(jobsOn) : range.flatMap(jobsOn);
+  const scopeDaysList =
+    view === "month" ? range.filter((d) => d.getMonth() === anchor.getMonth()) : range;
+  const scopeJobs = scopeDaysList.flatMap(jobsOn);
   const scopeHours = scopeJobs.reduce((t, j) => t + hoursOf(j), 0);
-  const scopeDays = view === "month" ? range.filter((d) => d.getMonth() === anchor.getMonth()).length : range.length;
-  const util = Math.round((scopeHours / Math.max(dailyCapacity * scopeDays, 1)) * 100);
+  const util = Math.round((scopeHours / Math.max(dailyCapacity * scopeDaysList.length, 1)) * 100);
   const selectedJob = jobs.find((j) => j.id === selected) ?? null;
-
-  const vehicleOf = (j: (typeof jobs)[number]) => {
-    const v = j.vehicles as { year?: number | null; make?: string | null; model?: string | null } | null;
-    if (!v) return null;
-    return [v.year, v.make, v.model].filter(Boolean).join(" ") || null;
-  };
 
   return (
     <div className="space-y-6">
@@ -171,7 +187,7 @@ function CalendarPage() {
           <p className="micro-label">Operations</p>
           <h1 className="display-title mt-1 text-3xl font-semibold">Shop calendar</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every vehicle on the books — switch between day, week and month, with live bay capacity.
+            Every vehicle on the books — switch between day, week and month with live bay capacity.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -185,7 +201,13 @@ function CalendarPage() {
             onChange={(v) => setView(v as View)}
           />
           <div className="flex items-center gap-1 rounded-full border border-elevated bg-surface p-1">
-            <Button variant="ghost" size="icon" className="size-8" onClick={() => step(-1)} aria-label="Previous">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => step(-1)}
+              aria-label="Previous"
+            >
               <ChevronLeft className="size-4" />
             </Button>
             <Button
@@ -196,7 +218,13 @@ function CalendarPage() {
             >
               Today
             </Button>
-            <Button variant="ghost" size="icon" className="size-8" onClick={() => step(1)} aria-label="Next">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => step(1)}
+              aria-label="Next"
+            >
               <ChevronRight className="size-4" />
             </Button>
           </div>
@@ -205,15 +233,19 @@ function CalendarPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Vehicles booked" value={String(scopeJobs.length)} />
-        <Kpi label="Booked value" value={money(scopeJobs.reduce((t, j) => t + Number(j.price ?? 0), 0))} tone="revenue" />
+        <Kpi
+          label="Booked value"
+          value={money(scopeJobs.reduce((t, j) => t + Number(j.price ?? 0), 0))}
+          tone="revenue"
+        />
         <Kpi
           label="Capacity used"
           value={`${util}%`}
           tone={util > 95 ? "critical" : "rig"}
-          hint={`${scopeHours.toFixed(1)} of ${(dailyCapacity * scopeDays).toFixed(0)} labour hours`}
+          hint={`${scopeHours.toFixed(1)} of ${(dailyCapacity * scopeDaysList.length).toFixed(0)} labour hours`}
         />
         <Kpi
-          label="Installers available"
+          label="Installers active"
           value={String(team.length)}
           tone="muted"
           hint={bays.length ? `${bays.length} active bays` : "No bays set up yet"}
@@ -229,28 +261,36 @@ function CalendarPage() {
 
         {view === "day" && (
           <DayBoard
-            day={anchor}
             jobs={jobsOn(anchor)}
             bays={bays.map((b) => b.name)}
             onSelect={setSelected}
             selected={selected}
-            vehicleOf={vehicleOf}
           />
         )}
 
         {view === "week" && (
           <div className="overflow-x-auto">
-            <div className="grid min-w-[900px] divide-x divide-elevated" style={{ gridTemplateColumns: "repeat(7, minmax(0,1fr))" }}>
+            <div className="grid min-w-[900px] grid-cols-7 divide-x divide-elevated">
               {range.map((d) => {
                 const list = jobsOn(d);
                 const hrs = list.reduce((t, j) => t + hoursOf(j), 0);
                 const pct = Math.min((hrs / Math.max(dailyCapacity, 1)) * 100, 100);
                 const today = sameDay(d, new Date());
                 return (
-                  <div key={d.toISOString()} className={cn("min-h-[420px] p-3", today && "bg-surface-2/60")}>
+                  <div
+                    key={d.toISOString()}
+                    className={cn("min-h-[420px] p-3", today && "bg-surface-2/60")}
+                  >
                     <div className="flex items-baseline justify-between">
-                      <p className="micro-label">{d.toLocaleDateString("en-US", { weekday: "short" })}</p>
-                      <p className={cn("font-display text-lg font-semibold", today && "text-bronze")}>
+                      <p className="micro-label">
+                        {d.toLocaleDateString("en-US", { weekday: "short" })}
+                      </p>
+                      <p
+                        className={cn(
+                          "display-title text-lg font-semibold",
+                          today && "text-bronze",
+                        )}
+                      >
                         {d.getDate()}
                       </p>
                     </div>
@@ -264,9 +304,7 @@ function CalendarPage() {
                       {hrs.toFixed(1)} / {dailyCapacity} h
                     </p>
                     <div className="mt-3 space-y-2">
-                      {list.length === 0 && (
-                        <p className="text-[11px] text-muted-foreground">Open</p>
-                      )}
+                      {list.length === 0 && <p className="text-[11px] text-muted-foreground">Open</p>}
                       {list.map((j) => (
                         <button
                           key={j.id}
@@ -284,9 +322,7 @@ function CalendarPage() {
                               minute: "2-digit",
                             })}
                           </p>
-                          <p className="truncate text-xs font-semibold">
-                            {vehicleOf(j) ?? j.title}
-                          </p>
+                          <p className="truncate text-xs font-semibold">{vehicleOf(j) ?? j.title}</p>
                           <p className="truncate text-[10px] text-muted-foreground">
                             {label(j.service_type)} · {j.installer || "Unassigned"}
                           </p>
@@ -306,7 +342,7 @@ function CalendarPage() {
             <div className="min-w-[840px]">
               <div className="grid grid-cols-7 border-b border-elevated">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="px-3 py-2 micro-label">
+                  <div key={d} className="micro-label px-3 py-2">
                     {d}
                   </div>
                 ))}
@@ -327,7 +363,9 @@ function CalendarPage() {
                       )}
                     >
                       <div className="flex items-center justify-between">
-                        <p className={cn("text-xs font-semibold tabular-nums", today && "text-bronze")}>
+                        <p
+                          className={cn("text-xs font-semibold tabular-nums", today && "text-bronze")}
+                        >
                           {d.getDate()}
                         </p>
                         {hrs > 0 && (
@@ -386,8 +424,7 @@ function CalendarPage() {
                 {vehicleOf(selectedJob) ?? selectedJob.title}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {(selectedJob.customers as { name?: string } | null)?.name ?? "No customer"} ·{" "}
-                {label(selectedJob.service_type)} ·{" "}
+                {selectedJob.customers?.name ?? "No customer"} · {label(selectedJob.service_type)} ·{" "}
                 {new Date(selectedJob.scheduled_start as string).toLocaleString("en-US", {
                   weekday: "short",
                   month: "short",
@@ -398,7 +435,7 @@ function CalendarPage() {
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {selectedJob.is_mobile
-                  ? `Mobile · ${selectedJob.address ?? "No address"}`
+                  ? `Mobile · ${[selectedJob.service_address, selectedJob.service_city].filter(Boolean).join(", ") || "No address"}`
                   : selectedJob.bay || "No bay assigned"}{" "}
                 · {selectedJob.installer || "Installer unassigned"} · {money(selectedJob.price)}
               </p>
@@ -422,71 +459,62 @@ function CalendarPage() {
 }
 
 function DayBoard({
-  day,
   jobs,
   bays,
   onSelect,
   selected,
-  vehicleOf,
 }: {
-  day: Date;
-  jobs: Array<Record<string, unknown> & { id: string }>;
+  jobs: JobRow[];
   bays: string[];
   onSelect: (id: string | null) => void;
   selected: string | null;
-  vehicleOf: (j: never) => string | null;
 }) {
-  const rowNames = Array.from(
-    new Set([...bays, ...jobs.map((j) => (j.bay as string) || "Unassigned")]),
-  );
+  const rowNames = Array.from(new Set([...bays, ...jobs.map((j) => j.bay || "Unassigned")]));
   if (rowNames.length === 0) rowNames.push("Unassigned");
+  const cols = `170px repeat(${HOURS.length}, minmax(60px,1fr))`;
+  const firstHour = HOURS[0] as number;
 
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[980px]">
-        <div
-          className="grid border-b border-elevated"
-          style={{ gridTemplateColumns: `170px repeat(${HOURS.length}, minmax(60px,1fr))` }}
-        >
-          <div className="px-4 py-2 micro-label">Bay</div>
+        <div className="grid border-b border-elevated" style={{ gridTemplateColumns: cols }}>
+          <div className="micro-label px-4 py-2">Bay</div>
           {HOURS.map((h) => (
-            <div key={h} className="border-l border-elevated px-2 py-2 micro-label">
+            <div key={h} className="micro-label border-l border-elevated px-2 py-2">
               {h % 12 === 0 ? 12 : h % 12}
               {h < 12 ? "a" : "p"}
             </div>
           ))}
         </div>
-        {rowNames.map((name) => (
-          <div
-            key={name}
-            className="grid border-b border-elevated last:border-0"
-            style={{ gridTemplateColumns: `170px repeat(${HOURS.length}, minmax(60px,1fr))` }}
-          >
-            <div className="px-4 py-3">
-              <p className="text-sm font-semibold">{name}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {jobs.filter((j) => ((j.bay as string) || "Unassigned") === name).length} vehicles
-              </p>
-            </div>
+        {rowNames.map((name) => {
+          const rowJobs = jobs.filter((j) => (j.bay || "Unassigned") === name);
+          return (
             <div
-              className="relative min-h-[76px]"
-              style={{ gridColumn: `2 / span ${HOURS.length}` }}
+              key={name}
+              className="grid border-b border-elevated last:border-0"
+              style={{ gridTemplateColumns: cols }}
             >
-              <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${HOURS.length},1fr)` }}>
-                {HOURS.map((h) => (
-                  <div key={h} className="border-l border-elevated/60" />
-                ))}
+              <div className="px-4 py-3">
+                <p className="text-sm font-semibold">{name}</p>
+                <p className="text-[11px] text-muted-foreground">{rowJobs.length} vehicles</p>
               </div>
-              {jobs
-                .filter((j) => ((j.bay as string) || "Unassigned") === name)
-                .map((j) => {
+              <div className="relative min-h-[76px]" style={{ gridColumn: `2 / span ${HOURS.length}` }}>
+                <div
+                  className="absolute inset-0 grid"
+                  style={{ gridTemplateColumns: `repeat(${HOURS.length},1fr)` }}
+                >
+                  {HOURS.map((h) => (
+                    <div key={h} className="border-l border-elevated/60" />
+                  ))}
+                </div>
+                {rowJobs.map((j) => {
                   const start = new Date(j.scheduled_start as string);
                   const end = j.scheduled_end
-                    ? new Date(j.scheduled_end as string)
+                    ? new Date(j.scheduled_end)
                     : new Date(start.getTime() + (Number(j.estimated_hours) || 3) * 3600000);
                   const sH = start.getHours() + start.getMinutes() / 60;
                   const eH = end.getHours() + end.getMinutes() / 60;
-                  const left = ((sH - (HOURS[0] as number)) / HOURS.length) * 100;
+                  const left = ((sH - firstHour) / HOURS.length) * 100;
                   const width = (Math.max(eH - sH, 0.75) / HOURS.length) * 100;
                   return (
                     <button
@@ -495,16 +523,17 @@ function DayBoard({
                       onClick={() => onSelect(j.id === selected ? null : j.id)}
                       className={cn(
                         "absolute top-2 h-[60px] overflow-hidden rounded-xl border border-l-2 bg-surface-2 px-3 py-1.5 text-left transition-colors hover:border-bronze/60",
-                        STATUS_TONE[j.status as string] ?? "border-l-elevated",
+                        STATUS_TONE[j.status] ?? "border-l-elevated",
                         selected === j.id ? "border-bronze/70" : "border-elevated",
                       )}
-                      style={{ left: `${Math.max(left, 0)}%`, width: `${Math.min(width, 100)}%` }}
+                      style={{
+                        left: `${Math.min(Math.max(left, 0), 95)}%`,
+                        width: `${Math.min(width, 100)}%`,
+                      }}
                     >
-                      <p className="truncate text-xs font-semibold">
-                        {vehicleOf(j as never) ?? (j.title as string)}
-                      </p>
+                      <p className="truncate text-xs font-semibold">{vehicleOf(j) ?? j.title}</p>
                       <p className="truncate text-[11px] text-muted-foreground">
-                        {(j.installer as string) || "Unassigned"} · {label(j.service_type as string)}
+                        {j.installer || "Unassigned"} · {label(j.service_type)}
                       </p>
                       <p className="truncate text-[10px] text-muted-foreground">
                         {start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} –{" "}
@@ -513,10 +542,11 @@ function DayBoard({
                     </button>
                   );
                 })}
+              </div>
             </div>
-          </div>
-        ))}
-        {day && jobs.length === 0 && (
+          );
+        })}
+        {jobs.length === 0 && (
           <p className="px-5 py-6 text-center text-xs text-muted-foreground">
             Nothing booked on this day — the shop is open.
           </p>
