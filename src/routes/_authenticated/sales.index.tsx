@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { money } from "@/lib/format";
+import { money, SERVICE_TYPES, SERVICE_TYPE_LABELS } from "@/lib/format";
 import { toast } from "sonner";
 import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/shop";
 import {
@@ -107,6 +107,7 @@ function SalesPage() {
   const [open, setOpen] = useState(false);
   const [addingCustomer, setAddingCustomer] = useState(false);
   const [customerId, setCustomerId] = useState("");
+  const [newTags, setNewTags] = useState<string[]>([]);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
