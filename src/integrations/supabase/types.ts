@@ -1613,9 +1613,12 @@ export type Database = {
       }
       jobs: {
         Row: {
+          accepted_at: string | null
+          accepted_by: string | null
           arrival_window: string | null
           bay: string | null
           bay_id: string | null
+          checked_in_at: string | null
           created_at: string
           created_by: string | null
           customer_id: string | null
@@ -1650,9 +1653,12 @@ export type Database = {
           vehicle_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           arrival_window?: string | null
           bay?: string | null
           bay_id?: string | null
+          checked_in_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
@@ -1687,9 +1693,12 @@ export type Database = {
           vehicle_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
           arrival_window?: string | null
           bay?: string | null
           bay_id?: string | null
+          checked_in_at?: string | null
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
@@ -2151,6 +2160,57 @@ export type Database = {
           },
           {
             foreignKeyName: "mobile_units_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_alerts: {
+        Row: {
+          actor: string | null
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          job_id: string | null
+          kind: string
+          organization_id: string
+          title: string
+        }
+        Insert: {
+          actor?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          job_id?: string | null
+          kind: string
+          organization_id: string
+          title: string
+        }
+        Update: {
+          actor?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          job_id?: string | null
+          kind?: string
+          organization_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_alerts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ops_alerts_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
