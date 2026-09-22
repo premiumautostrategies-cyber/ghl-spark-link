@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Car, ChevronDown, Clock3, ExternalLink, Mail, Phone, Search, UserRound } from "lucide-react";
+import { Car, Clock3, ExternalLink, Mail, Phone, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DealComms } from "@/components/deal-comms";
 import { InboxQuoteBuilder } from "@/components/inbox-quote-builder";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { money, shortDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
