@@ -52,6 +52,7 @@ import {
   TEMP_META,
   type LeadEvent,
 } from "@/lib/pipeline";
+import { useMarkAlertRead, useOpsAlerts } from "@/lib/ops-alerts";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/command-center")({
@@ -116,6 +117,8 @@ function CommandCenter() {
   const { orgId, locId } = useOrg();
   const [quickAction, setQuickAction] = useState<QuickAction>(null);
   const [openDealId, setOpenDealId] = useState<string | null>(null);
+  const { data: shopAlerts = [] } = useOpsAlerts();
+  const markAlertRead = useMarkAlertRead();
   const now = useMemo(() => new Date(), []);
   const historyStart = useMemo(() => {
     const date = new Date();
@@ -286,6 +289,26 @@ function CommandCenter() {
                 </Link>
               ))}
               {todayJobs.length === 0 && <EmptyRail text="No appointments today." />}
+            </RailSection>
+
+            <RailSection title="Shop alerts" action={{ label: "Open QC", to: "/qc" }}>
+              {shopAlerts.slice(0, 5).map((alert) => (
+                <Link
+                  key={alert.id}
+                  to={alert.kind === "qc_passed" ? "/jobs" : "/qc"}
+                  className="block py-2.5"
+                  onClick={() => markAlertRead.mutate(alert.id)}
+                >
+                  <span className="flex items-center gap-2">
+                    {!alert.is_read && <span className="size-1.5 shrink-0 rounded-full bg-bronze" />}
+                    <span className="truncate text-xs font-semibold">{alert.title}</span>
+                  </span>
+                  <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
+                    {alert.body ?? ""} {sinceLabel(alert.created_at)}
+                  </span>
+                </Link>
+              ))}
+              {shopAlerts.length === 0 && <EmptyRail text="No QC or delivery alerts." />}
             </RailSection>
 
             <RailSection title="Recent activity">
