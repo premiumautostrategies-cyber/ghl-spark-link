@@ -275,12 +275,12 @@ function KioskPage() {
               )}
             </Panel>
 
-            {job.notes && (
-              <Panel className="p-5 sm:col-span-2">
-                <p className="micro-label">Notes</p>
-                <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{job.notes}</p>
-              </Panel>
-            )}
+            <Panel className="p-5 sm:col-span-2">
+              <p className="micro-label">Notes</p>
+              <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">
+                {job.notes || "No special instructions or technician notes."}
+              </p>
+            </Panel>
           </div>
         </div>
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-elevated bg-background/95 p-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0">
