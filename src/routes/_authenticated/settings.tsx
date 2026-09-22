@@ -105,8 +105,8 @@ function SettingsPage() {
     <div className="space-y-6">
       <PageHeader title="Settings" subtitle="Your shop, locations and workspace data." />
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Shop</h2>
+      <div className="rounded-xl border border-elevated bg-surface p-4">
+        <h2 className="text-sm font-semibold">Shop</h2>
         <form
           className="mt-4 flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
@@ -126,8 +126,8 @@ function SettingsPage() {
         <p className="mt-3 text-xs text-muted-foreground">Signed in as {user?.email}</p>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Brand colour</h2>
+      <div className="rounded-xl border border-elevated bg-surface p-4">
+        <h2 className="text-sm font-semibold">Brand colour</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Pick the highlight colour used across buttons, pricing and charts so the app matches your
           company.
@@ -176,8 +176,8 @@ function SettingsPage() {
       </div>
 
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Locations</h2>
+      <div className="rounded-xl border border-elevated bg-surface p-4">
+        <h2 className="text-sm font-semibold">Locations</h2>
         <div className="mt-4 space-y-2">
           {locations.map((l) => (
             <div
@@ -199,8 +199,8 @@ function SettingsPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Demo shop</h2>
+      <div className="rounded-xl border border-elevated bg-surface p-4">
+        <h2 className="text-sm font-semibold">Demo shop</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Fills this workspace with a realistic restyling shop — service menu, film and coating
           stock, installers, customers and their vehicles, quotes, booked jobs, payments and signed

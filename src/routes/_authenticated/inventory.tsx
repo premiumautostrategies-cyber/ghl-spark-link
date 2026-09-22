@@ -190,12 +190,12 @@ function InventoryPage() {
           <table className="w-full min-w-[720px] text-sm">
             <thead className="border-b border-border text-left text-xs uppercase tracking-widest text-muted-foreground">
               <tr>
-                <th className="px-5 py-3">Item</th>
-                <th className="px-5 py-3">Category</th>
-                <th className="px-5 py-3">On hand</th>
-                <th className="px-5 py-3">Value</th>
-                <th className="px-5 py-3">Supplier</th>
-                <th className="px-5 py-3" />
+                <th className="px-4 py-2">Item</th>
+                <th className="px-4 py-2">Category</th>
+                <th className="px-4 py-2">On hand</th>
+                <th className="px-4 py-2">Value</th>
+                <th className="px-4 py-2">Supplier</th>
+                <th className="px-4 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -203,14 +203,14 @@ function InventoryPage() {
                 const isLow = Number(i.quantity_on_hand) <= Number(i.reorder_point);
                 return (
                   <tr key={i.id}>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-3">
                       <p className="font-medium">{i.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {[i.brand, i.sku].filter(Boolean).join(" · ") || "—"}
                       </p>
                     </td>
-                    <td className="px-5 py-3">{label(i.category)}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-3">{label(i.category)}</td>
+                    <td className="px-4 py-3">
                       <span className="font-medium">
                         {Number(i.quantity_on_hand)} {i.unit}
                       </span>
@@ -220,11 +220,11 @@ function InventoryPage() {
                         </Badge>
                       )}
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-3">
                       {money(Number(i.quantity_on_hand) * Number(i.unit_cost))}
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">{i.supplier || "—"}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-3 text-muted-foreground">{i.supplier || "—"}</td>
+                    <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
                         <Button
                           size="sm"

@@ -23,6 +23,7 @@ import {
 import { money, STATUS_LABELS } from "@/lib/format";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/estimates")({
   head: () => ({
@@ -136,12 +137,10 @@ function EstimatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold uppercase tracking-tight">Estimates</h1>
-          <p className="text-sm text-muted-foreground">Build a quote, send it, track approval.</p>
-        </div>
-        <Dialog open={openNew} onOpenChange={setOpenNew}>
+      <PageHeader
+        title="Estimates"
+        subtitle="Build a quote, send it, track approval."
+        action={<Dialog open={openNew} onOpenChange={setOpenNew}>
           <DialogTrigger asChild>
             <Button>New estimate</Button>
           </DialogTrigger>
@@ -184,18 +183,18 @@ function EstimatesPage() {
               </Button>
             </form>
           </DialogContent>
-        </Dialog>
-      </div>
+        </Dialog>}
+      />
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         {estimates.length === 0 && (
-          <p className="px-5 py-6 text-sm text-muted-foreground">No estimates yet.</p>
+          <p className="px-4 py-6 text-sm text-muted-foreground">No estimates yet.</p>
         )}
         {estimates.map((est) => (
           <button
             key={est.id}
             onClick={() => setActiveId(est.id)}
-            className="flex w-full flex-wrap items-center gap-3 border-b border-border px-5 py-4 text-left last:border-b-0 hover:bg-secondary/60"
+            className="flex w-full flex-wrap items-center gap-4 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-secondary/60"
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">

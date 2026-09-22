@@ -136,8 +136,8 @@ function AnalyticsPage() {
         />
       ) : (
         <>
-          <div className="rounded-xl border border-border bg-card p-5">
-            <h2 className="text-sm uppercase tracking-widest text-muted-foreground">Shop health</h2>
+          <div className="rounded-xl border border-elevated bg-surface p-4">
+            <h2 className="text-sm font-semibold">Shop health</h2>
             <ul className="mt-3 space-y-2 text-sm">
               {health.length === 0 && (
                 <li className="text-muted-foreground">
@@ -153,8 +153,8 @@ function AnalyticsPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border border-border bg-card p-5">
-              <h2 className="text-sm uppercase tracking-widest text-muted-foreground">
+            <div className="rounded-xl border border-elevated bg-surface p-4">
+              <h2 className="text-sm font-semibold">
                 Revenue by service
               </h2>
               <div className="mt-4 space-y-3">
@@ -170,8 +170,8 @@ function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5">
-              <h2 className="text-sm uppercase tracking-widest text-muted-foreground">
+            <div className="rounded-xl border border-elevated bg-surface p-4">
+              <h2 className="text-sm font-semibold">
                 Production by installer
               </h2>
               <div className="mt-4 space-y-3">
@@ -190,14 +190,14 @@ function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
-              <h2 className="text-sm uppercase tracking-widest text-muted-foreground">
+            <div className="rounded-xl border border-elevated bg-surface p-4 lg:col-span-2">
+              <h2 className="text-sm font-semibold">
                 Lead sources
               </h2>
-              <div className="mt-4 flex flex-wrap gap-3">
+              <div className="mt-4 flex flex-wrap gap-4">
                 {bySource.map(([src, count]) => (
                   <div key={src} className="rounded-lg border border-border px-4 py-3">
-                    <p className="text-xs uppercase tracking-widest text-muted-foreground">{src}</p>
+                    <p className="text-xs uppercase text-muted-foreground">{src}</p>
                     <p className="text-xl font-semibold">{count}</p>
                   </div>
                 ))}

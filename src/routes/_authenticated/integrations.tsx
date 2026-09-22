@@ -31,6 +31,7 @@ import {
 } from "@/lib/integrations.functions";
 import { getGhlStatus, saveGhlCredentials, importGhlContacts } from "@/lib/ghl.functions";
 import { importHubspotContacts } from "@/lib/hubspot.functions";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({
@@ -222,19 +223,14 @@ function IntegrationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold uppercase tracking-tight">Integrations</h1>
-          <p className="text-sm text-muted-foreground">
-            {connectedCount} connected · {failing} needing attention. Shop data pushes out
-            automatically as jobs move.
-          </p>
-        </div>
-        <Button onClick={() => sync.mutate()} disabled={sync.isPending}>
+      <PageHeader
+        title="Integrations"
+        subtitle={`${connectedCount} connected · ${failing} needing attention. Shop data pushes out automatically as jobs move.`}
+        action={<Button onClick={() => sync.mutate()} disabled={sync.isPending}>
           <RefreshCw className={`mr-2 h-4 w-4 ${sync.isPending ? "animate-spin" : ""}`} />
           Sync now
-        </Button>
-      </div>
+        </Button>}
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         {PROVIDERS.map((def) => {
@@ -246,7 +242,7 @@ function IntegrationsPage() {
           return (
             <section
               key={def.id}
-              className="rounded-xl border border-border bg-card p-5 flex flex-col gap-4"
+              className="flex flex-col gap-4 rounded-xl border border-elevated bg-surface p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
@@ -259,9 +255,9 @@ function IntegrationsPage() {
                   </div>
                 </div>
                 <span
-                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${
+                  className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
                     state === "connected"
-                      ? "border-emerald-500/40 text-emerald-400"
+                      ? "border-revenue/40 text-revenue"
                       : state === "error"
                         ? "border-destructive/50 text-destructive"
                         : "border-border text-muted-foreground"
