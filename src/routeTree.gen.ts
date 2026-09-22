@@ -42,6 +42,7 @@ import { Route as AuthenticatedAutomationsIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedAutomationsWorkflowIdRouteImport } from './routes/_authenticated/automations.$workflowId'
 import { Route as AuthenticatedSalesIndexRouteImport } from './routes/_authenticated/sales.index'
 import { Route as AuthenticatedSalesDealIdRouteImport } from './routes/_authenticated/sales.$dealId'
+import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales.new'
 import { Route as ApiPublicSyncDrainRouteImport } from './routes/api/public/sync-drain'
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/connector/return'
 import { Route as OauthHubspotReturnRouteImport } from './routes/oauth/hubspot/return'
@@ -221,6 +222,11 @@ const AuthenticatedSalesDealIdRoute =
     path: '/sales/$dealId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
+  id: '/sales/new',
+  path: '/sales/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicSyncDrainRoute = ApiPublicSyncDrainRouteImport.update({
   id: '/api/public/sync-drain',
   path: '/api/public/sync-drain',
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/warranty': typeof AuthenticatedWarrantyRoute
   '/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
+  '/sales/new': typeof AuthenticatedSalesNewRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByTo {
   '/warranty': typeof AuthenticatedWarrantyRoute
   '/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
+  '/sales/new': typeof AuthenticatedSalesNewRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/_authenticated/warranty': typeof AuthenticatedWarrantyRoute
   '/_authenticated/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
+  '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
   '/api/public/sync-drain': typeof ApiPublicSyncDrainRoute
   '/oauth/connector/return': typeof OauthConnectorReturnRoute
   '/oauth/hubspot/return': typeof OauthHubspotReturnRoute
@@ -423,6 +432,7 @@ export interface FileRouteTypes {
     | '/warranty'
     | '/automations/$workflowId'
     | '/sales/$dealId'
+    | '/sales/new'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
@@ -465,6 +475,7 @@ export interface FileRouteTypes {
     | '/warranty'
     | '/automations/$workflowId'
     | '/sales/$dealId'
+    | '/sales/new'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/_authenticated/warranty'
     | '/_authenticated/automations/$workflowId'
     | '/_authenticated/sales/$dealId'
+    | '/_authenticated/sales/new'
     | '/api/public/sync-drain'
     | '/oauth/connector/return'
     | '/oauth/hubspot/return'
@@ -772,6 +784,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesDealIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/sales/new': {
+      id: '/_authenticated/sales/new'
+      path: '/sales/new'
+      fullPath: '/sales/new'
+      preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/sync-drain': {
       id: '/api/public/sync-drain'
       path: '/api/public/sync-drain'
@@ -855,6 +874,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
   AuthenticatedAutomationsWorkflowIdRoute: typeof AuthenticatedAutomationsWorkflowIdRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
+  AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
   AuthenticatedAutomationsIndexRoute: typeof AuthenticatedAutomationsIndexRoute
   AuthenticatedSalesIndexRoute: typeof AuthenticatedSalesIndexRoute
 }
@@ -884,6 +904,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAutomationsWorkflowIdRoute:
     AuthenticatedAutomationsWorkflowIdRoute,
   AuthenticatedSalesDealIdRoute: AuthenticatedSalesDealIdRoute,
+  AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
   AuthenticatedAutomationsIndexRoute: AuthenticatedAutomationsIndexRoute,
   AuthenticatedSalesIndexRoute: AuthenticatedSalesIndexRoute,
 }
