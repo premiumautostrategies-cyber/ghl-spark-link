@@ -123,7 +123,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
       </aside>
 
       <section className="flex min-h-[620px] min-w-0 flex-col border-b border-elevated xl:min-h-0 xl:border-b-0 xl:border-r">
-        {deal ? <><header className="border-b border-elevated px-5 py-3"><h2 className="text-sm font-semibold">Conversation</h2><p className="truncate text-xs text-muted-foreground">Text and email with {deal.customers?.name}</p></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name ?? null} variant="inbox" channels={["sms", "email"]} /></> : <div className="grid flex-1 place-items-center text-sm text-muted-foreground">Select a customer.</div>}
+        {deal ? <><header className="flex items-center justify-between gap-3 border-b border-elevated px-5 py-3"><div className="min-w-0"><h2 className="text-sm font-semibold">Conversation</h2><p className="truncate text-xs text-muted-foreground">Text and email with {deal.customers?.name}</p></div><ConversationSummaryButton customer={deal.customers?.name ?? "Customer"} vehicle={vehicle} opportunity={deal.title} stage={stageLabel(deal.stage)} value={money(deal.value)} turns={summaryTurns} /></header><DealComms dealId={deal.id} customerId={deal.customer_id} customerName={deal.customers?.name ?? null} variant="inbox" channels={["sms", "email"]} /></> : <div className="grid flex-1 place-items-center text-sm text-muted-foreground">Select a customer.</div>}
       </section>
 
       <aside className="min-h-[680px] bg-background/15 xl:min-h-0">{deal ? <InboxQuoteBuilder key={deal.id} deal={deal} /> : null}</aside>
