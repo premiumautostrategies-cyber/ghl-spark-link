@@ -347,11 +347,47 @@ function AppShellContent({ children }: { children: ReactNode }) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="ghost" size="icon" asChild title="Notifications">
-              <Link to="/sales" aria-label="Notifications">
-                <Bell className="size-4" />
-              </Link>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+                  <Bell className="size-4" />
+                  {unreadAlerts > 0 && (
+                    <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-critical" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuLabel className="flex items-center justify-between gap-2">
+                  <span>Shop alerts</span>
+                  {unreadAlerts > 0 && (
+                    <button
+                      type="button"
+                      className="text-[11px] font-normal text-muted-foreground hover:text-bronze"
+                      onClick={(event) => { event.preventDefault(); markRead.mutate("all"); }}
+                    >
+                      Mark all read
+                    </button>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {alerts.length === 0 && (
+                  <p className="px-2 py-4 text-center text-xs text-muted-foreground">No shop alerts right now.</p>
+                )}
+                {alerts.slice(0, 8).map((alert) => (
+                  <DropdownMenuItem
+                    key={alert.id}
+                    className="flex-col items-start gap-0.5"
+                    onSelect={() => { markRead.mutate(alert.id); goTo(alert.kind === "qc_passed" ? "/jobs" : "/qc"); }}
+                  >
+                    <span className="flex w-full items-center gap-2">
+                      {!alert.is_read && <span className="size-1.5 shrink-0 rounded-full bg-bronze" />}
+                      <span className="truncate text-xs font-semibold">{alert.title}</span>
+                    </span>
+                    {alert.body && <span className="text-[11px] text-muted-foreground">{alert.body}</span>}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
