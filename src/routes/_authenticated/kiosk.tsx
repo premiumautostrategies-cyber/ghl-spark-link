@@ -10,6 +10,7 @@ import { label, money, shortDate } from "@/lib/format";
 import { PRODUCTION_PHASES } from "@/lib/shop";
 import { toast } from "sonner";
 import { ArrowLeft, Pause, Play, Check } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/kiosk")({
   head: () => ({
@@ -158,8 +159,8 @@ function KioskPage() {
           <ArrowLeft className="mr-1.5 h-4 w-4" /> All vehicles
         </Button>
 
-        <Panel className="p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+        <Panel className="p-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="micro-label">{job.bay ?? "No bay"} · {shortDate(job.scheduled_start)}</p>
               <h1 className="display-title mt-1 text-3xl">
@@ -194,7 +195,7 @@ function KioskPage() {
                     <div
                       key={p.id}
                       className={cn(
-                        "rounded-2xl border p-4",
+                        "rounded-xl border p-4",
                         p.status === "active" ? "border-bronze bg-bronze/10" : "border-elevated bg-surface-2",
                       )}
                     >
@@ -235,7 +236,7 @@ function KioskPage() {
           </Panel>
 
           <div className="space-y-4">
-            <Panel className="p-5">
+            <Panel className="p-4">
               <p className="micro-label">Material</p>
               <p className="mt-2 text-sm">
                 {job.inventory_rolls
@@ -252,7 +253,7 @@ function KioskPage() {
               )}
             </Panel>
 
-            <Panel className="p-5">
+            <Panel className="p-4">
               <p className="micro-label">Check-in notes</p>
               {inspection ? (
                 <ul className="mt-2 space-y-1.5">
@@ -272,7 +273,7 @@ function KioskPage() {
             </Panel>
 
             {job.notes && (
-              <Panel className="p-5">
+              <Panel className="p-4">
                 <p className="micro-label">Coverage instructions</p>
                 <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{job.notes}</p>
               </Panel>
@@ -284,14 +285,11 @@ function KioskPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="border-b border-elevated pb-5">
-        <p className="micro-label">Shop floor</p>
-        <h1 className="display-title mt-1 text-3xl font-semibold">Today's vehicles</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Tap your vehicle to see the cut file, check-in notes and your phase timers.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Today's vehicles"
+        subtitle="Tap your vehicle to see the cut file, check-in notes and phase timers."
+      />
 
       {jobs.length === 0 ? (
         <Panel className="p-10 text-center">
@@ -309,7 +307,7 @@ function KioskPage() {
                 type="button"
                 onClick={() => setOpenJob(j.id)}
                 className={cn(
-                  "rounded-2xl border p-5 text-left transition-colors",
+                  "rounded-xl border p-4 text-left transition-colors",
                   active ? "border-bronze bg-bronze/10" : "border-elevated bg-surface hover:border-bronze/40",
                 )}
               >

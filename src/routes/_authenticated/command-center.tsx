@@ -72,6 +72,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Panel, Tag } from "@/components/os-ui";
+import { PageHeader } from "@/components/page-header";
 import { useOrg } from "@/lib/use-org";
 import { label, money } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -460,14 +461,11 @@ function CommandCenter() {
   };
 
   return (
-    <div className={cn("min-w-0 space-y-5", preset === "compact" && "space-y-4")}>
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-elevated pb-4">
-        <div>
-          <p className="micro-label">{organization?.name ?? "Systemize"} · Live operations</p>
-          <h1 className="display-title mt-1 text-3xl font-semibold">Command Center</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Money in, money out, capacity and today's priorities in one view.</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+    <div className={cn("min-w-0 space-y-6", preset === "compact" && "space-y-4")}>
+      <PageHeader
+        title="Command Center"
+        subtitle={`${organization?.name ?? "Systemize"} · Money in, money out, capacity and today's priorities.`}
+        action={<div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-lg border border-elevated bg-surface p-1">
             <Button size="sm" variant={preset === "compact" ? "secondary" : "ghost"} onClick={() => choosePreset("compact")}>Compact</Button>
             <Button size="sm" variant={preset === "executive" ? "secondary" : "ghost"} onClick={() => choosePreset("executive")}>Executive</Button>
@@ -477,11 +475,11 @@ function CommandCenter() {
             {customizing ? "Done" : "Customize dashboard"}
           </Button>
           <QuickAddMenu onChoose={setQuickAction} />
-        </div>
-      </div>
+        </div>}
+      />
 
       {customizing && (
-        <Panel className="flex flex-wrap items-center justify-between gap-3 border-bronze/35 bg-bronze/5 p-3">
+        <Panel className="flex flex-wrap items-center justify-between gap-4 border-bronze/35 bg-bronze/5 p-4">
           <div>
             <p className="text-sm font-semibold">Dashboard editing is on</p>
             <p className="text-xs text-muted-foreground">Drag widgets to reorder. Resize or hide them from each widget header.</p>
@@ -504,7 +502,7 @@ function CommandCenter() {
         </Panel>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         {kpis.map((kpi) => <MetricCard key={kpi.label} {...kpi} compact={preset === "compact"} />)}
       </div>
 
