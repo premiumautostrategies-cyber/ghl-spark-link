@@ -505,7 +505,7 @@ function DayBoard({
           ))}
         </div>
         {rowNames.map((name) => {
-          const rowJobs = jobs.filter((j) => (j.bay || "Unassigned") === name);
+          const rowJobs = jobs.filter((j) => matchBay(j.bay, bays) === name);
           return (
             <div
               key={name}
