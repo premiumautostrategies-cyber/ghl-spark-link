@@ -261,12 +261,22 @@ function QcPage() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,340px)_1fr]">
         <Panel>
-          <SectionTitle title="Vehicles in production" />
+          <SectionTitle
+            title={showAll ? "All vehicles in production" : "Submitted for QC"}
+            hint={showAll ? "Everything on the floor" : "Installers have finished these"}
+            right={
+              <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
+                {showAll ? "Show submitted only" : "Show all in production"}
+              </Button>
+            }
+          />
           <div className="divide-y divide-elevated">
-            {jobs.length === 0 && (
-              <p className="px-4 py-8 text-center text-xs text-muted-foreground">Nothing in production.</p>
+            {visibleJobs.length === 0 && (
+              <p className="px-4 py-8 text-center text-xs text-muted-foreground">
+                {showAll ? "Nothing in production." : "No vehicles waiting on QC right now."}
+              </p>
             )}
-            {jobs.map((j) => {
+            {visibleJobs.map((j) => {
               const list = checklistFor(j.id);
               return (
                 <button
@@ -295,6 +305,8 @@ function QcPage() {
               );
             })}
           </div>
+        </Panel>
+
         </Panel>
 
         {current ? (
