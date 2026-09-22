@@ -854,7 +854,7 @@ function TechnicianProductionPage() {
                       className="hidden"
                       onChange={(e) => {
                         const files = Array.from(e.target.files ?? []);
-                        if (files.length) uploadPhotos.mutate(files);
+                        if (files.length) uploadPhotos.mutate({ jobId: job.id, files });
                         e.target.value = "";
                       }}
                     />
