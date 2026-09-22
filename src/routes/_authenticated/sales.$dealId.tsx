@@ -917,9 +917,10 @@ function DealDesk() {
           {/* Payments */}
           <Panel>
             <SectionTitle
-              title="Collect payment"
-              hint={`${money(collected)} collected of ${money(total)}`}
+              title="Log a payment"
+              hint={`${money(collected)} logged of ${money(total)} · ${money(balance)} outstanding`}
             />
+
             <form
               className="grid gap-2.5 border-t border-elevated p-4 sm:grid-cols-2"
               onSubmit={(e) => {
