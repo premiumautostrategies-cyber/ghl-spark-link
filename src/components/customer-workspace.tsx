@@ -11,5 +11,12 @@ export function CustomerWorkspace({
   onOpenDeal?: (dealId: string) => void;
   onAddVehicle?: (customerId: string) => void;
 }) {
-  return <RecordWorkspace customerId={customerId} onClose={onClose} onOpenDeal={onOpenDeal} onAddVehicle={onAddVehicle} />;
+  return (
+    <RecordWorkspace
+      customerId={customerId}
+      onClose={onClose}
+      {...(onOpenDeal ? { onOpenDeal } : {})}
+      {...(onAddVehicle ? { onAddVehicle } : {})}
+    />
+  );
 }

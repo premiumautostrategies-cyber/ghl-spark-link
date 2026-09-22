@@ -147,7 +147,7 @@ export function RecordWorkspace({
       if (!primaryDeal) return;
       const { error } = await supabase.from("deals").update({ stage, last_activity_at: new Date().toISOString() }).eq("id", primaryDeal.id);
       if (error) throw error;
-      await supabase.from("lead_events").insert({ organization_id: primaryDeal.organization_id, deal_id: primaryDeal.id, actor: "shop", kind: "stage_moved", detail: `Moved to ${stageLabel(stage)}` });
+      await supabase.from("lead_events").insert({ organization_id: customer.organization_id, deal_id: primaryDeal.id, actor: "shop", kind: "stage_moved", detail: `Moved to ${stageLabel(stage)}` });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["record-workspace-deal", dealId] });

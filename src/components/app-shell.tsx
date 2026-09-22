@@ -96,7 +96,7 @@ const SALES: NavSection = {
   icon: BriefcaseBusiness,
   items: [
     { to: "/sales", label: "Pipeline", icon: BriefcaseBusiness },
-    { to: "/sales", label: "Inbox", icon: GalleryVerticalEnd, searchTerms: "messages conversations" },
+    { to: "/inbox", label: "Inbox", icon: GalleryVerticalEnd, searchTerms: "messages conversations" },
     { to: "/estimates", label: "Quotes", icon: FileText, searchTerms: "estimates proposals" },
   ],
 };
