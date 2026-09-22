@@ -487,7 +487,7 @@ function DayBoard({
   onSelect: (id: string | null) => void;
   selected: string | null;
 }) {
-  const rowNames = Array.from(new Set([...bays, ...jobs.map((j) => j.bay || "Unassigned")]));
+  const rowNames = Array.from(new Set([...bays, ...jobs.map((j) => matchBay(j.bay, bays))]));
   if (rowNames.length === 0) rowNames.push("Unassigned");
   const cols = `170px repeat(${HOURS.length}, minmax(60px,1fr))`;
   const firstHour = HOURS[0] as number;
