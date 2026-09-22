@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -150,7 +150,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       style={{
         "--sidebar-width": "14.5rem",
         "--sidebar-width-icon": "3.25rem",
-      } as React.CSSProperties}
+      } as CSSProperties}
     >
       <AppShellContent>{children}</AppShellContent>
     </SidebarProvider>
