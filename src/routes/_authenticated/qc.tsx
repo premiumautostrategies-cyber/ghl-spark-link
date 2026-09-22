@@ -132,6 +132,7 @@ function QcPage() {
       temp,
       notes,
       items,
+      requireTemp,
     }: {
       checklistId: string;
       jobId: string;
@@ -139,17 +140,20 @@ function QcPage() {
       temp: number;
       notes: string;
       items: Item[];
+      requireTemp: boolean;
     }) => {
       const missing = items.filter((i) => i.is_required && !i.passed);
       if (missing.length) throw new Error(`${missing.length} required check(s) still open`);
       if (!inspector.trim()) throw new Error("Enter the lead installer or foreman name");
-      if (!(temp >= 190 && temp <= 200)) throw new Error("Log a post-heat edge temp between 190°F and 200°F");
+      if (requireTemp && !(temp >= 190 && temp <= 200)) {
+        throw new Error("Log a post-heat edge temp between 190°F and 200°F for film work");
+      }
       const { error } = await supabase
         .from("qc_checklists")
         .update({
           status: "passed",
           inspector: inspector.trim(),
-          edge_temp_f: temp,
+          ...(requireTemp ? { edge_temp_f: temp } : {}),
           notes: notes || null,
           signed_at: new Date().toISOString(),
         })
@@ -179,17 +183,50 @@ function QcPage() {
   });
 
   const failQc = useMutation({
-    mutationFn: async ({ checklistId, jobId }: { checklistId: string; jobId: string }) => {
-      await supabase.from("qc_checklists").update({ status: "failed" }).eq("id", checklistId);
+    mutationFn: async ({
+      checklistId,
+      jobId,
+      reason,
+      existingNotes,
+    }: {
+      checklistId: string;
+      jobId: string;
+      reason: string;
+      existingNotes: string | null;
+    }) => {
+      if (reason.trim().length < 5) {
+        throw new Error("Tell the installer exactly what to correct before sending it back");
+      }
+      const stamped = `QC correction (${new Date().toLocaleString("en-US")}): ${reason.trim()}`;
+      await supabase
+        .from("qc_checklists")
+        .update({
+          status: "failed",
+          notes: existingNotes ? `${existingNotes}\n${stamped}` : stamped,
+        })
+        .eq("id", checklistId);
       await supabase
         .from("jobs")
         .update({ qc_status: "failed", key_released: false, status: "in_progress" })
         .eq("id", jobId);
+      if (orgId) {
+        const job = jobs.find((j) => j.id === jobId);
+        await logOpsAlert({
+          organizationId: orgId,
+          jobId,
+          kind: "qc_failed",
+          title: `QC returned — ${job?.title ?? "vehicle"}`,
+          body: reason.trim(),
+          actor: job?.installer ?? null,
+        });
+      }
     },
     onSuccess: () => {
-      toast.warning("Sent back to the installer for correction");
+      toast.warning("Sent back to the installer with correction notes");
+      setCorrection("");
       invalidate();
     },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const checklistFor = (jobId: string) => checklists.find((c) => c.job_id === jobId) ?? null;
@@ -199,8 +236,11 @@ function QcPage() {
     (a, b) => a.sort_order - b.sort_order,
   );
 
-  const awaiting = jobs.filter((j) => j.qc_status !== "passed");
+  const submitted = jobs.filter((j) => ["in_review", "failed", "passed"].includes(j.qc_status ?? ""));
+  const visibleJobs = showAll ? jobs : submitted;
+  const awaiting = jobs.filter((j) => j.qc_status === "in_review" || j.qc_status === "failed");
   const passed = jobs.filter((j) => j.qc_status === "passed");
+
 
   return (
     <div className="space-y-5">
