@@ -37,7 +37,7 @@ export function SalesInbox({ onOpenRecord }: { onOpenRecord: (dealId: string) =>
   const { data: deals = [] } = useQuery({
     queryKey: ["sales-inbox-deals"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("deals").select("id,customer_id,vehicle_id,estimate_id,title,stage,value,service_tags,created_at,speed_to_lead_at,last_activity_at,customers(id,name,phone,email,company,notes,created_at),vehicles(id,year,make,model,color,plate)").not("stage", "in", "(won,lost)").order("last_activity_at", { ascending: false, nullsFirst: false });
+      const { data, error } = await supabase.from("deals").select("id,customer_id,vehicle_id,estimate_id,title,stage,value,service_tags,created_at,speed_to_lead_at,last_activity_at,customers(id,name,phone,email,company,notes,created_at),vehicles(id,year,make,model,color,plate)").order("last_activity_at", { ascending: false, nullsFirst: false });
       if (error) throw error;
       return data as unknown as InboxDeal[];
     },
