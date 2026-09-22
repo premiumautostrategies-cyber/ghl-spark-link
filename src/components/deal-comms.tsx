@@ -30,10 +30,12 @@ export function DealComms({
   dealId,
   customerId,
   customerName,
+  variant = "panel",
 }: {
   dealId: string;
   customerId: string | null;
   customerName?: string | null;
+  variant?: "panel" | "inbox";
 }) {
   const qc = useQueryClient();
   const { orgId, locId } = useOrg();
@@ -92,15 +94,9 @@ export function DealComms({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  return (
-    <Panel className="min-w-0">
-      <SectionTitle
-        title="Communication centre"
-        hint={`Texts, email and call logs with ${customerName ?? "this customer"}.`}
-        right={<Tag tone="comms">{messages.length} in thread</Tag>}
-      />
-      <div className="border-t border-elevated p-4">
-        <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+  const content = (
+      <div className={cn("flex min-h-0 flex-col", variant === "inbox" ? "flex-1" : "border-t border-elevated p-4")}>
+        <div className={cn("space-y-3 overflow-y-auto pr-1", variant === "inbox" ? "min-h-0 flex-1 p-5" : "max-h-72")}>
           {messages.length === 0 ? (
             <p className="rounded-xl border border-dashed border-elevated p-5 text-center text-xs text-muted-foreground">
               Nothing logged yet. The speed-to-lead text fires automatically on new leads.
@@ -129,7 +125,7 @@ export function DealComms({
           )}
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className={cn("flex flex-wrap gap-1.5", variant === "inbox" ? "border-t border-elevated px-4 pt-3" : "mt-3")}>
           {CHANNELS.map((c) => (
             <button
               key={c.key}
@@ -162,21 +158,14 @@ export function DealComms({
           </div>
         )}
 
-        <Textarea
-          className="mt-2"
-          rows={3}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder={channel === "call" ? "What was said on the call…" : "Type your message…"}
-        />
-        <Button
-          className="mt-2"
-          disabled={!body.trim() || send.isPending}
-          onClick={() => send.mutate({ channel, body: body.trim() })}
-        >
-          {channel === "call" ? "Log call" : channel === "note" ? "Save note" : "Send"}
-        </Button>
+        <div className={cn(variant === "inbox" && "px-4 pb-4")}>
+          <Textarea className="mt-2" rows={3} value={body} onChange={(e) => setBody(e.target.value)} placeholder={channel === "call" ? "What was said on the call…" : "Type your message…"} />
+          <Button className="mt-2" disabled={!body.trim() || send.isPending} onClick={() => send.mutate({ channel, body: body.trim() })}>{channel === "call" ? "Log call" : channel === "note" ? "Save note" : "Send"}</Button>
+        </div>
       </div>
-    </Panel>
   );
+
+  if (variant === "inbox") return content;
+
+  return <Panel className="min-w-0"><SectionTitle title="Communication centre" hint={`Texts, email and call logs with ${customerName ?? "this customer"}.`} right={<Tag tone="comms">{messages.length} in thread</Tag>} />{content}</Panel>;
 }
