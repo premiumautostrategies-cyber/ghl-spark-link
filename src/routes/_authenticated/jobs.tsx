@@ -193,6 +193,25 @@ function TechnicianProductionPage() {
     },
   });
 
+  const photoPaths = useMemo(
+    () => jobDocuments.filter((d) => d.doc_type === "installer_photo" && d.file_url).map((d) => d.file_url as string),
+    [jobDocuments],
+  );
+
+  const { data: photoUrls = {} } = useQuery({
+    queryKey: ["installer-photo-urls", photoPaths],
+    enabled: photoPaths.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.from("job-documentation").createSignedUrls(photoPaths, 3600);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((row) => {
+        if (row.path && row.signedUrl) map[row.path] = row.signedUrl;
+      });
+      return map;
+    },
+  });
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["floor-jobs"] });
     qc.invalidateQueries({ queryKey: ["job-phases"] });
@@ -209,7 +228,7 @@ function TechnicianProductionPage() {
     return Array.from(new Set([...fromTeam, ...fromJobs]));
   }, [team, jobs]);
 
-  const isTechnician = roleNames.some((name) => /technician|installer/i.test(name));
+  const isTechnician = (roleNames ?? []).some((name) => /technician|installer/i.test(name));
   useEffect(() => {
     if (teamMember?.full_name && tech !== teamMember.full_name) setTech(teamMember.full_name);
     else if (!tech && !isTechnician && techNames[0]) setTech(techNames[0]);
@@ -497,6 +516,38 @@ function TechnicianProductionPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const uploadPhotos = useMutation({
+    mutationFn: async ({ jobId, files }: { jobId: string; files: File[] }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      if (!files.length) return;
+      const jobRow = jobs.find((item) => item.id === jobId);
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+        const path = `${orgId}/${jobId}/${crypto.randomUUID()}-${safeName}`;
+        const { error: uploadError } = await supabase.storage.from("job-documentation").upload(path, file);
+        if (uploadError) throw uploadError;
+        const { error: docError } = await supabase.from("documents").insert({
+          organization_id: orgId,
+          location_id: locId,
+          customer_id: jobRow?.customer_id ?? null,
+          vehicle_id: jobRow?.vehicle_id ?? null,
+          job_id: jobId,
+          name: file.name,
+          doc_type: "installer_photo",
+          status: "complete",
+          file_url: path,
+        });
+        if (docError) throw docError;
+      }
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`${variables.files.length} photo${variables.files.length === 1 ? "" : "s"} uploaded`);
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const requestQc = useMutation({
     mutationFn: async (jobId: string) => {
@@ -808,6 +859,67 @@ function TechnicianProductionPage() {
             </p>
           </Panel>
         </div>
+
+        <Panel>
+          <SectionTitle title="Job photos" hint="Add photos any time — or all at once when you finish" />
+          <div className="space-y-4 border-t border-elevated p-4 sm:p-5">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button asChild size="lg" variant="outline" className="min-h-14" disabled={uploadPhotos.isPending}>
+                <label>
+                  <Camera className="mr-2 h-5 w-5" /> Take photo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => {
+                      const files = Array.from(event.target.files ?? []);
+                      event.target.value = "";
+                      if (files.length) uploadPhotos.mutate({ jobId: job.id, files });
+                    }}
+                  />
+                </label>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="min-h-14" disabled={uploadPhotos.isPending}>
+                <label>
+                  <Images className="mr-2 h-5 w-5" /> Upload from library
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(event) => {
+                      const files = Array.from(event.target.files ?? []);
+                      event.target.value = "";
+                      if (files.length) uploadPhotos.mutate({ jobId: job.id, files });
+                    }}
+                  />
+                </label>
+              </Button>
+            </div>
+            {uploadPhotos.isPending && <p className="text-sm text-muted-foreground">Uploading…</p>}
+            {documents.filter((d) => d.doc_type === "installer_photo").length === 0 ? (
+              <p className="text-sm text-muted-foreground">No photos on this job yet.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {documents
+                  .filter((d) => d.doc_type === "installer_photo")
+                  .map((d) => {
+                    const url = d.file_url ? photoUrls[d.file_url] : undefined;
+                    return url ? (
+                      <a key={d.id} href={url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-elevated">
+                        <img src={url} alt={d.name ?? "Job photo"} className="aspect-square w-full object-cover" loading="lazy" />
+                      </a>
+                    ) : (
+                      <div key={d.id} className="aspect-square rounded-lg border border-elevated bg-surface-2" />
+                    );
+                  })}
+              </div>
+            )}
+          </div>
+        </Panel>
+
 
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-elevated bg-background/95 p-3 backdrop-blur">
           {s.qcPassed ? (
