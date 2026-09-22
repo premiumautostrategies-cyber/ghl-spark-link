@@ -213,19 +213,41 @@ function SchedulePage() {
     (j) => !j.scheduled_start && !["completed", "invoiced"].includes(j.status),
   );
 
-  const bays: Bay[] = bayRows.length
+  const virtualBay = (name: string, i: number): Bay => ({
+    id: `virtual-${name}`,
+    name,
+    discipline: "flex",
+    daily_hours_cap: 9,
+    required_certification: null,
+    sort_order: 100 + i,
+    is_active: true,
+  });
+
+  const baseBays: Bay[] = bayRows.length
     ? bayRows
     : Array.from(new Set([...dayJobs.map((j) => j.bay || "Unassigned"), "Bay 1", "Bay 2", "Bay 3"]))
         .sort()
-        .map((name, i) => ({
-          id: `virtual-${name}`,
-          name,
-          discipline: "flex",
-          daily_hours_cap: 9,
-          required_certification: null,
-          sort_order: i,
-          is_active: true,
-        }));
+        .map(virtualBay);
+
+  // Jobs store a short bay label ("Bay 1") while bay records may read "Bay 1 — PPF".
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const bayNameFor = (jobBay: string | null | undefined) => {
+    const raw = (jobBay ?? "").trim();
+    if (!raw) return "Unassigned";
+    const n = norm(raw);
+    const hit = baseBays.find((b) => {
+      const bn = norm(b.name);
+      return bn === n || bn.startsWith(n) || n.startsWith(bn);
+    });
+    return hit?.name ?? raw;
+  };
+
+  // Any job sitting on a bay name that no longer exists (or none at all) still needs a row,
+  // otherwise it silently disappears from the board.
+  const orphanNames = Array.from(
+    new Set(dayJobs.map((j) => bayNameFor(j.bay)).filter((n) => !baseBays.some((b) => b.name === n))),
+  ).sort();
+  const bays: Bay[] = [...baseBays, ...orphanNames.map(virtualBay)];
 
   const hoursFor = (j: { scheduled_start: string | null; scheduled_end: string | null }) => {
     if (!j.scheduled_start) return 0;
@@ -235,7 +257,7 @@ function SchedulePage() {
   };
 
   const bayLoad = (bay: Bay) =>
-    dayJobs.filter((j) => (j.bay || "Unassigned") === bay.name).reduce((t, j) => t + hoursFor(j), 0);
+    dayJobs.filter((j) => bayNameFor(j.bay) === bay.name).reduce((t, j) => t + hoursFor(j), 0);
 
   const certifiedFor = (cert: string | null) =>
     !cert
@@ -279,7 +301,7 @@ function SchedulePage() {
     }
   }
   for (const j of dayJobs) {
-    const bay = bays.find((b) => b.name === (j.bay || ""));
+    const bay = bays.find((b) => b.name === bayNameFor(j.bay));
     const cert = bay?.required_certification ?? certForService(j.service_type);
     if (!cert || !j.installer) continue;
     const ok = certifiedFor(cert).some((t) => t.full_name === j.installer);
@@ -581,7 +603,7 @@ function SchedulePage() {
                       ))}
                     </div>
                     {dayJobs
-                      .filter((j) => (j.bay || "Unassigned") === bay.name)
+                      .filter((j) => bayNameFor(j.bay) === bay.name)
                       .map((j) => {
                         const start = new Date(j.scheduled_start as string);
                         const end = j.scheduled_end ? new Date(j.scheduled_end) : null;
@@ -600,6 +622,9 @@ function SchedulePage() {
                             onClick={() => setInspect(j.id === inspect ? null : j.id)}
                             className={cn(
                               "absolute top-2 h-[62px] overflow-hidden rounded-xl border px-3 py-2 text-left transition-colors",
+                              // while a drag is in flight, let drops fall through to the hour cells
+                              dragJob && "pointer-events-none",
+                              dragJob === j.id && "opacity-60",
                               clash
                                 ? "border-critical/60 bg-critical/15"
                                 : "border-elevated bg-surface-2 hover:border-bronze/50",

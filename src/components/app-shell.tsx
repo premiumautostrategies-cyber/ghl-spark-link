@@ -12,6 +12,7 @@ import {
   BarChart3,
   Bot,
   Briefcase,
+  CalendarDays,
   CalendarRange,
   ClipboardList,
   Command,
@@ -58,6 +59,7 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     group: "Operations",
     items: [
       { to: "/command-center", label: "Command Center", icon: Command },
+      { to: "/calendar", label: "Shop Calendar", icon: CalendarDays },
       { to: "/documents", label: "Documents", icon: FileText },
       { to: "/inventory", label: "Stock", icon: Package },
       { to: "/warranty", label: "Warranty & Aftercare", icon: ShieldCheck },
