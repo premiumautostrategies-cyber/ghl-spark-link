@@ -2,6 +2,7 @@
 
 ## Done
 - [x] Multi-tenant architecture, auth/roles, navigation shell, design system
+- [x] Consolidated application shell with collapsible Sales, Operations, and Systemize navigation
 - [x] Configurable Command Center (executive/compact presets, saved widget order/size/visibility)
 - [x] Dashboard KPI trends, revenue forecast, funnel, bay status, schedule, team, alerts, and loss analysis
 - [x] Dashboard quick-add flows and deep links
