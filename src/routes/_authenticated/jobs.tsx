@@ -193,6 +193,25 @@ function TechnicianProductionPage() {
     },
   });
 
+  const photoPaths = useMemo(
+    () => jobDocuments.filter((d) => d.doc_type === "installer_photo" && d.file_url).map((d) => d.file_url as string),
+    [jobDocuments],
+  );
+
+  const { data: photoUrls = {} } = useQuery({
+    queryKey: ["installer-photo-urls", photoPaths],
+    enabled: photoPaths.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.from("job-documentation").createSignedUrls(photoPaths, 3600);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((row) => {
+        if (row.path && row.signedUrl) map[row.path] = row.signedUrl;
+      });
+      return map;
+    },
+  });
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["floor-jobs"] });
     qc.invalidateQueries({ queryKey: ["job-phases"] });
