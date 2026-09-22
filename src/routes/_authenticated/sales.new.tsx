@@ -151,8 +151,8 @@ function NewLeadDesk() {
         .single();
       if (error) throw error;
 
-      // Speed to lead: fire the first text automatically on brand-new leads.
-      if (created?.stage === "new_lead") {
+      // Speed to lead: the first text goes out only when the rep leaves it switched on.
+      if (created?.stage === "new_lead" && sendFirstText) {
         await supabase.from("messages").insert({
           organization_id: orgId,
           location_id: locId,
@@ -178,7 +178,8 @@ function NewLeadDesk() {
       return created.id as string;
     },
     onSuccess: (dealId) => {
-      toast.success("Lead added — first text sent");
+      toast.success(sendFirstText ? "Lead added — first text sent" : "Lead added");
+
       qc.invalidateQueries({ queryKey: ["deals"] });
       qc.invalidateQueries({ queryKey: ["pipeline-events"] });
       qc.invalidateQueries({ queryKey: ["customers"] });
