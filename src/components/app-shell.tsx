@@ -181,7 +181,7 @@ function AppShellContent({ children }: { children: ReactNode }) {
   const { data: alerts = [] } = useOpsAlerts();
   const markRead = useMarkAlertRead();
   const unreadAlerts = alerts.filter((alert) => !alert.is_read).length;
-  const isTechnician = roleNames.some((name) => /technician|installer/i.test(name));
+  const isTechnician = (roleNames ?? []).some((name) => /technician|installer/i.test(name));
 
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
