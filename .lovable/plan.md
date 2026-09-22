@@ -1,14 +1,16 @@
 # Technician Production Workspace
 
 ## Goal
-Make **Production** the technician’s complete signed-in workspace. Remove the dispatch-board feel and the separate Shop Floor experience.
+Make **Production** the technician’s complete signed-in workspace. Design phone and iPad first, with desktop as the secondary adaptation. Remove the dispatch-board feel and the separate Shop Floor experience.
 
 ## What changes
 - Replace the Production board with a personal **My Day** screen for the signed-in technician.
+- Use a fast, touch-first structure inspired by the supplied mobile reference: Today / Upcoming / Completed, current job first, next jobs below, and no dense desktop controls carried onto mobile.
 - Show a prominent clock-in/clock-out control and today’s time status.
 - Show only that technician’s scheduled work, ordered by the times already set in the shop schedule.
 - Each schedule row shows time, vehicle, customer, service, bay/mobile location, duration, and current status.
 - Clicking the time or vehicle opens the full work order in the same workspace.
+- On phones, open one focused screen at a time: My Work → Job Overview → Checklist → Completion. On iPad and desktop, use the same hierarchy with more information visible side by side.
 - Keep the work order focused on the information needed to perform the installation: vehicle, services, coverage, product/film, tint percentage, instructions, existing condition, and required documents.
 - Keep checklist interaction optional during the work. Technicians can check items live or complete the remaining items together at the end.
 - Use one clear **Complete work / Send to QC** action. It validates only required end-of-job documentation, records completion, and notifies Sales/Management that QC is ready.
@@ -33,3 +35,4 @@ Make **Production** the technician’s complete signed-in workspace. Remove the 
 - Verify live checklist updates remain optional and bundle completion remains fast.
 - Verify completion creates the QC request and alert.
 - Verify manager/owner navigation and QC remain intact on desktop and mobile.
+- Verify the complete workflow at phone and iPad widths before treating desktop as complete.
