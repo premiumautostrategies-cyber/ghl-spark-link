@@ -12,6 +12,7 @@ import {
   BarChart3,
   Bot,
   Briefcase,
+  CalendarDays,
   CalendarRange,
   ClipboardList,
   Command,
