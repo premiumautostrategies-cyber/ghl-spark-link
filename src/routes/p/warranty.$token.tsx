@@ -36,7 +36,7 @@ function WarrantyPage() {
   const w = data.warranty;
   return (
     <Shell>
-      <div className="rounded-2xl border border-bronze/40 bg-surface p-6">
+      <div className="rounded-xl border border-bronze/40 bg-surface p-6">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="micro-label">{data.shopName}</p>

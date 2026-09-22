@@ -96,7 +96,7 @@ export function WorkflowCanvas({
   return (
     <div
       ref={shell}
-      className="relative h-[620px] overflow-auto rounded-2xl border border-elevated bg-surface-2/40"
+      className="relative h-[620px] overflow-auto rounded-xl border border-elevated bg-surface-2/40"
       style={{
         backgroundImage:
           "radial-gradient(circle, color-mix(in oklab, var(--color-hairline) 70%, transparent) 1px, transparent 1px)",

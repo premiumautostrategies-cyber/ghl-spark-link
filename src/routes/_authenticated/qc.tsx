@@ -13,6 +13,7 @@ import { label, shortDate } from "@/lib/format";
 import { QC_TEMPLATE } from "@/lib/shop";
 import { toast } from "sonner";
 import { Lock, LockOpen } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/qc")({
   head: () => ({
@@ -182,13 +183,10 @@ function QcPage() {
 
   return (
     <div className="space-y-5">
-      <div className="border-b border-elevated pb-5">
-        <p className="micro-label">Installation</p>
-        <h1 className="display-title mt-1 text-3xl font-semibold">Quality control</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          No vehicle reaches ready for pickup until the foreman signs every required check.
-        </p>
-      </div>
+      <PageHeader
+        title="Quality control"
+        subtitle="No vehicle reaches ready for pickup until the foreman signs every required check."
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Kpi label="Awaiting QC" value={String(awaiting.length)} tone={awaiting.length ? "urgent" : "muted"} />
@@ -205,7 +203,7 @@ function QcPage() {
           <SectionTitle title="Vehicles in production" />
           <div className="divide-y divide-elevated">
             {jobs.length === 0 && (
-              <p className="px-5 py-8 text-center text-xs text-muted-foreground">Nothing in production.</p>
+              <p className="px-4 py-8 text-center text-xs text-muted-foreground">Nothing in production.</p>
             )}
             {jobs.map((j) => {
               const list = checklistFor(j.id);
@@ -215,7 +213,7 @@ function QcPage() {
                   type="button"
                   onClick={() => setSelected(j.id)}
                   className={cn(
-                    "flex w-full items-center justify-between gap-3 px-5 py-3 text-left",
+                    "flex w-full items-center justify-between gap-4 px-4 py-3 text-left",
                     selected === j.id && "bg-surface-2",
                   )}
                 >

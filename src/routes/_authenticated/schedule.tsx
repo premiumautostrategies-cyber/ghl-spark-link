@@ -25,6 +25,7 @@ import { Kpi, Panel, SectionTitle, Tag } from "@/components/os-ui";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BAY_DISCIPLINES, certForService, estimateFilmFeet } from "@/lib/shop";
+import { PageHeader } from "@/components/page-header";
 
 const BAY_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
@@ -381,15 +382,11 @@ function SchedulePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-elevated pb-5">
-        <div>
-          <p className="micro-label">Systemize</p>
-          <h1 className="display-title mt-1 text-3xl font-semibold">Bays</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Drag unscheduled work onto a bay — capacity, certifications and film are checked as you drop.
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Bays"
+        subtitle="Drag unscheduled work onto a bay — capacity, certifications and film are checked as you drop."
+        action={
+          <div className="flex gap-2">
           {bayRows.length === 0 && (
             <Button variant="outline" onClick={() => seedBays.mutate()} disabled={seedBays.isPending}>
               Set up bays
@@ -477,8 +474,9 @@ function SchedulePage() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Booked today" value={String(dayJobs.length)} />

@@ -28,6 +28,7 @@ import { label as pretty, money } from "@/lib/format";
 import { CERTIFICATIONS } from "@/lib/shop";
 import { toast } from "sonner";
 import { AlertTriangle, MapPin, Navigation, Sparkles, Truck, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/mobile")({
   head: () => ({
@@ -285,16 +286,11 @@ function MobilePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-elevated pb-5">
-        <div>
-          <p className="micro-label">Mobile services</p>
-          <h1 className="display-title mt-1 text-3xl font-semibold">On-the-road day plan</h1>
-          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Off-site tint, PPF and detail work. Add the stops, then let the planner batch nearby
-            vehicles into one crew's day and put them in driving order.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="On-the-road day plan"
+        subtitle="Off-site tint, PPF and detail work. Add stops, then batch nearby vehicles into one crew's day and driving order."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
           <Input
             type="date"
             value={date}
@@ -357,8 +353,9 @@ function MobilePage() {
             <Sparkles className="mr-1.5 h-4 w-4" />
             {runPlanner.isPending ? "Planning the day…" : "Plan the day"}
           </Button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label="Stops booked" value={String(jobs.length)} hint={`${unrouted.length} not routed yet`} />

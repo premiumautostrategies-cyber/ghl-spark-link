@@ -174,53 +174,29 @@ function TeamPage() {
           body="Add installers and advisors so jobs can be assigned and paid out."
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {members.map((m) => {
-            const load = workload(m.full_name);
-            return (
-              <div key={m.id} className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-semibold">{m.full_name}</p>
-                    <p className="text-sm text-muted-foreground">{m.title}</p>
+        <div className="overflow-x-auto rounded-xl border border-elevated bg-surface">
+          <div className="grid min-w-[760px] grid-cols-[1.2fr_1fr_1fr_1fr_88px] gap-4 border-b border-elevated bg-surface-2/60 px-4 py-2 text-xs font-semibold uppercase text-muted-foreground">
+            <span>Person</span><span>Specialties</span><span>Pay</span><span>Open work</span><span>Status</span>
+          </div>
+          <div className="min-w-[760px] divide-y divide-elevated">
+            {members.map((m) => {
+              const load = workload(m.full_name);
+              return (
+                <div key={m.id} className="grid grid-cols-[1.2fr_1fr_1fr_1fr_88px] items-center gap-4 px-4 py-3 text-sm hover:bg-surface-2/40">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">{m.full_name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{m.title} · {[m.email, m.phone].filter(Boolean).join(" · ") || "No contact details"}</p>
                   </div>
-                  <Badge variant={m.is_active ? "secondary" : "outline"}>
-                    {m.is_active ? "Active" : "Inactive"}
-                  </Badge>
+                  <div className="flex min-w-0 flex-wrap gap-1">
+                    {(m.specialties ?? []).length ? (m.specialties ?? []).map((s) => <Badge key={s} variant="outline">{label(s)}</Badge>) : <span className="text-muted-foreground">—</span>}
+                  </div>
+                  <span>{m.pay_type === "commission" ? `${Number(m.commission_rate)}% commission` : m.pay_type === "salary" ? `${money(m.pay_rate)}/yr` : `${money(m.pay_rate)}/hr`}</span>
+                  <span>{load.length} · {money(load.reduce((t, j) => t + Number(j.price), 0))}</span>
+                  <Badge variant={m.is_active ? "secondary" : "outline"}>{m.is_active ? "Active" : "Inactive"}</Badge>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {(m.specialties ?? []).map((s) => (
-                    <Badge key={s} variant="outline">
-                      {label(s)}
-                    </Badge>
-                  ))}
-                </div>
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <dt className="text-xs uppercase tracking-widest text-muted-foreground">Pay</dt>
-                    <dd>
-                      {m.pay_type === "commission"
-                        ? `${Number(m.commission_rate)}% commission`
-                        : m.pay_type === "salary"
-                          ? `${money(m.pay_rate)}/yr`
-                          : `${money(m.pay_rate)}/hr`}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs uppercase tracking-widest text-muted-foreground">
-                      Open jobs
-                    </dt>
-                    <dd>
-                      {load.length} · {money(load.reduce((t, j) => t + Number(j.price), 0))}
-                    </dd>
-                  </div>
-                </dl>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  {[m.email, m.phone].filter(Boolean).join(" · ") || "No contact details"}
-                </p>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

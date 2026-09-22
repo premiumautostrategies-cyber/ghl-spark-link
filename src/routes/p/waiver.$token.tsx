@@ -68,7 +68,7 @@ function WaiverPage() {
         {[data.customerName, data.vehicle, data.plate].filter(Boolean).join(" · ")}
       </p>
 
-      <div className="mt-5 rounded-2xl border border-elevated bg-surface p-4">
+      <div className="mt-6 rounded-xl border border-elevated bg-surface p-4">
         <p className="micro-label">Pre-existing condition found at intake</p>
         {data.defects.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
@@ -77,7 +77,7 @@ function WaiverPage() {
         ) : (
           <ul className="mt-3 space-y-2">
             {data.defects.map((d) => (
-              <li key={d.id} className="flex items-start gap-2 rounded-xl border border-elevated bg-surface-2 p-3">
+              <li key={d.id} className="flex items-start gap-2 rounded-lg border border-elevated bg-surface-2 p-3">
                 <span
                   className={
                     d.severity === "critical"
@@ -103,14 +103,14 @@ function WaiverPage() {
       </div>
 
       {signed ? (
-        <div className="mt-4 rounded-2xl border border-revenue/40 bg-revenue/10 p-5">
+        <div className="mt-4 rounded-xl border border-revenue/40 bg-revenue/10 p-4">
           <ShieldCheck className="h-6 w-6 text-revenue" />
           <p className="mt-2 text-sm text-muted-foreground">
             Signed by {name}. Work is cleared to start — we'll keep you posted with photos.
           </p>
         </div>
       ) : (
-        <div className="mt-4 rounded-2xl border border-elevated bg-surface p-4">
+        <div className="mt-4 rounded-xl border border-elevated bg-surface p-4">
           <p className="text-xs text-muted-foreground">
             By signing you confirm this report reflects the condition of the vehicle before work begins.
           </p>

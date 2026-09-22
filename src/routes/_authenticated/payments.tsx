@@ -253,25 +253,25 @@ function PaymentsPage() {
           <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-border text-left text-xs uppercase tracking-widest text-muted-foreground">
               <tr>
-                <th className="px-5 py-3">Customer</th>
-                <th className="px-5 py-3">Job</th>
-                <th className="px-5 py-3">Type</th>
-                <th className="px-5 py-3">Method</th>
-                <th className="px-5 py-3">Date</th>
-                <th className="px-5 py-3 text-right">Amount</th>
-                <th className="px-5 py-3" />
+                <th className="px-4 py-2">Customer</th>
+                <th className="px-4 py-2">Job</th>
+                <th className="px-4 py-2">Type</th>
+                <th className="px-4 py-2">Method</th>
+                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2 text-right">Amount</th>
+                <th className="px-4 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {payments.map((p) => (
                 <tr key={p.id}>
-                  <td className="px-5 py-3 font-medium">{p.customers?.name ?? "—"}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{p.jobs?.title ?? "—"}</td>
-                  <td className="px-5 py-3 capitalize">{p.kind}</td>
-                  <td className="px-5 py-3">{label(p.method)}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{dayDate(p.paid_at)}</td>
-                  <td className="px-5 py-3 text-right font-semibold">{money(p.amount)}</td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-4 py-3 font-medium">{p.customers?.name ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.jobs?.title ?? "—"}</td>
+                  <td className="px-4 py-3 capitalize">{p.kind}</td>
+                  <td className="px-4 py-3">{label(p.method)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{dayDate(p.paid_at)}</td>
+                  <td className="px-4 py-3 text-right font-semibold">{money(p.amount)}</td>
+                  <td className="px-4 py-3 text-right">
                     {p.status === "pending" ? (
                       <Button size="sm" variant="outline" onClick={() => markPaid.mutate(p.id)}>
                         Mark paid

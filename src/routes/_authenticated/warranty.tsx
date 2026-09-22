@@ -8,6 +8,7 @@ import { label, dayDate } from "@/lib/format";
 import { AFTERCARE_STEPS, makeToken } from "@/lib/shop";
 import { toast } from "sonner";
 import { Copy, Send } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/warranty")({
   head: () => ({
@@ -154,13 +155,10 @@ function WarrantyPage() {
 
   return (
     <div className="space-y-5">
-      <div className="border-b border-elevated pb-5">
-        <p className="micro-label">Operations</p>
-        <h1 className="display-title mt-1 text-3xl font-semibold">Warranty &amp; aftercare</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Certificates carry the film lot numbers; the cure, edge-check and review cadence queues itself.
-        </p>
-      </div>
+      <PageHeader
+        title="Warranty & aftercare"
+        subtitle="Certificates carry film lot numbers; the cure, edge-check and review cadence queues itself."
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Kpi label="Certificates issued" value={String(warranties.length)} tone="revenue" />
@@ -172,12 +170,12 @@ function WarrantyPage() {
         <SectionTitle title="Ready to certify" hint="Completed vehicles without a warranty certificate" />
         <div className="divide-y divide-elevated">
           {uncertified.length === 0 && (
-            <p className="px-5 py-8 text-center text-xs text-muted-foreground">
+            <p className="px-4 py-8 text-center text-xs text-muted-foreground">
               Every finished vehicle has a certificate.
             </p>
           )}
           {uncertified.map((j) => (
-            <div key={j.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+            <div key={j.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3">
               <div>
                 <p className="text-sm font-semibold">{j.title}</p>
                 <p className="text-xs text-muted-foreground">
@@ -197,10 +195,10 @@ function WarrantyPage() {
         <SectionTitle title="Certificates" hint="Each one has a customer link with coverage terms and lot numbers" />
         <div className="divide-y divide-elevated">
           {warranties.length === 0 && (
-            <p className="px-5 py-8 text-center text-xs text-muted-foreground">No certificates yet.</p>
+            <p className="px-4 py-8 text-center text-xs text-muted-foreground">No certificates yet.</p>
           )}
           {warranties.map((w) => (
-            <div key={w.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+            <div key={w.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3">
               <div>
                 <p className="text-sm font-semibold">{w.certificate_number}</p>
                 <p className="text-xs text-muted-foreground">

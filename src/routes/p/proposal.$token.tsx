@@ -126,7 +126,7 @@ function ProposalPage() {
       </header>
 
       {done ? (
-        <div className="rounded-2xl border border-revenue/40 bg-revenue/10 p-6">
+        <div className="rounded-xl border border-revenue/40 bg-revenue/10 p-6">
           <ShieldCheck className="h-6 w-6 text-revenue" />
           <h2 className="mt-3 font-display text-xl">You're booked in</h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
@@ -152,7 +152,7 @@ function ProposalPage() {
                   <div
                     key={t.id}
                     className={cn(
-                      "flex flex-col rounded-2xl border p-4 text-left transition-colors",
+                       "flex flex-col rounded-xl border p-4 text-left transition-colors",
                       active ? "border-bronze bg-bronze/10" : "border-elevated bg-surface",
                     )}
                   >
@@ -266,7 +266,7 @@ function ProposalPage() {
             </section>
           )}
 
-          <section className="rounded-2xl border border-elevated bg-surface p-4">
+          <section className="rounded-xl border border-elevated bg-surface p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Total</span>
               <span className="font-display text-2xl text-bronze">{money(totals.price)}</span>
@@ -301,7 +301,7 @@ function ProposalPage() {
           onClick={() => setZoom(null)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-elevated bg-surface p-5"
+            className="w-full max-w-lg rounded-xl border border-elevated bg-surface p-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">

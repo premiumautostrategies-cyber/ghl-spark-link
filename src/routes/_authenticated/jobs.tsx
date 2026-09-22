@@ -103,7 +103,7 @@ function JobsPage() {
             return (
               <div key={status} className="rounded-xl border border-border bg-card">
                 <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                  <h2 className="text-sm uppercase tracking-widest text-muted-foreground">
+                  <h2 className="text-sm font-semibold">
                     {label(status)}
                   </h2>
                   <span className="text-xs text-muted-foreground">{list.length}</span>

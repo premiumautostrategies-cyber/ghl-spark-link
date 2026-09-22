@@ -25,6 +25,7 @@ import { dayDate } from "@/lib/format";
 import { DOC_CATEGORIES, STARTER_LIBRARY, docCategoryLabel } from "@/lib/doc-library";
 import { toast } from "sonner";
 import { Copy, FileText, Pencil, Search, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 
 export const Route = createFileRoute("/_authenticated/documents")({
   head: () => ({
@@ -177,16 +178,11 @@ function DocumentsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-elevated pb-5">
-        <div>
-          <p className="micro-label">Operations</p>
-          <h1 className="display-title mt-1 text-3xl font-semibold">Document library</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Warranty terms, liability releases, care instructions and shop policies — written once,
-            attached wherever they are needed. Write them here or paste in paperwork built elsewhere.
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Document library"
+        subtitle="Warranty terms, releases, care instructions and shop policies — written once and attached wherever needed."
+        action={
+          <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <a href={DOC_BUILDER_URL} target="_blank" rel="noreferrer">
               Create a document
@@ -202,8 +198,9 @@ function DocumentsPage() {
           <Button onClick={() => setEditing({ doc_type: "warranty", status: "published" })}>
             New document
           </Button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Kpi label="Documents" value={String(docs.length)} tone="revenue" />
@@ -221,7 +218,7 @@ function DocumentsPage() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-4">
         <div className="relative min-w-[220px] flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -248,11 +245,11 @@ function DocumentsPage() {
 
       {isLoading ? (
         <Panel>
-          <p className="px-5 py-10 text-center text-xs text-muted-foreground">Loading library…</p>
+          <p className="px-4 py-10 text-center text-xs text-muted-foreground">Loading library…</p>
         </Panel>
       ) : filtered.length === 0 ? (
         <Panel>
-          <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+          <p className="px-4 py-10 text-center text-sm text-muted-foreground">
             {docs.length === 0
               ? "Nothing in the library yet — load the starter set to begin with warranty terms, releases and care instructions."
               : "No documents match that search."}

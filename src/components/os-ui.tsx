@@ -21,7 +21,7 @@ export function Panel({
   return (
     <div
       {...rest}
-      className={cn("rounded-2xl border border-elevated bg-surface", className)}
+      className={cn("rounded-xl border border-elevated bg-surface", className)}
     >
       {children}
     </div>
@@ -38,7 +38,7 @@ export function SectionTitle({
   right?: ReactNode;
 }) {
   return (
-    <div className="flex items-end justify-between gap-3 px-5 pb-3 pt-4">
+    <div className="flex items-end justify-between gap-4 px-4 py-4">
       <div>
         <p className="micro-label">{title}</p>
         {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
@@ -60,7 +60,7 @@ export function Tag({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-normal",
         TONE[tone],
         className,
       )}
@@ -91,13 +91,7 @@ export function Kpi({
     muted: "text-foreground",
   };
   return (
-    <Panel className="relative overflow-hidden p-5">
-      <span
-        className={cn(
-          "absolute inset-x-0 top-0 h-px bg-current opacity-50",
-          accent[tone],
-        )}
-      />
+    <Panel className="p-4">
       <p className="micro-label">{label}</p>
       <p className={cn("mt-3 font-display text-3xl font-semibold tabular-nums", accent[tone])}>
         {value}
@@ -117,14 +111,14 @@ export function FilterPills<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="no-scrollbar flex gap-1.5 overflow-x-auto rounded-full border border-elevated bg-surface p-1">
+    <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg border border-elevated bg-surface p-1">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cn(
-            "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.1em] transition-colors",
+            "whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-semibold uppercase tracking-normal transition-colors",
             value === o.value
               ? "bg-bronze text-primary-foreground"
               : "text-muted-foreground hover:bg-surface-2 hover:text-foreground",

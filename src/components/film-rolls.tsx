@@ -274,7 +274,7 @@ export function FilmRolls() {
         )}
         <div className="divide-y divide-elevated border-t border-elevated">
           {rolls.length === 0 && (
-            <p className="px-5 py-8 text-center text-xs text-muted-foreground">
+            <p className="px-4 py-8 text-center text-xs text-muted-foreground">
               No rolls on the shelf yet.
             </p>
           )}
@@ -283,7 +283,7 @@ export function FilmRolls() {
             const original = Number(r.original_feet) || 1;
             const low = remaining <= Number(r.reorder_point_feet);
             return (
-              <div key={r.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
+              <div key={r.id} className="flex flex-wrap items-center gap-4 px-4 py-3">
                 <div className="min-w-[200px] flex-1">
                   <p className="text-sm font-semibold">
                     {r.roll_code}{" "}

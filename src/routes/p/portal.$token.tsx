@@ -55,8 +55,8 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-elevated bg-surface">
-      <header className="flex items-center gap-2 border-b border-elevated px-5 py-3">
+    <section className="rounded-xl border border-elevated bg-surface">
+      <header className="flex items-center gap-2 border-b border-elevated px-4 py-3">
         <span className="text-bronze">{icon}</span>
         <h2 className="text-sm font-semibold">{title}</h2>
         {hint && <span className="ml-auto text-xs text-muted-foreground">{hint}</span>}
@@ -67,7 +67,7 @@ function Card({
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="px-5 py-6 text-center text-xs text-muted-foreground">{children}</p>;
+  return <p className="px-4 py-6 text-center text-xs text-muted-foreground">{children}</p>;
 }
 
 function PortalPage() {
@@ -84,7 +84,7 @@ function PortalPage() {
 
   return (
     <Shell>
-      <div className="rounded-2xl border border-bronze/40 bg-surface p-6">
+      <div className="rounded-xl border border-bronze/40 bg-surface p-6">
         <p className="micro-label">{data.shopName}</p>
         <h1 className="display-title mt-2 text-3xl">Hello, {data.customer.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -96,7 +96,7 @@ function PortalPage() {
       <Card title="Your vehicles" icon={<Car className="h-4 w-4" />}>
         {data.vehicles.length === 0 && <Empty>No vehicles on file yet.</Empty>}
         {data.vehicles.map((v) => (
-          <div key={v.id} className="flex items-center justify-between gap-3 px-5 py-3">
+          <div key={v.id} className="flex items-center justify-between gap-4 px-4 py-3">
             <p className="text-sm font-semibold">{v.label}</p>
             {v.plate && <span className="text-xs text-muted-foreground">{v.plate}</span>}
           </div>
@@ -106,7 +106,7 @@ function PortalPage() {
       <Card title="Work in progress" icon={<Receipt className="h-4 w-4" />} hint={`${active.length} open`}>
         {active.length === 0 && <Empty>Nothing in progress right now.</Empty>}
         {active.map((d) => (
-          <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+          <div key={d.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold">{d.title}</p>
               <p className="text-xs text-muted-foreground">
@@ -124,7 +124,7 @@ function PortalPage() {
       <Card title="Quotes & proposals" icon={<FileText className="h-4 w-4" />}>
         {data.proposals.length === 0 && <Empty>No proposals yet.</Empty>}
         {data.proposals.map((p) => (
-          <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+          <div key={p.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold">{p.title}</p>
               <p className="text-xs text-muted-foreground">
@@ -147,7 +147,7 @@ function PortalPage() {
       <Card title="Warranty certificates" icon={<BadgeCheck className="h-4 w-4" />}>
         {data.warranties.length === 0 && <Empty>No certificates issued yet.</Empty>}
         {data.warranties.map((w) => (
-          <div key={w.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+          <div key={w.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold">{w.certificate_number}</p>
               <p className="text-xs text-muted-foreground">
@@ -170,7 +170,7 @@ function PortalPage() {
       <Card title="Aftercare messages" icon={<MessageSquare className="h-4 w-4" />}>
         {data.aftercare.length === 0 && <Empty>Nothing yet — aftercare starts after your install.</Empty>}
         {data.aftercare.map((t) => (
-          <div key={t.id} className="px-5 py-3">
+          <div key={t.id} className="px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
               {label(t.kind)} · {t.sent_at ? `sent ${dayDate(t.sent_at)}` : `due ${dayDate(t.scheduled_for)}`}
             </p>
@@ -182,7 +182,7 @@ function PortalPage() {
       {data.payments.length > 0 && (
         <Card title="Payments" icon={<Receipt className="h-4 w-4" />}>
           {data.payments.map((p) => (
-            <div key={p.id} className="flex items-center justify-between gap-3 px-5 py-3">
+            <div key={p.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <p className="text-sm">
                 {label(p.kind)} · {label(p.method)}
                 {p.paid_at ? ` · ${dayDate(p.paid_at)}` : ""}
