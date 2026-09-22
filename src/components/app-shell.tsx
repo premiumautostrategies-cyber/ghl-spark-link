@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AccentTheme } from "@/components/accent-theme";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -187,9 +188,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button variant="ghost" size="icon" className="md:hidden" aria-label="Search">
               <Search className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label="Notifications">
-              <ClipboardList className="size-4" />
-            </Button>
+            <ThemeToggle />
           </div>
         </header>
 
