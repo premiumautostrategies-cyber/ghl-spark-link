@@ -766,7 +766,56 @@ function DealDesk() {
         </div>
 
         <div className="min-w-0 space-y-4">
+          {/* Readiness */}
+          <Panel>
+            <SectionTitle title="Where this sale stands" hint="Each step unlocks the next." />
+            <div className="divide-y divide-elevated border-t border-elevated">
+              {[
+                { label: "Quote built", done: total > 0, detail: total > 0 ? money(total) : "Add services" },
+                {
+                  label: "Sent to customer",
+                  done: ["sent", "approved", "viewed"].includes(estimate?.status ?? ""),
+                  detail: label(estimate?.status ?? "not sent"),
+                },
+                {
+                  label: "Approved",
+                  done: ["won", "scheduled"].includes(deal.stage ?? "") || estimate?.status === "approved",
+                  detail: label(deal.stage ?? ""),
+                },
+                {
+                  label: "Deposit collected",
+                  done: collected > 0,
+                  detail: collected > 0 ? `${money(collected)} in` : "Nothing collected",
+                },
+                {
+                  label: "Scheduled",
+                  done: Boolean(job?.scheduled_start),
+                  detail: job?.scheduled_start ? shortDate(job.scheduled_start) : "Not booked",
+                },
+                {
+                  label: "QC passed",
+                  done: job?.qc_status === "passed",
+                  detail: job?.qc_status ? label(job.qc_status) : "Not started",
+                },
+              ].map((step) => (
+                <div key={step.label} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        step.done ? "bg-revenue" : "bg-muted-foreground/40",
+                      )}
+                    />
+                    <span className={step.done ? "text-foreground" : "text-muted-foreground"}>{step.label}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground">{step.detail}</span>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
           {/* Scheduling */}
+
           <Panel>
             <SectionTitle
               title="Book the bay"
