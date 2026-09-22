@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DayBookingSheet } from "@/components/day-booking-sheet";
 import { PageHeader } from "@/components/page-header";
+import { laneLayout, minutesOfDay } from "@/lib/overlap";
 
 type View = "day" | "week" | "month";
 
@@ -326,6 +327,13 @@ function CalendarPage() {
               {range.map((d) => {
                 const list = jobsOn(d);
                 const today = sameDay(d, new Date());
+                const lanes = laneLayout(
+                  list.map((j) => {
+                    const start = new Date(j.scheduled_start as string);
+                    const end = j.scheduled_end ? new Date(j.scheduled_end) : new Date(start.getTime() + hoursOf(j) * 3600000);
+                    return { id: j.id, start: minutesOfDay(start), end: Math.max(minutesOfDay(end), minutesOfDay(start) + 30) };
+                  }),
+                );
                 return (
                   <div
                     key={d.toISOString()}
@@ -342,19 +350,27 @@ function CalendarPage() {
                       const duration = Math.max((end.getTime() - start.getTime()) / 3600000, 0.5);
                       const top = ((startHour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100;
                       const height = (duration / (CALENDAR_END - CALENDAR_START)) * 100;
+                      const slot = lanes.get(j.id) ?? { lane: 0, lanes: 1 };
+                      const widthPct = 100 / slot.lanes;
+                      const compact = slot.lanes > 2;
                       return (
                         <button
                           key={j.id}
                           type="button"
                           onClick={() => setSelected(j.id === selected ? null : j.id)}
                           className={cn(
-                            "absolute inset-x-1 z-10 overflow-hidden rounded-md border border-l-2 border-elevated bg-surface-2 px-2 py-1 text-left transition-colors hover:border-bronze/50",
+                            "absolute z-10 overflow-hidden rounded-md border border-l-2 border-elevated bg-surface-2 px-1.5 py-1 text-left transition-colors hover:z-20 hover:border-bronze/50",
                             STATUS_TONE[j.status] ?? "border-l-elevated",
-                            selected === j.id && "border-bronze/70",
+                            selected === j.id && "z-20 border-bronze/70",
                           )}
-                          style={{ top: `${Math.max(top, 0)}%`, height: `${Math.max(height, 5)}%` }}
+                          style={{
+                            top: `${Math.max(top, 0)}%`,
+                            height: `${Math.max(height, 4)}%`,
+                            left: `calc(${slot.lane * widthPct}% + 2px)`,
+                            width: `calc(${widthPct}% - 4px)`,
+                          }}
                         >
-                          <p className="text-[10px] font-semibold tabular-nums text-muted-foreground">
+                          <p className="truncate text-[10px] font-semibold tabular-nums text-muted-foreground">
                             {new Date(j.scheduled_start as string).toLocaleTimeString("en-US", {
                               hour: "numeric",
                               minute: "2-digit",
@@ -362,10 +378,14 @@ function CalendarPage() {
                           </p>
                           <p className="truncate text-[11px] font-semibold">{j.customers?.name ?? "No customer"}</p>
                           <p className="truncate text-[10px]">{vehicleOf(j) ?? j.title}</p>
-                          <p className="truncate text-[10px] text-muted-foreground">
-                            {label(j.service_type)} · {j.installer || "Unassigned"}
-                          </p>
-                          <p className="truncate text-[10px] text-muted-foreground">{STATUS_LABELS[j.status] ?? label(j.status)}</p>
+                          {!compact && (
+                            <>
+                              <p className="truncate text-[10px] text-muted-foreground">
+                                {label(j.service_type)} · {j.installer || "Unassigned"}
+                              </p>
+                              <p className="truncate text-[10px] text-muted-foreground">{STATUS_LABELS[j.status] ?? label(j.status)}</p>
+                            </>
+                          )}
                         </button>
                       );
                     })}
@@ -486,6 +506,19 @@ function DayBoard({
         </div>
         {rowNames.map((name) => {
           const rowJobs = jobs.filter((j) => matchBay(j.bay, bays) === name);
+          const endOf = (j: JobRow) => {
+            const start = new Date(j.scheduled_start as string);
+            return j.scheduled_end
+              ? new Date(j.scheduled_end)
+              : new Date(start.getTime() + (Number(j.estimated_hours) || 3) * 3600000);
+          };
+          const lanes = laneLayout(
+            rowJobs.map((j) => {
+              const s = minutesOfDay(new Date(j.scheduled_start as string));
+              return { id: j.id, start: s, end: Math.max(minutesOfDay(endOf(j)), s + 45) };
+            }),
+          );
+          const laneCount = Math.max(1, ...Array.from(lanes.values()).map((l) => l.lanes));
           return (
             <div
               key={name}
@@ -496,7 +529,10 @@ function DayBoard({
                 <p className="text-sm font-semibold">{name}</p>
                 <p className="text-[11px] text-muted-foreground">{rowJobs.length} vehicles</p>
               </div>
-              <div className="relative min-h-[76px]" style={{ gridColumn: `2 / span ${HOURS.length}` }}>
+              <div
+                className="relative"
+                style={{ gridColumn: `2 / span ${HOURS.length}`, minHeight: `${laneCount * 68 + 8}px` }}
+              >
                 <div
                   className="absolute inset-0 grid"
                   style={{ gridTemplateColumns: `repeat(${HOURS.length},1fr)` }}
@@ -507,24 +543,24 @@ function DayBoard({
                 </div>
                 {rowJobs.map((j) => {
                   const start = new Date(j.scheduled_start as string);
-                  const end = j.scheduled_end
-                    ? new Date(j.scheduled_end)
-                    : new Date(start.getTime() + (Number(j.estimated_hours) || 3) * 3600000);
+                  const end = endOf(j);
                   const sH = start.getHours() + start.getMinutes() / 60;
                   const eH = end.getHours() + end.getMinutes() / 60;
                   const left = ((sH - firstHour) / HOURS.length) * 100;
                   const width = (Math.max(eH - sH, 0.75) / HOURS.length) * 100;
+                  const slot = lanes.get(j.id) ?? { lane: 0, lanes: 1 };
                   return (
                     <button
                       key={j.id}
                       type="button"
                       onClick={() => onSelect(j.id === selected ? null : j.id)}
                       className={cn(
-                        "absolute top-2 h-[60px] overflow-hidden rounded-xl border border-l-2 bg-surface-2 px-3 py-1.5 text-left transition-colors hover:border-bronze/60",
+                        "absolute h-[60px] overflow-hidden rounded-xl border border-l-2 bg-surface-2 px-3 py-1.5 text-left transition-colors hover:z-20 hover:border-bronze/60",
                         STATUS_TONE[j.status] ?? "border-l-elevated",
-                        selected === j.id ? "border-bronze/70" : "border-elevated",
+                        selected === j.id ? "z-20 border-bronze/70" : "border-elevated",
                       )}
                       style={{
+                        top: `${slot.lane * 68 + 8}px`,
                         left: `${Math.min(Math.max(left, 0), 95)}%`,
                         width: `${Math.min(width, 100)}%`,
                       }}
