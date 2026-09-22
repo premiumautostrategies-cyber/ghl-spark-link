@@ -228,7 +228,7 @@ function TechnicianProductionPage() {
     return Array.from(new Set([...fromTeam, ...fromJobs]));
   }, [team, jobs]);
 
-  const isTechnician = roleNames.some((name) => /technician|installer/i.test(name));
+  const isTechnician = (roleNames ?? []).some((name) => /technician|installer/i.test(name));
   useEffect(() => {
     if (teamMember?.full_name && tech !== teamMember.full_name) setTech(teamMember.full_name);
     else if (!tech && !isTechnician && techNames[0]) setTech(techNames[0]);
