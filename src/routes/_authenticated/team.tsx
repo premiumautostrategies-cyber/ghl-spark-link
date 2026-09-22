@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { label, money } from "@/lib/format";
+import { dayDate, label, money } from "@/lib/format";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/team")({
@@ -175,28 +175,29 @@ function TeamPage() {
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-elevated bg-surface">
-          <div className="grid min-w-[760px] grid-cols-[1.2fr_1fr_1fr_1fr_88px] gap-4 border-b border-elevated bg-surface-2/60 px-4 py-2 text-xs font-semibold uppercase text-muted-foreground">
-            <span>Person</span><span>Specialties</span><span>Pay</span><span>Open work</span><span>Status</span>
-          </div>
-          <div className="min-w-[760px] divide-y divide-elevated">
+          <table className="w-full min-w-[860px] text-sm">
+            <thead className="border-b border-elevated bg-surface-2/60 text-left text-xs uppercase text-muted-foreground"><tr>
+              <th className="px-4 py-2">Employee</th><th className="px-4 py-2">Role</th><th className="px-4 py-2">Status</th><th className="px-4 py-2">Open jobs</th><th className="px-4 py-2">Last activity</th>
+            </tr></thead><tbody className="divide-y divide-elevated">
             {members.map((m) => {
               const load = workload(m.full_name);
               return (
-                <div key={m.id} className="grid grid-cols-[1.2fr_1fr_1fr_1fr_88px] items-center gap-4 px-4 py-3 text-sm hover:bg-surface-2/40">
-                  <div className="min-w-0">
+                <tr key={m.id} className="hover:bg-surface-2/40">
+                  <td className="px-4 py-3 min-w-0">
                     <p className="truncate font-semibold">{m.full_name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{m.title} · {[m.email, m.phone].filter(Boolean).join(" · ") || "No contact details"}</p>
-                  </div>
-                  <div className="flex min-w-0 flex-wrap gap-1">
+                    <p className="truncate text-xs text-muted-foreground">{[m.email, m.phone].filter(Boolean).join(" · ") || "No contact details"}</p>
+                  </td>
+                  <td className="px-4 py-3"><p>{m.title}</p><div className="mt-1 flex min-w-0 flex-wrap gap-1">
                     {(m.specialties ?? []).length ? (m.specialties ?? []).map((s) => <Badge key={s} variant="outline">{label(s)}</Badge>) : <span className="text-muted-foreground">—</span>}
-                  </div>
-                  <span>{m.pay_type === "commission" ? `${Number(m.commission_rate)}% commission` : m.pay_type === "salary" ? `${money(m.pay_rate)}/yr` : `${money(m.pay_rate)}/hr`}</span>
-                  <span>{load.length} · {money(load.reduce((t, j) => t + Number(j.price), 0))}</span>
-                  <Badge variant={m.is_active ? "secondary" : "outline"}>{m.is_active ? "Active" : "Inactive"}</Badge>
-                </div>
+                  </div></td>
+                  <td className="px-4 py-3"><Badge variant={m.is_active ? "secondary" : "outline"}>{m.is_active ? "Active" : "Inactive"}</Badge></td>
+                  <td className="px-4 py-3"><span className="font-medium">{load.length}</span><span className="text-muted-foreground"> · {money(load.reduce((t, j) => t + Number(j.price), 0))}</span></td>
+                  <td className="px-4 py-3 text-muted-foreground">{dayDate(m.updated_at)}</td>
+                </tr>
               );
             })}
-          </div>
+            </tbody>
+          </table>
         </div>
       )}
     </div>

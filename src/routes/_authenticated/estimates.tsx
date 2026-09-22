@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { money, STATUS_LABELS } from "@/lib/format";
+import { dayDate, money, STATUS_LABELS } from "@/lib/format";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
@@ -52,7 +52,7 @@ function EstimatesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("estimates")
-        .select("*, customers(name), estimate_items(*)")
+        .select("*, customers(name), vehicles(year,make,model), estimate_items(*), deals(owner_name)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -186,28 +186,28 @@ function EstimatesPage() {
         </Dialog>}
       />
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card">
         {estimates.length === 0 && (
           <p className="px-4 py-6 text-sm text-muted-foreground">No estimates yet.</p>
         )}
-        {estimates.map((est) => (
-          <button
-            key={est.id}
-            onClick={() => setActiveId(est.id)}
-            className="flex w-full flex-wrap items-center gap-4 border-b border-border px-4 py-3 text-left last:border-b-0 hover:bg-secondary/60"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">
-                #{est.number} · {est.title}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {est.customers?.name ?? "No customer"} · {est.estimate_items.length} line items
-              </p>
-            </div>
-            <Badge variant="secondary">{STATUS_LABELS[est.status] ?? est.status}</Badge>
-            <span className="w-28 text-right font-semibold">{money(total(est))}</span>
-          </button>
-        ))}
+        {estimates.length > 0 && <table className="w-full min-w-[980px] text-sm">
+          <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase text-muted-foreground"><tr>
+            <th className="px-4 py-2">Customer</th><th className="px-4 py-2">Vehicle</th><th className="px-4 py-2">Service</th>
+            <th className="px-4 py-2 text-right">Amount</th><th className="px-4 py-2">Status</th><th className="px-4 py-2">Last activity</th><th className="px-4 py-2">Sales rep</th>
+          </tr></thead>
+          <tbody className="divide-y divide-border">{estimates.map((est) => {
+            const vehicle = est.vehicles;
+            return <tr key={est.id} onClick={() => setActiveId(est.id)} className="cursor-pointer hover:bg-secondary/40">
+              <td className="px-4 py-3 font-medium">{est.customers?.name ?? "No customer"}</td>
+              <td className="px-4 py-3 text-muted-foreground">{vehicle ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") : "—"}</td>
+              <td className="px-4 py-3"><p className="font-medium">{est.title}</p><p className="text-xs text-muted-foreground">#{est.number} · {est.estimate_items.length} items</p></td>
+              <td className="px-4 py-3 text-right font-semibold">{money(total(est))}</td>
+              <td className="px-4 py-3"><Badge variant="secondary">{STATUS_LABELS[est.status] ?? est.status}</Badge></td>
+              <td className="px-4 py-3 text-muted-foreground">{dayDate(est.updated_at)}</td>
+              <td className="px-4 py-3 text-muted-foreground">{est.deals?.[0]?.owner_name ?? "—"}</td>
+            </tr>;
+          })}</tbody>
+        </table>}
       </div>
 
       <Dialog open={active !== null} onOpenChange={(v) => !v && setActiveId(null)}>
