@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +6,7 @@ import { useOrg } from "@/lib/use-org";
 import { Panel, SectionTitle, Tag } from "@/components/os-ui";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { label, money, shortDate } from "@/lib/format";
+import { label } from "@/lib/format";
 import { PRODUCTION_PHASES } from "@/lib/shop";
 import { toast } from "sonner";
 import { ArrowLeft, Pause, Play, Check } from "lucide-react";
@@ -154,31 +154,34 @@ function KioskPage() {
   if (job) {
     const done = jobPhases.filter((p) => p.status === "complete").length;
     return (
-      <div className="space-y-4">
-        <Button variant="ghost" onClick={() => setOpenJob(null)}>
-          <ArrowLeft className="mr-1.5 h-4 w-4" /> All vehicles
+      <div className="mx-auto max-w-3xl space-y-4 pb-24">
+        <Button variant="ghost" className="min-h-12" onClick={() => setOpenJob(null)}>
+          <ArrowLeft className="mr-2 h-5 w-5" /> My Day
         </Button>
 
-        <Panel className="p-4">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="micro-label">{job.bay ?? "No bay"} · {shortDate(job.scheduled_start)}</p>
-              <h1 className="display-title mt-1 text-3xl">
+        <Panel className="p-5 sm:p-6">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+            <div className="min-w-0">
+              <p className="micro-label">
+                {new Date(job.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} · {job.bay ?? "No bay"}
+              </p>
+              <h1 className="display-title mt-2 text-2xl sm:text-3xl">
                 {[job.vehicles?.year, job.vehicles?.make, job.vehicles?.model].filter(Boolean).join(" ") || job.title}
               </h1>
-              <p className="mt-1 text-base text-muted-foreground">
-                {job.customers?.name ?? "No customer"} · {label(job.service_type)}
-                {job.vehicles?.plate ? ` · ${job.vehicles.plate}` : ""}
-              </p>
+              <p className="mt-2 text-base font-medium">{label(job.service_type)}</p>
             </div>
             <Tag tone="rig">{done}/{jobPhases.length || PRODUCTION_PHASES.length} phases done</Tag>
           </div>
+          <dl className="mt-5 grid gap-3 border-t border-elevated pt-4 text-sm sm:grid-cols-2">
+            <div><dt className="text-xs text-muted-foreground">Customer</dt><dd className="mt-1 font-medium">{job.customers?.name ?? "No customer"}</dd></div>
+            <div><dt className="text-xs text-muted-foreground">Vehicle</dt><dd className="mt-1 font-medium">{[job.vehicles?.year, job.vehicles?.make, job.vehicles?.model].filter(Boolean).join(" ") || "No vehicle"}{job.vehicles?.plate ? ` · ${job.vehicles.plate}` : ""}</dd></div>
+          </dl>
         </Panel>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
+        <div className="space-y-4">
           <Panel>
-            <SectionTitle title="Production phases" hint="Tap to start, pause or finish a phase" />
-            <div className="space-y-3 border-t border-elevated p-4">
+            <SectionTitle title="Checklist" hint="Complete each step in order" />
+            <div className="space-y-3 border-t border-elevated p-4 sm:p-5">
               {jobPhases.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-elevated p-6 text-center">
                   <p className="text-sm text-muted-foreground">No phases on this vehicle yet.</p>
@@ -195,12 +198,12 @@ function KioskPage() {
                     <div
                       key={p.id}
                       className={cn(
-                        "rounded-xl border p-4",
+                        "rounded-xl border p-4 sm:p-5",
                         p.status === "active" ? "border-bronze bg-bronze/10" : "border-elevated bg-surface-2",
                       )}
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
+                        <div className="min-w-0">
                           <p className="text-lg font-semibold">
                             {PRODUCTION_PHASES.find((x) => x.key === p.phase)?.label ?? label(p.phase)}
                           </p>
@@ -209,19 +212,19 @@ function KioskPage() {
                             {p.assigned_to ? ` · ${p.assigned_to}` : ""}
                           </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex shrink-0 gap-2">
                           {p.status !== "complete" && p.status !== "active" && (
-                            <Button size="lg" onClick={() => setPhase.mutate({ phase: p, action: "start" })}>
+                            <Button size="lg" className="min-h-12" onClick={() => setPhase.mutate({ phase: p, action: "start" })}>
                               <Play className="mr-1.5 h-5 w-5" /> Start
                             </Button>
                           )}
                           {p.status === "active" && (
-                            <Button size="lg" variant="outline" onClick={() => setPhase.mutate({ phase: p, action: "pause" })}>
+                            <Button size="lg" className="min-h-12" variant="outline" onClick={() => setPhase.mutate({ phase: p, action: "pause" })}>
                               <Pause className="mr-1.5 h-5 w-5" /> Pause
                             </Button>
                           )}
                           {p.status !== "complete" && (
-                            <Button size="lg" variant="outline" onClick={() => setPhase.mutate({ phase: p, action: "complete" })}>
+                            <Button size="lg" className="min-h-12" variant="outline" onClick={() => setPhase.mutate({ phase: p, action: "complete" })}>
                               <Check className="mr-1.5 h-5 w-5" /> Done
                             </Button>
                           )}
@@ -235,9 +238,9 @@ function KioskPage() {
             </div>
           </Panel>
 
-          <div className="space-y-4">
-            <Panel className="p-4">
-              <p className="micro-label">Material</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Panel className="p-5">
+              <p className="micro-label">Instructions & material</p>
               <p className="mt-2 text-sm">
                 {job.inventory_rolls
                   ? `${job.inventory_rolls.roll_code} · ${job.inventory_rolls.product_line ?? ""} · lot ${job.inventory_rolls.lot_number ?? "—"}`
@@ -253,8 +256,8 @@ function KioskPage() {
               )}
             </Panel>
 
-            <Panel className="p-4">
-              <p className="micro-label">Check-in notes</p>
+            <Panel className="p-5">
+              <p className="micro-label">Inspection & photos</p>
               {inspection ? (
                 <ul className="mt-2 space-y-1.5">
                   {(inspection.inspection_defects ?? []).map((d, i) => (
@@ -273,22 +276,27 @@ function KioskPage() {
             </Panel>
 
             {job.notes && (
-              <Panel className="p-4">
-                <p className="micro-label">Coverage instructions</p>
+              <Panel className="p-5 sm:col-span-2">
+                <p className="micro-label">Notes</p>
                 <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{job.notes}</p>
               </Panel>
             )}
           </div>
+        </div>
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-elevated bg-background/95 p-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0">
+          <Button asChild size="lg" className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold">
+            <Link to="/qc">Ready for QC</Link>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        title="Today's vehicles"
-        subtitle="Tap your vehicle to see the cut file, check-in notes and phase timers."
+        title="My Day"
+        subtitle="Today’s assigned vehicles and work steps."
       />
 
       {jobs.length === 0 ? (
@@ -296,7 +304,7 @@ function KioskPage() {
           <p className="text-sm text-muted-foreground">Nothing is booked in today.</p>
         </Panel>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-3">
           {jobs.map((j) => {
             const mine = phases.filter((p) => p.job_id === j.id);
             const done = mine.filter((p) => p.status === "complete").length;
@@ -307,22 +315,23 @@ function KioskPage() {
                 type="button"
                 onClick={() => setOpenJob(j.id)}
                 className={cn(
-                  "rounded-xl border p-4 text-left transition-colors",
+                  "grid min-h-36 w-full grid-cols-[84px_minmax(0,1fr)] gap-4 rounded-xl border p-5 text-left transition-colors sm:min-h-40 sm:grid-cols-[110px_minmax(0,1fr)_auto] sm:items-center",
                   active ? "border-bronze bg-bronze/10" : "border-elevated bg-surface hover:border-bronze/40",
                 )}
               >
-                <p className="micro-label">{j.bay ?? "No bay"} · {shortDate(j.scheduled_start)}</p>
-                <p className="mt-2 text-lg font-semibold leading-tight">
-                  {[j.vehicles?.year, j.vehicles?.make, j.vehicles?.model].filter(Boolean).join(" ") || j.title}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {j.customers?.name ?? "No customer"} · {label(j.service_type)}
-                </p>
-                <div className="mt-3 flex items-center justify-between">
-                  <Tag tone={active ? "bronze" : "muted"}>
-                    {mine.length ? `${done}/${mine.length} phases` : "Not started"}
-                  </Tag>
-                  <span className="text-sm tabular-nums text-muted-foreground">{money(j.price)}</span>
+                <div>
+                  <p className="text-lg font-semibold tabular-nums">{new Date(j.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
+                  <p className="mt-1 text-xs font-medium uppercase text-muted-foreground">{j.bay ?? "No bay"}</p>
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xl font-semibold leading-tight">{[j.vehicles?.year, j.vehicles?.make, j.vehicles?.model].filter(Boolean).join(" ") || j.title}</p>
+                  <p className="mt-2 text-base">{label(j.service_type)}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{j.customers?.name ?? "No customer"}</p>
+                  <div className="mt-3 sm:hidden"><Tag tone={active ? "bronze" : "muted"}>{mine.length ? `${done}/${mine.length} steps` : "Not started"}</Tag></div>
+                </div>
+                <div className="col-span-2 sm:col-span-1 sm:text-right">
+                  <Tag tone={active ? "bronze" : "muted"}>{mine.length ? `${done}/${mine.length} steps` : "Not started"}</Tag>
+                  <p className="mt-3 text-sm font-semibold text-bronze">{mine.length ? "Open job" : "Start job"}</p>
                 </div>
               </button>
             );
