@@ -82,7 +82,7 @@ export function ConversationSummaryButton(props: Props) {
               <div>
                 <p className="micro-label mb-1.5">Where it stands</p>
                 <p className="text-sm leading-6">{mutation.data.summary}</p>
-                <p className={cn("mt-2 text-xs font-medium uppercase tracking-wide", SENTIMENT[mutation.data.sentiment] ?? SENTIMENT.unclear)}>
+                <p className={cn("mt-2 text-xs font-medium uppercase tracking-wide", SENTIMENT[mutation.data.sentiment] ?? SENTIMENT['unclear'])}>
                   {mutation.data.sentiment}
                 </p>
               </div>
