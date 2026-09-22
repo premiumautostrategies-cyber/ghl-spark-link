@@ -163,7 +163,7 @@ function KioskPage() {
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
             <div className="min-w-0">
               <p className="micro-label">
-                {new Date(job.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} · {job.bay ?? "No bay"}
+                {job.scheduled_start ? new Date(job.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "Unscheduled"} · {job.bay ?? "No bay"}
               </p>
               <h1 className="display-title mt-2 text-2xl sm:text-3xl">
                 {[job.vehicles?.year, job.vehicles?.make, job.vehicles?.model].filter(Boolean).join(" ") || job.title}
@@ -320,7 +320,7 @@ function KioskPage() {
                 )}
               >
                 <div>
-                  <p className="text-lg font-semibold tabular-nums">{new Date(j.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
+                  <p className="text-lg font-semibold tabular-nums">{j.scheduled_start ? new Date(j.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "Unscheduled"}</p>
                   <p className="mt-1 text-xs font-medium uppercase text-muted-foreground">{j.bay ?? "No bay"}</p>
                 </div>
                 <div className="min-w-0">
