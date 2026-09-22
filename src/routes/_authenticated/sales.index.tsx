@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
@@ -39,7 +39,6 @@ import {
 import { money } from "@/lib/format";
 import { toast } from "sonner";
 import { DEFAULT_MESSAGE_TEMPLATES } from "@/lib/shop";
-import { LeadWorkspace } from "@/components/lead-workspace";
 import {
   CLOSED_STAGES,
   leadSignal,
@@ -103,6 +102,7 @@ export const Route = createFileRoute("/_authenticated/sales/")({
 
 function SalesPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { orgId, locId } = useOrg();
   const [open, setOpen] = useState(false);
   const [addingCustomer, setAddingCustomer] = useState(false);
@@ -111,7 +111,6 @@ function SalesPage() {
   const [search, setSearch] = useState("");
   const [dragging, setDragging] = useState<string | null>(null);
   const [focusMode, setFocusMode] = useState(false);
-  const [openDealId, setOpenDealId] = useState<string | null>(null);
   const [snoozed, setSnoozed] = useState<string[]>([]);
   const [showClosed, setShowClosed] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -345,6 +344,7 @@ function SalesPage() {
 
   const columns = showClosed ? [...PIPELINE_STAGES, ...CLOSED_STAGES] : PIPELINE_STAGES;
   const focusTotal = counts.untouched + counts.live + counts.followup;
+  const openDeal = (dealId: string) => navigate({ to: "/sales/$dealId", params: { dealId } });
 
   return (
     <div className="min-w-0 space-y-5">
@@ -457,7 +457,7 @@ function SalesPage() {
         <FocusPanel
           list={focusList}
           counts={counts}
-          onOpen={(id) => setOpenDealId(id)}
+          onOpen={openDeal}
           onSnooze={(id) => setSnoozed((s) => [...s, id])}
         />
       )}
@@ -519,7 +519,7 @@ function SalesPage() {
                       deal={d}
                       signal={signals.get(d.id)}
                       dragging={dragging === d.id}
-                      onOpen={() => setOpenDealId(d.id)}
+                      onOpen={() => openDeal(d.id)}
                       onTag={(t) => setSearch(t)}
                     />
                   ))}
@@ -538,8 +538,6 @@ function SalesPage() {
           </DragOverlay>
         </DndContext>
       )}
-
-      <LeadWorkspace dealId={openDealId} onClose={() => setOpenDealId(null)} />
     </div>
   );
 }
