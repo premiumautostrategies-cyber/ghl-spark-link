@@ -657,10 +657,14 @@ function TechnicianProductionPage() {
             <ShieldAlert className="mt-0.5 h-5 w-5 text-critical" />
             <div>
               <p className="text-sm font-semibold text-critical">QC sent this vehicle back</p>
-              <p className="mt-1 text-sm text-muted-foreground">Correct the flagged work, then request QC again.</p>
+              <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">
+                {checklists.find((c) => c.job_id === job.id)?.notes ||
+                  "Correct the flagged work, then request QC again."}
+              </p>
             </div>
           </div>
         )}
+
 
         <Panel className="p-5 sm:p-6">
           <h1 className="display-title text-2xl sm:text-3xl">{vehicle}</h1>
