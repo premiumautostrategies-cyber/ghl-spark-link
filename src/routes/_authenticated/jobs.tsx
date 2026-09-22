@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +16,6 @@ import { PRODUCTION_PHASES, QC_TEMPLATE } from "@/lib/shop";
 import { logOpsAlert, OPS_ALERTS_KEY } from "@/lib/ops-alerts";
 import { toast } from "sonner";
 import { AlertTriangle, ArrowLeft, Camera, Check, ChevronDown, ClipboardCheck, Images, Pause, Play, ShieldAlert } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/jobs")({
@@ -95,7 +94,7 @@ function clock(value: string | null) {
 
 function TechnicianProductionPage() {
   const qc = useQueryClient();
-  const { orgId, locId, user, roleNames, teamMember } = useOrg();
+  const { orgId, locId, roleNames, teamMember } = useOrg();
   const [openJob, setOpenJob] = useState<string | null>(null);
   const [tech, setTech] = useState(teamMember?.full_name ?? "");
   const [scheduleView, setScheduleView] = useState<"today" | "upcoming" | "completed">("today");
@@ -115,7 +114,7 @@ function TechnicianProductionPage() {
         .select(
           "*, customers(name,phone), vehicles(year,make,model,color,plate), inventory_rolls(roll_code,lot_number,product_line), job_services(description,quantity)",
         )
-        .in("status", ["scheduled", "in_progress", "ready_for_pickup"])
+        .in("status", ["scheduled", "in_progress", "ready_for_pickup", "completed"])
         .is("deleted_at", null)
         .order("scheduled_start");
       if (error) throw error;
@@ -812,9 +811,9 @@ function TechnicianProductionPage() {
 
         <div className="fixed inset-x-0 bottom-0 z-20 border-t border-elevated bg-background/95 p-3 backdrop-blur">
           {s.qcPassed ? (
-            <Button asChild size="lg" className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold">
-              <Link to="/qc">QC passed — vehicle ready</Link>
-            </Button>
+        <Button size="lg" className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold" disabled>
+               QC passed — vehicle ready
+             </Button>
           ) : (
             <Button size="lg" className="mx-auto min-h-14 w-full max-w-3xl text-sm font-semibold" disabled={!s.inspectionDone || job.qc_status === "in_review"} onClick={openCompletion}>
               <ClipboardCheck className="mr-2 h-5 w-5" />
