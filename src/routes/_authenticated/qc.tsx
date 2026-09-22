@@ -40,10 +40,17 @@ type Item = {
   sort_order: number;
 };
 
+const FILM_SERVICES = ["ppf", "wrap", "color_change", "tint"];
+const needsHeatCheck = (serviceType: string | null | undefined) =>
+  FILM_SERVICES.includes((serviceType ?? "").toLowerCase());
+
 function QcPage() {
   const qc = useQueryClient();
   const { orgId } = useOrg();
   const [selected, setSelected] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [correction, setCorrection] = useState("");
+
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["qc-jobs"],
