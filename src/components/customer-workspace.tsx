@@ -221,7 +221,7 @@ export function CustomerWorkspace({
                           <Car className="h-4 w-4 text-bronze" />
                           <span className="text-sm font-medium">{vehicleName(v)}</span>
                           <span className="ml-auto text-[11px] text-muted-foreground">
-                            {[v.plate, `${history.length} projects · ${money(spend)}`]
+                            {[v.plate, `${history.length} ${history.length === 1 ? "project" : "projects"} · ${money(spend)}`]
                               .filter(Boolean)
                               .join(" · ")}
                           </span>
