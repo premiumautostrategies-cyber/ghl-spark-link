@@ -50,6 +50,9 @@ import {
   type LeadSignal,
 } from "@/lib/pipeline";
 
+import { useSalesConfig } from "@/lib/sales-mode";
+import { DynamicActivity } from "@/components/dynamic-activity";
+
 const SPEED_TO_LEAD_BODY = DEFAULT_MESSAGE_TEMPLATES[0].body;
 
 type Deal = {
