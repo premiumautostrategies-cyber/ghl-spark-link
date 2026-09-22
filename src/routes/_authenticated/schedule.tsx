@@ -552,6 +552,18 @@ function SchedulePage() {
               const load = bayLoad(bay);
               const cap = Number(bay.daily_hours_cap);
               const over = load > cap;
+              const bayJobs = dayJobs.filter((j) => bayNameFor(j.bay) === bay.name);
+              const endOf = (j: (typeof bayJobs)[number]) => {
+                const s = new Date(j.scheduled_start as string);
+                return j.scheduled_end ? new Date(j.scheduled_end) : new Date(s.getTime() + 2 * 3600000);
+              };
+              const lanes = laneLayout(
+                bayJobs.map((j) => {
+                  const s = minutesOfDay(new Date(j.scheduled_start as string));
+                  return { id: j.id, start: s, end: Math.max(minutesOfDay(endOf(j)), s + 45) };
+                }),
+              );
+              const laneCount = Math.max(1, ...Array.from(lanes.values()).map((l) => l.lanes));
               return (
                 <div
                   key={bay.id}
@@ -575,8 +587,8 @@ function SchedulePage() {
                     </p>
                   </div>
                   <div
-                    className="relative col-span-full col-start-2 min-h-[80px]"
-                    style={{ gridColumn: `2 / span ${BAY_HOURS.length}` }}
+                    className="relative col-span-full col-start-2"
+                    style={{ gridColumn: `2 / span ${BAY_HOURS.length}`, minHeight: `${laneCount * 70 + 8}px` }}
                   >
                     <div
                       className="absolute inset-0 grid"
@@ -600,47 +612,50 @@ function SchedulePage() {
                         />
                       ))}
                     </div>
-                    {dayJobs
-                      .filter((j) => bayNameFor(j.bay) === bay.name)
-                      .map((j) => {
-                        const start = new Date(j.scheduled_start as string);
-                        const end = j.scheduled_end ? new Date(j.scheduled_end) : null;
-                        const startH = start.getHours() + start.getMinutes() / 60;
-                        const endH = end ? end.getHours() + end.getMinutes() / 60 : startH + 2;
-                        const left = ((startH - (BAY_HOURS[0] as number)) / BAY_HOURS.length) * 100;
-                        const width = (Math.max(endH - startH, 0.75) / BAY_HOURS.length) * 100;
-                        const clash = conflictIds.has(j.id);
-                        return (
-                          <button
-                            key={j.id}
-                            type="button"
-                            draggable
-                            onDragStart={() => setDragJob(j.id)}
-                            onDragEnd={() => setDragJob(null)}
-                            onClick={() => setInspect(j.id === inspect ? null : j.id)}
-                            className={cn(
-                              "absolute top-2 h-[62px] overflow-hidden rounded-xl border px-3 py-2 text-left transition-colors",
-                              // while a drag is in flight, let drops fall through to the hour cells
-                              dragJob && "pointer-events-none",
-                              dragJob === j.id && "opacity-60",
-                              clash
-                                ? "border-critical/60 bg-critical/15"
-                                : "border-elevated bg-surface-2 hover:border-bronze/50",
-                            )}
-                            style={{ left: `${Math.max(left, 0)}%`, width: `${Math.min(width, 100)}%` }}
-                          >
-                            <p className="truncate text-xs font-semibold">{j.title}</p>
-                            <p className="truncate text-[11px] text-muted-foreground">
-                              {j.installer || "Unassigned"} · {label(j.service_type)}
+                    {bayJobs.map((j) => {
+                      const start = new Date(j.scheduled_start as string);
+                      const end = endOf(j);
+                      const startH = start.getHours() + start.getMinutes() / 60;
+                      const endH = end.getHours() + end.getMinutes() / 60;
+                      const left = ((startH - (BAY_HOURS[0] as number)) / BAY_HOURS.length) * 100;
+                      const width = (Math.max(endH - startH, 0.75) / BAY_HOURS.length) * 100;
+                      const clash = conflictIds.has(j.id);
+                      const slot = lanes.get(j.id) ?? { lane: 0, lanes: 1 };
+                      return (
+                        <button
+                          key={j.id}
+                          type="button"
+                          draggable
+                          onDragStart={() => setDragJob(j.id)}
+                          onDragEnd={() => setDragJob(null)}
+                          onClick={() => setInspect(j.id === inspect ? null : j.id)}
+                          className={cn(
+                            "absolute h-[62px] overflow-hidden rounded-xl border px-3 py-2 text-left transition-colors hover:z-20",
+                            // while a drag is in flight, let drops fall through to the hour cells
+                            dragJob && "pointer-events-none",
+                            dragJob === j.id && "opacity-60",
+                            clash
+                              ? "border-critical/60 bg-critical/15"
+                              : "border-elevated bg-surface-2 hover:border-bronze/50",
+                          )}
+                          style={{
+                            top: `${slot.lane * 70 + 8}px`,
+                            left: `${Math.max(left, 0)}%`,
+                            width: `${Math.min(width, 100)}%`,
+                          }}
+                        >
+                          <p className="truncate text-xs font-semibold">{j.title}</p>
+                          <p className="truncate text-[11px] text-muted-foreground">
+                            {j.installer || "Unassigned"} · {label(j.service_type)}
+                          </p>
+                          {Number(j.film_feet_estimate) > 0 && (
+                            <p className="truncate text-[11px] text-bronze">
+                              {Number(j.film_feet_estimate)} ft reserved
                             </p>
-                            {Number(j.film_feet_estimate) > 0 && (
-                              <p className="truncate text-[11px] text-bronze">
-                                {Number(j.film_feet_estimate)} ft reserved
-                              </p>
-                            )}
-                          </button>
-                        );
-                      })}
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               );
