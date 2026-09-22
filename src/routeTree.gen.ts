@@ -24,6 +24,7 @@ import { Route as AuthenticatedCustomersRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedEstimatesRouteImport } from './routes/_authenticated/estimates'
 import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
+import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedInspectionsRouteImport } from './routes/_authenticated/inspections'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
@@ -123,6 +124,11 @@ const AuthenticatedEstimatesRoute = AuthenticatedEstimatesRouteImport.update({
 const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedInspectionsRoute =
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
   '/import': typeof AuthenticatedImportRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/inspections': typeof AuthenticatedInspectionsRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/inventory': typeof AuthenticatedInventoryRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
   '/import': typeof AuthenticatedImportRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/inspections': typeof AuthenticatedInspectionsRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/inventory': typeof AuthenticatedInventoryRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/estimates': typeof AuthenticatedEstimatesRoute
   '/_authenticated/import': typeof AuthenticatedImportRoute
+  '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/inspections': typeof AuthenticatedInspectionsRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
@@ -398,6 +407,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/estimates'
     | '/import'
+    | '/inbox'
     | '/inspections'
     | '/integrations'
     | '/inventory'
@@ -439,6 +449,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/estimates'
     | '/import'
+    | '/inbox'
     | '/inspections'
     | '/integrations'
     | '/inventory'
@@ -481,6 +492,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documents'
     | '/_authenticated/estimates'
     | '/_authenticated/import'
+    | '/_authenticated/inbox'
     | '/_authenticated/inspections'
     | '/_authenticated/integrations'
     | '/_authenticated/inventory'
@@ -632,6 +644,13 @@ declare module '@tanstack/react-router' {
       path: '/import'
       fullPath: '/import'
       preLoaderRoute: typeof AuthenticatedImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inbox': {
+      id: '/_authenticated/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof AuthenticatedInboxRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inspections': {
@@ -820,6 +839,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedEstimatesRoute: typeof AuthenticatedEstimatesRoute
   AuthenticatedImportRoute: typeof AuthenticatedImportRoute
+  AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedInspectionsRoute: typeof AuthenticatedInspectionsRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
@@ -847,6 +867,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedEstimatesRoute: AuthenticatedEstimatesRoute,
   AuthenticatedImportRoute: AuthenticatedImportRoute,
+  AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedInspectionsRoute: AuthenticatedInspectionsRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
