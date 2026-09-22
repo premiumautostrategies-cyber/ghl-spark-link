@@ -161,7 +161,7 @@ function TechnicianProductionPage() {
   const { data: checklists = [] } = useQuery({
     queryKey: ["floor-qc"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("qc_checklists").select("id,job_id,status");
+      const { data, error } = await supabase.from("qc_checklists").select("id,job_id,status,notes");
       if (error) throw error;
       return data;
     },
