@@ -293,7 +293,7 @@ export function DayBookingSheet({
         vehicle_id: vid,
         installer: installer || null,
         bay: isMobile ? null : bay || null,
-        price: price.trim() ? Number(price) : undefined,
+        price: Number(price) || 0,
         estimated_hours: dur,
         scheduled_start: startAt.toISOString(),
         scheduled_end: endAt.toISOString(),
