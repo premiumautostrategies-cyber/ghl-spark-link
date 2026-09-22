@@ -517,6 +517,38 @@ function TechnicianProductionPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const uploadPhotos = useMutation({
+    mutationFn: async ({ jobId, files }: { jobId: string; files: File[] }) => {
+      if (!orgId) throw new Error("No workspace selected");
+      if (!files.length) return;
+      const jobRow = jobs.find((item) => item.id === jobId);
+      for (const file of files) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+        const path = `${orgId}/${jobId}/${crypto.randomUUID()}-${safeName}`;
+        const { error: uploadError } = await supabase.storage.from("job-documentation").upload(path, file);
+        if (uploadError) throw uploadError;
+        const { error: docError } = await supabase.from("documents").insert({
+          organization_id: orgId,
+          location_id: locId,
+          customer_id: jobRow?.customer_id ?? null,
+          vehicle_id: jobRow?.vehicle_id ?? null,
+          job_id: jobId,
+          name: file.name,
+          doc_type: "installer_photo",
+          status: "complete",
+          file_url: path,
+        });
+        if (docError) throw docError;
+      }
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`${variables.files.length} photo${variables.files.length === 1 ? "" : "s"} uploaded`);
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
   const requestQc = useMutation({
     mutationFn: async (jobId: string) => {
       if (!orgId) throw new Error("No workspace selected");
