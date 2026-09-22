@@ -203,8 +203,9 @@ function NewLeadDesk() {
             <p className="micro-label">Sales desk</p>
             <h1 className="display-title mt-1 text-3xl">{title.trim() || "New lead"}</h1>
             <p className={cn("mt-1.5 text-sm", TEMP_META.new.text)}>
-              Untouched — the first text goes out as soon as you save
+              {sendFirstText ? "Untouched — the first text goes out when you save" : "Untouched — no automatic text will be sent"}
             </p>
+
           </div>
           <div className="text-right">
             <p className="micro-label">Quote total</p>
