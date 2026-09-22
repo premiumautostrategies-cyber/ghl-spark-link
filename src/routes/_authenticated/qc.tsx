@@ -307,8 +307,6 @@ function QcPage() {
           </div>
         </Panel>
 
-        </Panel>
-
         {current ? (
           <Panel>
             <SectionTitle
