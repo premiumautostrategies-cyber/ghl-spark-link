@@ -279,6 +279,30 @@ function TechnicianProductionPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const startJob = useMutation({
+    mutationFn: async (jobId: string) => {
+      if (!tech) throw new Error("Pick your name first");
+      const jobRow = jobs.find((item) => item.id === jobId);
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("jobs")
+        .update({
+          installer: jobRow?.installer ?? tech,
+          accepted_by: jobRow?.accepted_by ?? tech,
+          accepted_at: jobRow?.accepted_at ?? now,
+          checked_in_at: now,
+          status: "in_progress",
+        })
+        .eq("id", jobId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Job started — vehicle checked in");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const checkIn = useMutation({
     mutationFn: async (jobId: string) => {
       const { error } = await supabase
@@ -293,6 +317,7 @@ function TechnicianProductionPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const startInspection = useMutation({
     mutationFn: async (jobId: string) => {
