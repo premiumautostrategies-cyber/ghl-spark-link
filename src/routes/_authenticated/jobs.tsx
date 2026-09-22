@@ -1148,7 +1148,7 @@ function TechnicianProductionPage() {
                 </>
               );
             })()}
-            <div className="mt-4 flex min-h-12 items-center justify-center rounded-lg bg-bronze px-4 text-sm font-semibold text-bronze-foreground">
+            <div className="mt-4 flex min-h-12 items-center justify-center rounded-lg bg-bronze px-4 text-sm font-semibold text-primary-foreground">
               Continue job
             </div>
           </button>
