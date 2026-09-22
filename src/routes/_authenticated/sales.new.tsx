@@ -44,6 +44,8 @@ export const Route = createFileRoute("/_authenticated/sales/new")({
   component: NewLeadDesk,
 });
 
+const digits = (value: string) => value.replace(/\D/g, "");
+
 function NewLeadDesk() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -52,15 +54,34 @@ function NewLeadDesk() {
   const [customerId, setCustomerId] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [title, setTitle] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [sendFirstText, setSendFirstText] = useState(true);
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers-lite"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("id,name").order("name");
+      const { data, error } = await supabase.from("customers").select("id,name,phone,email").order("name");
       if (error) throw error;
       return data;
     },
   });
+
+  const phoneDigits = digits(newPhone);
+  const emailKey = newEmail.trim().toLowerCase();
+  const nameKey = newName.trim().toLowerCase();
+  const matches = addingCustomer
+    ? customers
+        .filter((c) => {
+          const byPhone = phoneDigits.length >= 7 && digits(c.phone ?? "").endsWith(phoneDigits.slice(-7));
+          const byEmail = emailKey.length > 4 && (c.email ?? "").toLowerCase() === emailKey;
+          const byName = nameKey.length > 2 && (c.name ?? "").toLowerCase() === nameKey;
+          return byPhone || byEmail || byName;
+        })
+        .slice(0, 3)
+    : [];
+
 
   const addDeal = useMutation({
     mutationFn: async (form: FormData) => {
