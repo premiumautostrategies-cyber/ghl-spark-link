@@ -279,7 +279,6 @@ function WorkflowsTab() {
             return (
               <div key={w.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3 hover:bg-surface-2/40">
                 <div className="min-w-[240px] flex-1">
-                  <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <Link
                       to="/automations/$workflowId"
@@ -290,7 +289,7 @@ function WorkflowsTab() {
                     </Link>
                     <p className="mt-1 text-xs text-muted-foreground">{w.description}</p>
                   </div>
-                  </div>
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Tag tone="bronze">{TRIGGER_LABEL[w.trigger_event] ?? w.trigger_event}</Tag>
                   <Tag tone="muted">{graph.nodes.length - 1} steps</Tag>
