@@ -41,6 +41,7 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
       { to: "/sales", label: "Pipeline", icon: Briefcase },
       { to: "/customers", label: "Customers", icon: Users },
       { to: "/services", label: "Service Menu", icon: Layers },
+      { to: "/calendar", label: "Shop Calendar", icon: CalendarDays },
       { to: "/payments", label: "Payments", icon: CreditCard },
     ],
   },
@@ -59,7 +60,6 @@ const NAV_GROUPS: { group: string; items: NavItem[] }[] = [
     group: "Operations",
     items: [
       { to: "/command-center", label: "Command Center", icon: Command },
-      { to: "/calendar", label: "Shop Calendar", icon: CalendarDays },
       { to: "/documents", label: "Documents", icon: FileText },
       { to: "/inventory", label: "Stock", icon: Package },
       { to: "/warranty", label: "Warranty & Aftercare", icon: ShieldCheck },

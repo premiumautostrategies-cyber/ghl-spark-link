@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Panel, SectionTitle, Tag, Kpi, FilterPills } from "@/components/os-ui";
 import { label, money, STATUS_LABELS } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { DayBookingSheet } from "@/components/day-booking-sheet";
 
 type View = "day" | "week" | "month";
 
@@ -120,6 +121,7 @@ function CalendarPage() {
   const [view, setView] = useState<View>("week");
   const [anchor, setAnchor] = useState(() => startOfDay(new Date()));
   const [selected, setSelected] = useState<string | null>(null);
+  const [bookDate, setBookDate] = useState<Date | null>(null);
 
   const { data: jobs = [] } = useQuery({
     queryKey: ["calendar-jobs"],
@@ -202,13 +204,16 @@ function CalendarPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3 border-b border-elevated pb-5">
         <div>
-          <p className="micro-label">Operations</p>
+          <p className="micro-label">Sales</p>
           <h1 className="display-title mt-1 text-3xl font-semibold">Shop calendar</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Every vehicle on the books — switch between day, week and month with live bay capacity.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" onClick={() => setBookDate(anchor)}>
+            <Plus className="mr-1.5 size-3.5" /> New appointment
+          </Button>
           <FilterPills
             options={[
               { value: "day", label: "Day" },
@@ -299,7 +304,12 @@ function CalendarPage() {
                     key={d.toISOString()}
                     className={cn("min-h-[420px] p-3", today && "bg-surface-2/60")}
                   >
-                    <div className="flex items-baseline justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setBookDate(d)}
+                      title="Book an appointment"
+                      className="flex w-full items-baseline justify-between rounded-md px-1 py-0.5 text-left transition-colors hover:bg-elevated"
+                    >
                       <p className="micro-label">
                         {d.toLocaleDateString("en-US", { weekday: "short" })}
                       </p>
@@ -311,7 +321,7 @@ function CalendarPage() {
                       >
                         {d.getDate()}
                       </p>
-                    </div>
+                    </button>
                     <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-elevated">
                       <div
                         className={cn("h-full", hrs > dailyCapacity ? "bg-critical" : "bg-bronze")}
@@ -322,7 +332,15 @@ function CalendarPage() {
                       {hrs.toFixed(1)} / {dailyCapacity} h
                     </p>
                     <div className="mt-3 space-y-2">
-                      {list.length === 0 && <p className="text-[11px] text-muted-foreground">Open</p>}
+                      {list.length === 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setBookDate(d)}
+                          className="w-full rounded-lg border border-dashed border-elevated py-2 text-[11px] text-muted-foreground transition-colors hover:border-bronze/50 hover:text-bronze"
+                        >
+                          Open · book
+                        </button>
+                      )}
                       {list.map((j) => (
                         <button
                           key={j.id}
@@ -374,8 +392,10 @@ function CalendarPage() {
                   return (
                     <div
                       key={d.toISOString()}
+                      onClick={() => setBookDate(d)}
+                      title="Book an appointment"
                       className={cn(
-                        "min-h-[112px] border-b border-l border-elevated p-2",
+                        "min-h-[112px] cursor-pointer border-b border-l border-elevated p-2 transition-colors hover:bg-elevated/40",
                         outside && "opacity-40",
                         today && "bg-surface-2/60",
                       )}
@@ -402,7 +422,10 @@ function CalendarPage() {
                           <button
                             key={j.id}
                             type="button"
-                            onClick={() => setSelected(j.id === selected ? null : j.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelected(j.id === selected ? null : j.id);
+                            }}
                             className={cn(
                               "block w-full truncate rounded border-l-2 bg-surface-2 px-1.5 py-1 text-left text-[10px] font-medium",
                               STATUS_TONE[j.status] ?? "border-l-elevated",
@@ -414,7 +437,8 @@ function CalendarPage() {
                         {list.length > 3 && (
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setAnchor(d);
                               setView("day");
                             }}
@@ -432,6 +456,8 @@ function CalendarPage() {
           </div>
         )}
       </Panel>
+
+      <DayBookingSheet date={bookDate} onClose={() => setBookDate(null)} />
 
       {selectedJob && (
         <Panel className="p-5">
