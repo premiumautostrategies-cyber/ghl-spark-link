@@ -229,10 +229,23 @@ function SchedulePage() {
         .sort()
         .map(virtualBay);
 
+  // Jobs store a short bay label ("Bay 1") while bay records may read "Bay 1 — PPF".
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const bayNameFor = (jobBay: string | null | undefined) => {
+    const raw = (jobBay ?? "").trim();
+    if (!raw) return "Unassigned";
+    const n = norm(raw);
+    const hit = baseBays.find((b) => {
+      const bn = norm(b.name);
+      return bn === n || bn.startsWith(n) || n.startsWith(bn);
+    });
+    return hit?.name ?? raw;
+  };
+
   // Any job sitting on a bay name that no longer exists (or none at all) still needs a row,
   // otherwise it silently disappears from the board.
   const orphanNames = Array.from(
-    new Set(dayJobs.map((j) => j.bay || "Unassigned").filter((n) => !baseBays.some((b) => b.name === n))),
+    new Set(dayJobs.map((j) => bayNameFor(j.bay)).filter((n) => !baseBays.some((b) => b.name === n))),
   ).sort();
   const bays: Bay[] = [...baseBays, ...orphanNames.map(virtualBay)];
 
