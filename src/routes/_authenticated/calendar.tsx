@@ -84,12 +84,30 @@ function sameDay(a: Date, b: Date) {
   );
 }
 
+/** Labour hours this job consumes on the day it starts (multi-day bookings clamp to one shop day). */
 function hoursOf(j: JobRow) {
-  if (Number(j.estimated_hours) > 0) return Number(j.estimated_hours);
+  if (Number(j.estimated_hours) > 0) return Math.min(Number(j.estimated_hours), 10);
   if (j.scheduled_start && j.scheduled_end) {
-    return (new Date(j.scheduled_end).getTime() - new Date(j.scheduled_start).getTime()) / 3600000;
+    const span =
+      (new Date(j.scheduled_end).getTime() - new Date(j.scheduled_start).getTime()) / 3600000;
+    return Math.min(Math.max(span, 0.5), 9);
   }
   return 3;
+}
+
+/** Job rows store a short bay label ("Bay 1") while bay records may read "Bay 1 — PPF". */
+function normalizeBay(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+function matchBay(jobBay: string | null, bayNames: string[]) {
+  const raw = (jobBay ?? "").trim();
+  if (!raw) return "Unassigned";
+  const n = normalizeBay(raw);
+  const hit = bayNames.find((b) => {
+    const bn = normalizeBay(b);
+    return bn === n || bn.startsWith(n) || n.startsWith(bn);
+  });
+  return hit ?? raw;
 }
 
 function vehicleOf(j: JobRow) {
