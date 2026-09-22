@@ -126,6 +126,8 @@ function SettingsPage() {
         <p className="mt-3 text-xs text-muted-foreground">Signed in as {user?.email}</p>
       </div>
 
+      <SalesSettings />
+
       <div className="rounded-xl border border-elevated bg-surface p-4">
         <h2 className="text-sm font-semibold">Brand colour</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
