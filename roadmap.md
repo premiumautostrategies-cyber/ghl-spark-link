@@ -64,3 +64,14 @@ Lead -> auto text -> quote -> proposal link -> signature + deposit -> bay bookin
 - [ ] AI batching + route optimisation for mobile crews (day plan, drive order, gaps)
 - [ ] Inventory rethink — a clear opinionated way to run stock (rolls, consumables, reorder, usage per job)
 - [ ] Investor/developer polish pass: consistent empty states, demo data, no dead ends
+
+## Core product upgrade (SYSTEMIZE spec)
+- [x] P1 Dynamic Pipeline: stage + new-lead state + activity temperature + live activity + focus priority
+- [x] P1 Lead Workspace drawer (activity timeline, conversation, quote, notes, stage moves)
+- [x] Customer-activity event log (lead_events) seeded with realistic restyling activity
+- [x] Workspace bootstrap RPC (remix DB lost the auth signup trigger); demo seed double-run guard
+- [ ] P2 Customer / vehicle / quote / schedule continuity
+- [ ] P3 Production board + technician My Day mobile experience
+- [ ] P4 Command Center (sales execution) vs Operations/Owner split
+- [ ] P5 Visual consistency pass across modules
+- [ ] P6 Automation recipes, document/SOP attachment, integration presentation
