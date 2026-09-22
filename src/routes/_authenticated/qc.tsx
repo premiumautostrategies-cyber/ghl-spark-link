@@ -75,6 +75,8 @@ function QcPage() {
     qc.invalidateQueries({ queryKey: ["qc-checklists"] });
     qc.invalidateQueries({ queryKey: ["qc-jobs"] });
     qc.invalidateQueries({ queryKey: ["jobs"] });
+    qc.invalidateQueries({ queryKey: ["floor-jobs"] });
+    qc.invalidateQueries({ queryKey: OPS_ALERTS_KEY });
   };
 
   const startChecklist = useMutation({
