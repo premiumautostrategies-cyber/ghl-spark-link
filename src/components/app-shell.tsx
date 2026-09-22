@@ -74,6 +74,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useMarkAlertRead, useOpsAlerts } from "@/lib/ops-alerts";
 
 type NavItem = {
   to: string;
@@ -177,6 +178,10 @@ function AppShellContent({ children }: { children: ReactNode }) {
   const { user, organization, location } = useRouteContext({ from: "/_authenticated" });
   const { isMobile, setOpenMobile } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { data: alerts = [] } = useOpsAlerts();
+  const markRead = useMarkAlertRead();
+  const unreadAlerts = alerts.filter((alert) => !alert.is_read).length;
+
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
   const sectionActive = (section: NavSection) =>
