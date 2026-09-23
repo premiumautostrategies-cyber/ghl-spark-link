@@ -81,6 +81,24 @@ function PortalPage() {
   }
 
   const active = data.deals.filter((d) => d.stage !== "lost");
+  const now = new Date();
+  const upcoming = data.jobs
+    .filter((j) => j.scheduled_start && new Date(j.scheduled_start) >= now && !j.key_released)
+    .slice(0, 3);
+  const inShop = data.jobs.filter(
+    (j) => !j.key_released && (j.status === "in_progress" || j.qc_status === "in_review" || j.status === "ready_for_pickup"),
+  );
+  const history = data.jobs.filter((j) => j.key_released || j.status === "completed" || j.status === "invoiced");
+
+  const STEPS = ["Booked", "Checked in", "In the shop", "Final check", "Ready"] as const;
+  const stepIndex = (j: (typeof data.jobs)[number]) => {
+    if (j.key_released || j.status === "completed" || j.status === "invoiced") return 4;
+    if (j.status === "ready_for_pickup" || j.qc_status === "passed") return 4;
+    if (j.qc_status === "in_review") return 3;
+    if (j.status === "in_progress") return 2;
+    if (j.checked_in_at) return 1;
+    return 0;
+  };
 
   return (
     <Shell>
@@ -88,10 +106,101 @@ function PortalPage() {
         <p className="micro-label">{data.shopName}</p>
         <h1 className="display-title mt-2 text-3xl">Hello, {data.customer.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Everything on your vehicles — quotes, proposals, warranty certificates and the aftercare
-          notes we have sent you.
+          Track your vehicle, review quotes, see your photos and keep every document in one place.
         </p>
       </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { label: "Vehicles", value: String(data.vehicles.length) },
+          { label: "In the shop", value: String(inShop.length) },
+          { label: "Paid to date", value: money(data.billing.paid) },
+          { label: "Balance", value: money(data.billing.balance) },
+        ].map((k) => (
+          <div key={k.label} className="rounded-xl border border-elevated bg-surface px-4 py-3">
+            <p className="micro-label">{k.label}</p>
+            <p className="mt-1 text-lg font-semibold tabular-nums">{k.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {inShop.length > 0 && (
+        <Card title="Where your vehicle is right now" icon={<Wrench className="h-4 w-4" />}>
+          {inShop.map((j) => {
+            const idx = stepIndex(j);
+            return (
+              <div key={j.id} className="px-4 py-4">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="text-sm font-semibold">{j.vehicle ?? j.title}</p>
+                  <p className="text-xs text-muted-foreground">{label(j.service_type)}</p>
+                </div>
+                <div className="mt-3 flex gap-1">
+                  {STEPS.map((s, i) => (
+                    <div key={s} className="min-w-0 flex-1">
+                      <div className={i <= idx ? "h-1 rounded-full bg-bronze" : "h-1 rounded-full bg-elevated"} />
+                      <p
+                        className={
+                          i === idx
+                            ? "mt-1.5 truncate text-[10px] font-semibold text-bronze"
+                            : "mt-1.5 truncate text-[10px] text-muted-foreground"
+                        }
+                      >
+                        {s}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </Card>
+      )}
+
+      {upcoming.length > 0 && (
+        <Card title="Your appointments" icon={<CalendarClock className="h-4 w-4" />}>
+          {upcoming.map((j) => (
+            <div key={j.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">
+                  {new Date(j.scheduled_start as string).toLocaleString("en-US", {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {j.vehicle ?? j.title} · {label(j.service_type)}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {j.is_mobile
+                  ? `We come to you${j.service_city ? ` · ${j.service_city}` : ""}${j.arrival_window ? ` · ${j.arrival_window}` : ""}`
+                  : "At the shop"}
+              </p>
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {data.photos.length > 0 && (
+        <Card title="Photos from your install" icon={<Camera className="h-4 w-4" />} hint={`${data.photos.length}`}>
+          <div className="grid grid-cols-3 gap-2 p-4 sm:grid-cols-4">
+            {data.photos.map((p) => (
+              <a
+                key={p.id}
+                href={p.url}
+                target="_blank"
+                rel="noreferrer"
+                className="overflow-hidden rounded-lg border border-elevated"
+              >
+                <img src={p.url} alt="Install photo" className="aspect-square w-full object-cover" />
+              </a>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <Card title="Your vehicles" icon={<Car className="h-4 w-4" />}>
         {data.vehicles.length === 0 && <Empty>No vehicles on file yet.</Empty>}
@@ -120,6 +229,7 @@ function PortalPage() {
           </div>
         ))}
       </Card>
+
 
       <Card title="Quotes & proposals" icon={<FileText className="h-4 w-4" />}>
         {data.proposals.length === 0 && <Empty>No proposals yet.</Empty>}
