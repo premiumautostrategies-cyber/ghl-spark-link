@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { BAY_DISCIPLINES, certForService, estimateFilmFeet } from "@/lib/shop";
 import { PageHeader } from "@/components/page-header";
+import { laneLayout, minutesOfDay } from "@/lib/overlap";
 
 const BAY_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 
