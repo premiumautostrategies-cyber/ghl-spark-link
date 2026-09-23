@@ -281,6 +281,9 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
     setExtras([]);
     if (available.length) setService(item);
     else addLine.mutate({ description: item.name, unitPrice: Number(item.base_price) });
+    if (onSite && item.mobile_available && Number(item.travel_fee) > 0) {
+      addLine.mutate({ description: `Travel to customer — ${item.name}`, unitPrice: Number(item.travel_fee) });
+    }
   }
 
   return (
