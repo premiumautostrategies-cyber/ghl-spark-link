@@ -307,12 +307,16 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
             <CatPill label="All" active={category === "all"} onClick={() => setCategory("all")} />
             {categories.map((item) => <CatPill key={item.id} label={item.name} accent={item.accent_color} active={category === item.id} onClick={() => setCategory(item.id)} />)}
           </div>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input type="checkbox" checked={onSite} onChange={(event) => setOnSite(event.target.checked)} className="h-3.5 w-3.5 accent-bronze" />
+            On-site / mobile job — add travel fees automatically
+          </label>
           <div className="divide-y divide-elevated overflow-hidden rounded-lg border border-elevated">
             {visibleServices.length === 0 ? <p className="p-3 text-xs text-muted-foreground">No services match.</p> : visibleServices.map((item) => {
               const count = options.filter((option) => option.service_id === item.id).length;
               return (
                 <Button key={item.id} variant="ghost" className="h-auto w-full justify-between rounded-none px-3 py-2.5 text-left" onClick={() => openService(item)}>
-                  <span className="min-w-0"><span className="block truncate text-xs font-medium">{item.name}</span><span className="block text-[11px] text-muted-foreground">{count ? `${count} options` : `${(item.duration_minutes / 60).toFixed(1)} h`}</span></span>
+                  <span className="min-w-0"><span className="block truncate text-xs font-medium">{item.name}{item.mobile_available ? " · on-site" : ""}</span><span className="block text-[11px] text-muted-foreground">{count ? `${count} options` : `${(item.duration_minutes / 60).toFixed(1)} h`}</span></span>
                   <span className="flex shrink-0 items-center gap-1 text-xs tabular-nums text-bronze">{money(item.base_price)} <ChevronRight className="size-3" /></span>
                 </Button>
               );
