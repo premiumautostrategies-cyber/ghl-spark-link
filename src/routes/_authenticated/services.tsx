@@ -343,6 +343,8 @@ function ServicesPage() {
         is_internal: form.get("is_internal") === "on",
         deposit_type: depositType,
         deposit_value: depositType === "none" ? 0 : Number(form.get("deposit_value") || 0),
+        mobile_available: form.get("mobile_available") === "on",
+        travel_fee: Number(form.get("travel_fee") || 0),
       };
       const { error } = id
         ? await supabase.from("services").update(payload).eq("id", id)
