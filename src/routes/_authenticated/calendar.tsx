@@ -301,100 +301,72 @@ function CalendarPage() {
 
         {view === "week" && (
           <div className="overflow-x-auto">
-            <div className="grid min-w-[980px] grid-cols-[52px_repeat(7,minmax(128px,1fr))]">
-              <div className="border-b border-elevated" />
-              {range.map((d) => {
-                const today = sameDay(d, new Date());
-                return (
-                  <button
-                    key={d.toISOString()}
-                    type="button"
-                    onClick={() => setBookDate(d)}
-                    className={cn("border-b border-l border-elevated px-2 py-2 text-left hover:bg-elevated/40", today && "bg-surface-2")}
-                  >
-                    <span className="text-[10px] font-semibold uppercase text-muted-foreground">{d.toLocaleDateString("en-US", { weekday: "short" })}</span>
-                    <span className={cn("ml-2 text-sm font-semibold", today && "text-bronze")}>{d.getDate()}</span>
-                  </button>
-                );
-              })}
-              <div className="relative h-[660px] border-r border-elevated">
-                {HOURS.map((hour) => (
-                  <span key={hour} className="absolute right-2 -translate-y-1/2 text-[10px] tabular-nums text-muted-foreground" style={{ top: `${((hour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100}%` }}>
-                    {hour % 12 || 12}{hour < 12 ? "a" : "p"}
-                  </span>
-                ))}
-              </div>
+            <div className="grid min-w-[980px] grid-cols-7">
               {range.map((d) => {
                 const list = jobsOn(d);
                 const today = sameDay(d, new Date());
-                const lanes = laneLayout(
-                  list.map((j) => {
-                    const start = new Date(j.scheduled_start as string);
-                    const end = j.scheduled_end ? new Date(j.scheduled_end) : new Date(start.getTime() + hoursOf(j) * 3600000);
-                    return { id: j.id, start: minutesOfDay(start), end: Math.max(minutesOfDay(end), minutesOfDay(start) + 30) };
-                  }),
-                );
+                const hours = list.reduce((t, j) => t + hoursOf(j), 0);
                 return (
-                  <div
-                    key={d.toISOString()}
-                    onDoubleClick={() => setBookDate(d)}
-                    className={cn("relative h-[660px] border-l border-elevated", today && "bg-surface-2/60")}
-                  >
-                    {HOURS.map((hour) => (
-                      <div key={hour} className="absolute inset-x-0 border-t border-elevated/60" style={{ top: `${((hour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100}%` }} />
-                    ))}
-                    {list.map((j) => {
-                      const start = new Date(j.scheduled_start as string);
-                      const end = j.scheduled_end ? new Date(j.scheduled_end) : new Date(start.getTime() + hoursOf(j) * 3600000);
-                      const startHour = start.getHours() + start.getMinutes() / 60;
-                      const duration = Math.max((end.getTime() - start.getTime()) / 3600000, 0.5);
-                      const top = ((startHour - CALENDAR_START) / (CALENDAR_END - CALENDAR_START)) * 100;
-                      const height = (duration / (CALENDAR_END - CALENDAR_START)) * 100;
-                      const slot = lanes.get(j.id) ?? { lane: 0, lanes: 1 };
-                      const widthPct = 100 / slot.lanes;
-                      const compact = slot.lanes > 2;
-                      return (
-                        <button
-                          key={j.id}
-                          type="button"
-                          onClick={() => setSelected(j.id === selected ? null : j.id)}
-                          className={cn(
-                            "absolute z-10 overflow-hidden rounded-md border border-l-2 border-elevated bg-surface-2 px-1.5 py-1 text-left transition-colors hover:z-20 hover:border-bronze/50",
-                            STATUS_TONE[j.status] ?? "border-l-elevated",
-                            selected === j.id && "z-20 border-bronze/70",
-                          )}
-                          style={{
-                            top: `${Math.max(top, 0)}%`,
-                            height: `${Math.max(height, 4)}%`,
-                            left: `calc(${slot.lane * widthPct}% + 2px)`,
-                            width: `calc(${widthPct}% - 4px)`,
-                          }}
-                        >
-                          <p className="truncate text-[10px] font-semibold tabular-nums text-muted-foreground">
-                            {new Date(j.scheduled_start as string).toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                          <p className="truncate text-[11px] font-semibold">{j.customers?.name ?? "No customer"}</p>
-                          <p className="truncate text-[10px]">{vehicleOf(j) ?? j.title}</p>
-                          {!compact && (
-                            <>
-                              <p className="truncate text-[10px] text-muted-foreground">
-                                {label(j.service_type)} · {j.installer || "Unassigned"}
-                              </p>
-                              <p className="truncate text-[10px] text-muted-foreground">{STATUS_LABELS[j.status] ?? label(j.status)}</p>
-                            </>
-                          )}
-                        </button>
-                      );
-                    })}
+                  <div key={d.toISOString()} className="min-w-0 border-l border-elevated first:border-l-0">
+                    <button
+                      type="button"
+                      onClick={() => setBookDate(d)}
+                      className={cn(
+                        "flex w-full items-baseline gap-2 border-b border-elevated px-3 py-2 text-left hover:bg-elevated/40",
+                        today && "bg-surface-2",
+                      )}
+                    >
+                      <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+                        {d.toLocaleDateString("en-US", { weekday: "short" })}
+                      </span>
+                      <span className={cn("text-sm font-semibold", today && "text-bronze")}>{d.getDate()}</span>
+                      <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">
+                        {list.length ? `${list.length} · ${hours.toFixed(1)}h` : ""}
+                      </span>
+                    </button>
+                    <div
+                      onDoubleClick={() => setBookDate(d)}
+                      className={cn("h-[620px] overflow-y-auto", today && "bg-surface-2/40")}
+                    >
+                      {list.length === 0 && (
+                        <p className="px-3 py-3 text-[10px] text-muted-foreground">Open</p>
+                      )}
+                      {list.map((j) => {
+                        const start = new Date(j.scheduled_start as string);
+                        return (
+                          <button
+                            key={j.id}
+                            type="button"
+                            onClick={() => setSelected(j.id === selected ? null : j.id)}
+                            className={cn(
+                              "block w-full border-b border-l-2 border-elevated px-2.5 py-2 text-left transition-colors hover:bg-elevated/40",
+                              STATUS_TONE[j.status] ?? "border-l-elevated",
+                              selected === j.id && "bg-elevated/60",
+                            )}
+                          >
+                            <p className="truncate text-[10px] font-semibold tabular-nums text-muted-foreground">
+                              {start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })} ·{" "}
+                              {hoursOf(j).toFixed(1)}h
+                            </p>
+                            <p className="truncate text-[11px] font-semibold">{j.customers?.name ?? "No customer"}</p>
+                            <p className="truncate text-[10px]">{vehicleOf(j) ?? j.title}</p>
+                            <p className="truncate text-[10px] text-muted-foreground">
+                              {label(j.service_type)} · {j.installer || "Unassigned"}
+                            </p>
+                            <p className="truncate text-[10px] text-muted-foreground">
+                              {j.bay || "No bay"} · {STATUS_LABELS[j.status] ?? label(j.status)}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}
             </div>
           </div>
         )}
+
 
         {view === "month" && (
           <div className="overflow-x-auto">
