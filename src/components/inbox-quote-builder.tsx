@@ -50,6 +50,7 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
   const [extras, setExtras] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [onSite, setOnSite] = useState(false);
   const [depositPercent, setDepositPercent] = useState(Number(organization?.deposit_percent ?? 30));
 
   const { data: estimate } = useQuery({
