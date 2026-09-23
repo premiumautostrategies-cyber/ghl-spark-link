@@ -532,6 +532,23 @@ function SchedulePage() {
         </Panel>
       )}
 
+      <div className="flex w-fit gap-1 rounded-xl border border-elevated bg-surface-2 p-1">
+        {(["bays", "mobile"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+              view === v ? "bg-bronze text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {v === "bays" ? "Shop bays" : `Mobile vans${mobileDayJobs.length ? ` (${mobileDayJobs.length})` : ""}`}
+          </button>
+        ))}
+      </div>
+
+      {view === "bays" ? (
       <Panel className="overflow-hidden">
         <SectionTitle
           title="Bay board"
