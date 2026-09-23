@@ -30,6 +30,8 @@ type Service = {
   duration_minutes: number;
   category_id: string | null;
   customer_description: string | null;
+  mobile_available: boolean | null;
+  travel_fee: number | string | null;
 };
 
 type Option = {
@@ -82,7 +84,7 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id,name,base_price,duration_minutes,category_id,customer_description")
+        .select("id,name,base_price,duration_minutes,category_id,customer_description,mobile_available,travel_fee")
         .eq("is_active", true)
         .is("deleted_at", null)
         .order("sort_order")
