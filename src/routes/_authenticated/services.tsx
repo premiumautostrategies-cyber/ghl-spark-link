@@ -100,6 +100,8 @@ type Service = {
   image_url: string | null;
   swatch_color: string | null;
   coverage_panels: string[];
+  mobile_available?: boolean | null;
+  travel_fee?: number | string | null;
 };
 
 type Variant = {
