@@ -210,7 +210,10 @@ function SchedulePage() {
   }, []);
   const day = (days[dayIndex] ?? days[0]) as Date;
 
-  const dayJobs = jobs.filter((j) => sameDay(j.scheduled_start, day));
+  const allDayJobs = jobs.filter((j) => sameDay(j.scheduled_start, day));
+  // Off-site work never occupies a physical bay, so it is kept out of the bay board and capacity math.
+  const dayJobs = allDayJobs.filter((j) => !j.is_mobile);
+  const mobileDayJobs = allDayJobs.filter((j) => j.is_mobile);
   const unscheduled = jobs.filter(
     (j) => !j.scheduled_start && !["completed", "invoiced"].includes(j.status),
   );
