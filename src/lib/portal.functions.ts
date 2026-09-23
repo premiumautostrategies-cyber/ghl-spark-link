@@ -279,6 +279,7 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
       { data: warranties },
       { data: aftercare },
       { data: payments },
+      { data: jobs },
     ] = await Promise.all([
       db.from("organizations").select("name,accent_color,review_url").eq("id", customer.organization_id ?? "").maybeSingle(),
       db.from("vehicles").select("id,year,make,model,color,plate").eq("customer_id", customer.id),
@@ -307,12 +308,53 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
         .select("id,amount,kind,status,paid_at,method")
         .eq("customer_id", customer.id)
         .order("paid_at", { ascending: false }),
+      db
+        .from("jobs")
+        .select(
+          "id,title,service_type,status,qc_status,scheduled_start,scheduled_end,price,vehicle_id,checked_in_at,key_released,bay,is_mobile,arrival_window,service_address,service_city",
+        )
+        .eq("customer_id", customer.id)
+        .is("deleted_at", null)
+        .order("scheduled_start", { ascending: true, nullsFirst: false }),
     ]);
 
     const vehicleLabel = (id: string | null) => {
       const v = (vehicles ?? []).find((x) => x.id === id);
       return v ? [v.year, v.make, v.model].filter(Boolean).join(" ") : null;
     };
+
+    const jobRows = jobs ?? [];
+    const jobIds = jobRows.map((j) => j.id);
+
+    /* Photos the installer bundled with the job, shown back to the owner. */
+    let photos: Array<{ id: string; url: string; jobId: string | null }> = [];
+    if (jobIds.length > 0) {
+      const { data: docs } = await db
+        .from("documents")
+        .select("id,file_url,job_id,created_at")
+        .in("job_id", jobIds)
+        .eq("doc_type", "installer_photo")
+        .order("created_at", { ascending: false })
+        .limit(24);
+      const signed = await Promise.all(
+        (docs ?? [])
+          .filter((d) => d.file_url)
+          .map(async (d) => {
+            const { data: s } = await db.storage
+              .from("job-documentation")
+              .createSignedUrl(d.file_url as string, 3600);
+            return s?.signedUrl ? { id: d.id, url: s.signedUrl, jobId: d.job_id } : null;
+          }),
+      );
+      photos = signed.filter((p): p is { id: string; url: string; jobId: string | null } => p !== null);
+    }
+
+    const paidTotal = (payments ?? [])
+      .filter((p) => p.status === "paid")
+      .reduce((t, p) => t + Number(p.amount ?? 0), 0);
+    const workTotal = jobRows
+      .filter((j) => j.status !== "lead" && j.status !== "estimate")
+      .reduce((t, j) => t + Number(j.price ?? 0), 0);
 
     return {
       shopName: org?.name ?? "Our shop",
@@ -329,5 +371,13 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
       warranties: (warranties ?? []).map((w) => ({ ...w, vehicle: vehicleLabel(w.vehicle_id) })),
       aftercare: (aftercare ?? []).filter((t) => t.status === "sent" || new Date(t.scheduled_for) <= new Date()),
       payments: payments ?? [],
+      jobs: jobRows.map((j) => ({ ...j, vehicle: vehicleLabel(j.vehicle_id) })),
+      photos,
+      billing: {
+        workTotal,
+        paid: paidTotal,
+        balance: Math.max(workTotal - paidTotal, 0),
+      },
     };
   });
+
