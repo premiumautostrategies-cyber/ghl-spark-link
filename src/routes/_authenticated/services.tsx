@@ -1090,6 +1090,31 @@ function ServicesPage() {
               </div>
 
               <div className="space-y-2 sm:col-span-2">
+                <Label>On-site / mobile</Label>
+                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="mobile_available"
+                      defaultChecked={Boolean(editing?.mobile_available)}
+                      className="h-4 w-4 accent-bronze"
+                    />
+                    Can be performed at the customer&apos;s location
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Travel fee</span>
+                    <Input
+                      name="travel_fee"
+                      type="number"
+                      step="0.01"
+                      className="h-8 w-28"
+                      defaultValue={String(editing?.travel_fee ?? 0)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="sv-tag">Tags</Label>
                 <div className="flex flex-wrap gap-2">
                   {draftTags.map((t) => (
