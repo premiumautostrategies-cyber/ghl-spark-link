@@ -1,7 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getCustomerPortal } from "@/lib/portal.functions";
 import { dayDate, label, money } from "@/lib/format";
-import { BadgeCheck, Car, FileText, MessageSquare, Receipt } from "lucide-react";
+import {
+  BadgeCheck,
+  CalendarClock,
+  Camera,
+  Car,
+  FileText,
+  MessageSquare,
+  Receipt,
+  Wrench,
+} from "lucide-react";
 
 export const Route = createFileRoute("/p/portal/$token")({
   head: () => ({
