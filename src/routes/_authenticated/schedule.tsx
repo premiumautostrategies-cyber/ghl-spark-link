@@ -1,4 +1,4 @@
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,7 @@ export const Route = createFileRoute("/_authenticated/schedule")({
 function SchedulePage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"bays" | "mobile">("bays");
   const [dayIndex, setDayIndex] = useState(0);
   const [inspect, setInspect] = useState<string | null>(null);
   const [dragJob, setDragJob] = useState<string | null>(null);
@@ -210,7 +211,10 @@ function SchedulePage() {
   }, []);
   const day = (days[dayIndex] ?? days[0]) as Date;
 
-  const dayJobs = jobs.filter((j) => sameDay(j.scheduled_start, day));
+  const allDayJobs = jobs.filter((j) => sameDay(j.scheduled_start, day));
+  // Off-site work never occupies a physical bay, so it is kept out of the bay board and capacity math.
+  const dayJobs = allDayJobs.filter((j) => !j.is_mobile);
+  const mobileDayJobs = allDayJobs.filter((j) => j.is_mobile);
   const unscheduled = jobs.filter(
     (j) => !j.scheduled_start && !["completed", "invoiced"].includes(j.status),
   );
@@ -529,6 +533,23 @@ function SchedulePage() {
         </Panel>
       )}
 
+      <div className="flex w-fit gap-1 rounded-xl border border-elevated bg-surface-2 p-1">
+        {(["bays", "mobile"] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setView(v)}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+              view === v ? "bg-bronze text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {v === "bays" ? "Shop bays" : `Mobile vans${mobileDayJobs.length ? ` (${mobileDayJobs.length})` : ""}`}
+          </button>
+        ))}
+      </div>
+
+      {view === "bays" ? (
       <Panel className="overflow-hidden">
         <SectionTitle
           title="Bay board"
@@ -664,6 +685,47 @@ function SchedulePage() {
           </div>
         </div>
       </Panel>
+      ) : (
+        <Panel>
+          <SectionTitle
+            title="Mobile vans"
+            hint={`${mobileDayJobs.length} on-site stop${mobileDayJobs.length === 1 ? "" : "s"} · ${day.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`}
+            right={
+              <Button asChild variant="outline" size="sm">
+                <Link to="/mobile">Open dispatch</Link>
+              </Button>
+            }
+          />
+          {mobileDayJobs.length === 0 ? (
+            <p className="px-5 py-6 text-sm text-muted-foreground">
+              No off-site work booked for this day.
+            </p>
+          ) : (
+            <div className="divide-y divide-elevated">
+              {mobileDayJobs.map((j) => (
+                <button
+                  key={j.id}
+                  type="button"
+                  onClick={() => setInspect(j.id === inspect ? null : j.id)}
+                  className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 text-left hover:bg-surface-2"
+                >
+                  <span className="w-24 text-sm tabular-nums text-muted-foreground">
+                    {j.scheduled_start
+                      ? new Date(j.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+                      : "—"}
+                  </span>
+                  <span className="min-w-[180px] flex-1 truncate text-sm font-semibold">{j.title}</span>
+                  <span className="min-w-[160px] flex-1 truncate text-xs text-muted-foreground">
+                    {j.service_address || "No address yet"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{j.installer || "Unassigned"}</span>
+                  {j.arrival_window && <Tag tone="bronze">{j.arrival_window}</Tag>}
+                </button>
+              ))}
+            </div>
+          )}
+        </Panel>
+      )}
 
       {bayRows.length > 0 && (
         <Panel>

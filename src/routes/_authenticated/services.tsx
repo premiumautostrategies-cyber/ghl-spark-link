@@ -100,6 +100,8 @@ type Service = {
   image_url: string | null;
   swatch_color: string | null;
   coverage_panels: string[];
+  mobile_available?: boolean | null;
+  travel_fee?: number | string | null;
 };
 
 type Variant = {
@@ -343,6 +345,8 @@ function ServicesPage() {
         is_internal: form.get("is_internal") === "on",
         deposit_type: depositType,
         deposit_value: depositType === "none" ? 0 : Number(form.get("deposit_value") || 0),
+        mobile_available: form.get("mobile_available") === "on",
+        travel_fee: Number(form.get("travel_fee") || 0),
       };
       const { error } = id
         ? await supabase.from("services").update(payload).eq("id", id)
@@ -1084,6 +1088,31 @@ function ServicesPage() {
                       </span>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="space-y-2 sm:col-span-2">
+                <Label>On-site / mobile</Label>
+                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-elevated bg-surface-2 px-3 py-2">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="mobile_available"
+                      defaultChecked={Boolean(editing?.mobile_available)}
+                      className="h-4 w-4 accent-bronze"
+                    />
+                    Can be performed at the customer&apos;s location
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">Travel fee</span>
+                    <Input
+                      name="travel_fee"
+                      type="number"
+                      step="0.01"
+                      className="h-8 w-28"
+                      defaultValue={String(editing?.travel_fee ?? 0)}
+                    />
+                  </div>
                 </div>
               </div>
 

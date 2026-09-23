@@ -30,6 +30,8 @@ type Service = {
   duration_minutes: number;
   category_id: string | null;
   customer_description: string | null;
+  mobile_available: boolean | null;
+  travel_fee: number | string | null;
 };
 
 type Option = {
@@ -48,6 +50,7 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
   const [extras, setExtras] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [onSite, setOnSite] = useState(false);
   const [depositPercent, setDepositPercent] = useState(Number(organization?.deposit_percent ?? 30));
 
   const { data: estimate } = useQuery({
@@ -82,7 +85,7 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("id,name,base_price,duration_minutes,category_id,customer_description")
+        .select("id,name,base_price,duration_minutes,category_id,customer_description,mobile_available,travel_fee")
         .eq("is_active", true)
         .is("deleted_at", null)
         .order("sort_order")
@@ -279,6 +282,9 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
     setExtras([]);
     if (available.length) setService(item);
     else addLine.mutate({ description: item.name, unitPrice: Number(item.base_price) });
+    if (onSite && item.mobile_available && Number(item.travel_fee) > 0) {
+      addLine.mutate({ description: `Travel to customer — ${item.name}`, unitPrice: Number(item.travel_fee) });
+    }
   }
 
   return (
@@ -301,12 +307,16 @@ export function InboxQuoteBuilder({ deal }: { deal: QuoteDeal }) {
             <CatPill label="All" active={category === "all"} onClick={() => setCategory("all")} />
             {categories.map((item) => <CatPill key={item.id} label={item.name} accent={item.accent_color} active={category === item.id} onClick={() => setCategory(item.id)} />)}
           </div>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input type="checkbox" checked={onSite} onChange={(event) => setOnSite(event.target.checked)} className="h-3.5 w-3.5 accent-bronze" />
+            On-site / mobile job — add travel fees automatically
+          </label>
           <div className="divide-y divide-elevated overflow-hidden rounded-lg border border-elevated">
             {visibleServices.length === 0 ? <p className="p-3 text-xs text-muted-foreground">No services match.</p> : visibleServices.map((item) => {
               const count = options.filter((option) => option.service_id === item.id).length;
               return (
                 <Button key={item.id} variant="ghost" className="h-auto w-full justify-between rounded-none px-3 py-2.5 text-left" onClick={() => openService(item)}>
-                  <span className="min-w-0"><span className="block truncate text-xs font-medium">{item.name}</span><span className="block text-[11px] text-muted-foreground">{count ? `${count} options` : `${(item.duration_minutes / 60).toFixed(1)} h`}</span></span>
+                  <span className="min-w-0"><span className="block truncate text-xs font-medium">{item.name}{item.mobile_available ? " · on-site" : ""}</span><span className="block text-[11px] text-muted-foreground">{count ? `${count} options` : `${(item.duration_minutes / 60).toFixed(1)} h`}</span></span>
                   <span className="flex shrink-0 items-center gap-1 text-xs tabular-nums text-bronze">{money(item.base_price)} <ChevronRight className="size-3" /></span>
                 </Button>
               );

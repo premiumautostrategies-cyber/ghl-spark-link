@@ -22,6 +22,7 @@ import {
   Plug,
   Search,
   Settings,
+  Truck,
   Users,
   Wrench,
 } from "lucide-react";
@@ -138,6 +139,7 @@ const TECHNICIAN_ITEM: NavItem = { to: "/jobs", label: "My Work", icon: Wrench, 
 
 const STANDALONE_ITEMS: NavItem[] = [
   { to: "/calendar", label: "Schedule", icon: CalendarDays, searchTerms: "appointments bays" },
+  { to: "/mobile", label: "Mobile Dispatch", icon: Truck, searchTerms: "mobile van route on-site dispatch" },
 ];
 
 const CUSTOMER_ITEM: NavItem = { to: "/customers", label: "Customers", icon: Users, searchTerms: "vehicles history" };
