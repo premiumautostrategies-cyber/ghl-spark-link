@@ -3314,6 +3314,7 @@ export type Database = {
           is_internal: boolean
           is_public: boolean
           location_id: string | null
+          mobile_available: boolean
           name: string
           organization_id: string | null
           pricing_mode: string
@@ -3321,6 +3322,7 @@ export type Database = {
           supports_add_ons: boolean
           swatch_color: string | null
           tags: string[]
+          travel_fee: number
           unit: string
           updated_at: string
         }
@@ -3343,6 +3345,7 @@ export type Database = {
           is_internal?: boolean
           is_public?: boolean
           location_id?: string | null
+          mobile_available?: boolean
           name: string
           organization_id?: string | null
           pricing_mode?: string
@@ -3350,6 +3353,7 @@ export type Database = {
           supports_add_ons?: boolean
           swatch_color?: string | null
           tags?: string[]
+          travel_fee?: number
           unit?: string
           updated_at?: string
         }
@@ -3372,6 +3376,7 @@ export type Database = {
           is_internal?: boolean
           is_public?: boolean
           location_id?: string | null
+          mobile_available?: boolean
           name?: string
           organization_id?: string | null
           pricing_mode?: string
@@ -3379,6 +3384,7 @@ export type Database = {
           supports_add_ons?: boolean
           swatch_color?: string | null
           tags?: string[]
+          travel_fee?: number
           unit?: string
           updated_at?: string
         }
