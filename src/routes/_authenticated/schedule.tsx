@@ -1,4 +1,4 @@
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,7 @@ export const Route = createFileRoute("/_authenticated/schedule")({
 function SchedulePage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"bays" | "mobile">("bays");
   const [dayIndex, setDayIndex] = useState(0);
   const [inspect, setInspect] = useState<string | null>(null);
   const [dragJob, setDragJob] = useState<string | null>(null);
