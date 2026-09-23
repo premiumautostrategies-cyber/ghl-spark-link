@@ -667,6 +667,47 @@ function SchedulePage() {
           </div>
         </div>
       </Panel>
+      ) : (
+        <Panel>
+          <SectionTitle
+            title="Mobile vans"
+            hint={`${mobileDayJobs.length} on-site stop${mobileDayJobs.length === 1 ? "" : "s"} · ${day.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`}
+            right={
+              <Button asChild variant="outline" size="sm">
+                <Link to="/mobile">Open dispatch</Link>
+              </Button>
+            }
+          />
+          {mobileDayJobs.length === 0 ? (
+            <p className="px-5 py-6 text-sm text-muted-foreground">
+              No off-site work booked for this day.
+            </p>
+          ) : (
+            <div className="divide-y divide-elevated">
+              {mobileDayJobs.map((j) => (
+                <button
+                  key={j.id}
+                  type="button"
+                  onClick={() => setInspect(j.id === inspect ? null : j.id)}
+                  className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3 text-left hover:bg-surface-2"
+                >
+                  <span className="w-24 text-sm tabular-nums text-muted-foreground">
+                    {j.scheduled_start
+                      ? new Date(j.scheduled_start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+                      : "—"}
+                  </span>
+                  <span className="min-w-[180px] flex-1 truncate text-sm font-semibold">{j.title}</span>
+                  <span className="min-w-[160px] flex-1 truncate text-xs text-muted-foreground">
+                    {j.service_address || "No address yet"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{j.installer || "Unassigned"}</span>
+                  {j.arrival_window && <Tag tone="bronze">{j.arrival_window}</Tag>}
+                </button>
+              ))}
+            </div>
+          )}
+        </Panel>
+      )}
 
       {bayRows.length > 0 && (
         <Panel>
