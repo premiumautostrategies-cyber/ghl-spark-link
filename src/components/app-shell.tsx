@@ -22,6 +22,7 @@ import {
   Plug,
   Search,
   Settings,
+  Truck,
   Users,
   Wrench,
 } from "lucide-react";
