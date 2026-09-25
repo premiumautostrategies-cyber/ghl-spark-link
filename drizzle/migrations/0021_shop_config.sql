@@ -1,2 +1,0 @@
-ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS shop_config jsonb NOT NULL DEFAULT '{}'::jsonb;
-ALTER TABLE public.locations ADD COLUMN IF NOT EXISTS shop_config jsonb NOT NULL DEFAULT '{}'::jsonb;

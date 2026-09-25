@@ -27,7 +27,6 @@ export const CLOSED_STAGES = [
 
 export function stageLabel(stage: string) {
   return (
-    configuredStageLabel(stage) ??
     PIPELINE_STAGES.find((s) => s.key === stage)?.label ??
     CLOSED_STAGES.find((s) => s.key === stage)?.label ??
     stage
