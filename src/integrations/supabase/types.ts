@@ -1907,6 +1907,7 @@ export type Database = {
           organization_id: string
           phone: string | null
           settings: Json | null
+          shop_config: Json
           state: string | null
           timezone: string | null
           updated_at: string
@@ -1923,6 +1924,7 @@ export type Database = {
           organization_id: string
           phone?: string | null
           settings?: Json | null
+          shop_config?: Json
           state?: string | null
           timezone?: string | null
           updated_at?: string
@@ -1939,6 +1941,7 @@ export type Database = {
           organization_id?: string
           phone?: string | null
           settings?: Json | null
+          shop_config?: Json
           state?: string | null
           timezone?: string | null
           updated_at?: string
@@ -2294,6 +2297,7 @@ export type Database = {
           name: string
           review_url: string | null
           settings: Json | null
+          shop_config: Json
           slug: string | null
           updated_at: string
         }
@@ -2306,6 +2310,7 @@ export type Database = {
           name: string
           review_url?: string | null
           settings?: Json | null
+          shop_config?: Json
           slug?: string | null
           updated_at?: string
         }
@@ -2318,6 +2323,7 @@ export type Database = {
           name?: string
           review_url?: string | null
           settings?: Json | null
+          shop_config?: Json
           slug?: string | null
           updated_at?: string
         }
