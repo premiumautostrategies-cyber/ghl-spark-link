@@ -111,6 +111,7 @@ export function certForService(serviceType: string | null | undefined) {
   if (t.includes("wrap") || t.includes("color")) return "wrap";
   if (t.includes("ceramic") || t.includes("coating")) return "ceramic";
   if (t.includes("detail") || t.includes("correction")) return "detail";
+  if (t.includes("pdr") || t.includes("dent")) return "detail";
   return null;
 }
 

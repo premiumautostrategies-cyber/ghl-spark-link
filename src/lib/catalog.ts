@@ -15,6 +15,7 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   ceramic: ceramicImg,
   detail: ceramicImg,
   paint_correction: correctionImg,
+  pdr: correctionImg,
   protection_package: ppfImg,
   accessory: graphicsImg,
   other: wrapImg,
