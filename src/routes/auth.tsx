@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,37 +33,26 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  // Demo mode: any password (or none) gets you in. We keep a stable internal
-  // password per email so the account can be created and reused.
-  function demoPassword(addr: string) {
-    return `systemize-demo-${addr.trim().toLowerCase()}`;
-  }
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!password || password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
     setBusy(true);
     try {
-      const fallback = demoPassword(email);
-      const tryIn = async (pw: string) =>
-        (await supabase.auth.signInWithPassword({ email, password: pw })).error;
-
-      const signUpIfNeeded = async () => {
+      if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
-          password: fallback,
+          password,
           options: { data: { shop_name: shopName || "My shop" } },
         });
-        if (error && !/already/i.test(error.message)) throw error;
-      };
-
-      let error = password ? await tryIn(password) : await tryIn(fallback);
-      if (error && password) error = await tryIn(fallback);
-      if (error) {
-        await signUpIfNeeded();
-        error = await tryIn(fallback);
         if (error) throw error;
+        toast.success("Check your email to confirm your account.");
+        return;
       }
-      // Make sure the shop workspace exists before entering the app.
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       await supabase.rpc("bootstrap_user_workspace", {
         _shop_name: shopName || "My shop",
       });
@@ -76,17 +64,14 @@ function AuthPage() {
     }
   }
 
-
   async function googleSignIn() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/command-center" },
     });
-    if (result.error) {
+    if (error) {
       toast.error("Google sign-in failed. Try again.");
-      return;
     }
-    if (result.redirected) return;
-    navigate({ to: "/command-center", replace: true });
   }
 
   return (
@@ -123,13 +108,15 @@ function AuthPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password (optional in demo)</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Anything works"
+              placeholder="Minimum 8 characters"
+              required
+              minLength={8}
             />
           </div>
 
