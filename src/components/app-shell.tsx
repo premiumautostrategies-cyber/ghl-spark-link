@@ -25,6 +25,18 @@ import {
   Truck,
   Users,
   Wrench,
+  Megaphone,
+  Repeat,
+  Car,
+  Receipt,
+  Percent,
+  Image,
+  Film,
+  History,
+  Rocket,
+  Handshake,
+  CalendarPlus,
+  MapPin,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AccentTheme } from "@/components/accent-theme";
@@ -100,6 +112,10 @@ const SALES: NavSection = {
     { to: "/sales", label: "Sales", icon: BriefcaseBusiness, searchTerms: "pipeline activity leads" },
     { to: "/inbox", label: "Messages", icon: MessageSquareText, searchTerms: "inbox conversations text email" },
     { to: "/estimates", label: "Quotes", icon: FileText, searchTerms: "estimates proposals" },
+    { to: "/follow-ups", label: "Follow-ups", icon: Repeat, searchTerms: "reviews referrals warranty seasonal growth" },
+    { to: "/campaigns", label: "Ad Performance", icon: Megaphone, searchTerms: "ads campaigns spend roas marketing" },
+    { to: "/vehicle-intel", label: "Vehicle Intel", icon: Car, searchTerms: "vin make model decode" },
+    { to: "/book", label: "Booking Link", icon: CalendarPlus, searchTerms: "online booking public form" },
   ],
 };
 
@@ -109,9 +125,15 @@ const OPERATIONS: NavSection = {
   items: [
     { to: "/command-center", label: "Owner", icon: Building2 },
     { to: "/payments", label: "Payments", icon: CreditCard },
+    { to: "/invoices", label: "Invoices", icon: Receipt, searchTerms: "due dates overdue balance" },
+    { to: "/commissions", label: "Commissions", icon: Percent, searchTerms: "earnings pay" },
+    { to: "/corporate", label: "Locations", icon: MapPin, searchTerms: "corporate multi location rollup" },
     { to: "/team", label: "Team", icon: Users },
     { to: "/analytics", label: "Reports", icon: BarChart3 },
     { to: "/inventory", label: "Inventory", icon: Package, searchTerms: "stock film rolls" },
+    { to: "/films", label: "Film Catalog", icon: Film, searchTerms: "ppf tint wrap brands" },
+    { to: "/gallery", label: "Gallery", icon: Image, searchTerms: "photos portfolio" },
+    { to: "/audit", label: "Audit Log", icon: History, searchTerms: "changes history" },
   ],
 };
 
@@ -145,6 +167,8 @@ const STANDALONE_ITEMS: NavItem[] = [
 const CUSTOMER_ITEM: NavItem = { to: "/customers", label: "Customers", icon: Users, searchTerms: "vehicles history" };
 
 const ADMIN_ITEMS: NavItem[] = [
+  { to: "/setup", label: "Shop Setup", icon: Rocket, searchTerms: "onboarding go live checklist wizard" },
+  { to: "/agency", label: "Agency Access", icon: Handshake, searchTerms: "marketing agency portal" },
   { to: "/integrations", label: "Integrations", icon: Plug },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
