@@ -19,15 +19,19 @@ import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
+import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authenticated/command-center'
+import { Route as AuthenticatedCommissionsRouteImport } from './routes/_authenticated/commissions'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedEstimatesRouteImport } from './routes/_authenticated/estimates'
+import { Route as AuthenticatedFollowUpsRouteImport } from './routes/_authenticated/follow-ups'
 import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedInspectionsRouteImport } from './routes/_authenticated/inspections'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
+import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedJobsRouteImport } from './routes/_authenticated/jobs'
 import { Route as AuthenticatedKioskRouteImport } from './routes/_authenticated/kiosk'
 import { Route as AuthenticatedMobileRouteImport } from './routes/_authenticated/mobile'
@@ -101,10 +105,21 @@ const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCampaignsRoute = AuthenticatedCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCommandCenterRoute =
   AuthenticatedCommandCenterRouteImport.update({
     id: '/command-center',
     path: '/command-center',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCommissionsRoute =
+  AuthenticatedCommissionsRouteImport.update({
+    id: '/commissions',
+    path: '/commissions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
@@ -120,6 +135,11 @@ const AuthenticatedDocumentsRoute = AuthenticatedDocumentsRouteImport.update({
 const AuthenticatedEstimatesRoute = AuthenticatedEstimatesRouteImport.update({
   id: '/estimates',
   path: '/estimates',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFollowUpsRoute = AuthenticatedFollowUpsRouteImport.update({
+  id: '/follow-ups',
+  path: '/follow-ups',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
@@ -147,6 +167,11 @@ const AuthenticatedIntegrationsRoute =
 const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedJobsRoute = AuthenticatedJobsRouteImport.update({
@@ -278,15 +303,19 @@ export interface FileRoutesByFullPath {
   '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/calendar': typeof AuthenticatedCalendarRoute
+  '/campaigns': typeof AuthenticatedCampaignsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
+  '/commissions': typeof AuthenticatedCommissionsRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
+  '/follow-ups': typeof AuthenticatedFollowUpsRoute
   '/import': typeof AuthenticatedImportRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/inspections': typeof AuthenticatedInspectionsRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/inventory': typeof AuthenticatedInventoryRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/kiosk': typeof AuthenticatedKioskRoute
   '/mobile': typeof AuthenticatedMobileRoute
@@ -321,15 +350,19 @@ export interface FileRoutesByTo {
   '/workflow': typeof WorkflowRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/calendar': typeof AuthenticatedCalendarRoute
+  '/campaigns': typeof AuthenticatedCampaignsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
+  '/commissions': typeof AuthenticatedCommissionsRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
+  '/follow-ups': typeof AuthenticatedFollowUpsRoute
   '/import': typeof AuthenticatedImportRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/inspections': typeof AuthenticatedInspectionsRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/inventory': typeof AuthenticatedInventoryRoute
+  '/invoices': typeof AuthenticatedInvoicesRoute
   '/jobs': typeof AuthenticatedJobsRoute
   '/kiosk': typeof AuthenticatedKioskRoute
   '/mobile': typeof AuthenticatedMobileRoute
@@ -366,15 +399,19 @@ export interface FileRoutesById {
   '/workflow': typeof WorkflowRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
+  '/_authenticated/campaigns': typeof AuthenticatedCampaignsRoute
   '/_authenticated/command-center': typeof AuthenticatedCommandCenterRoute
+  '/_authenticated/commissions': typeof AuthenticatedCommissionsRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/estimates': typeof AuthenticatedEstimatesRoute
+  '/_authenticated/follow-ups': typeof AuthenticatedFollowUpsRoute
   '/_authenticated/import': typeof AuthenticatedImportRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/inspections': typeof AuthenticatedInspectionsRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
+  '/_authenticated/invoices': typeof AuthenticatedInvoicesRoute
   '/_authenticated/jobs': typeof AuthenticatedJobsRoute
   '/_authenticated/kiosk': typeof AuthenticatedKioskRoute
   '/_authenticated/mobile': typeof AuthenticatedMobileRoute
@@ -411,15 +448,19 @@ export interface FileRouteTypes {
     | '/workflow'
     | '/analytics'
     | '/calendar'
+    | '/campaigns'
     | '/command-center'
+    | '/commissions'
     | '/customers'
     | '/documents'
     | '/estimates'
+    | '/follow-ups'
     | '/import'
     | '/inbox'
     | '/inspections'
     | '/integrations'
     | '/inventory'
+    | '/invoices'
     | '/jobs'
     | '/kiosk'
     | '/mobile'
@@ -454,15 +495,19 @@ export interface FileRouteTypes {
     | '/workflow'
     | '/analytics'
     | '/calendar'
+    | '/campaigns'
     | '/command-center'
+    | '/commissions'
     | '/customers'
     | '/documents'
     | '/estimates'
+    | '/follow-ups'
     | '/import'
     | '/inbox'
     | '/inspections'
     | '/integrations'
     | '/inventory'
+    | '/invoices'
     | '/jobs'
     | '/kiosk'
     | '/mobile'
@@ -498,15 +543,19 @@ export interface FileRouteTypes {
     | '/workflow'
     | '/_authenticated/analytics'
     | '/_authenticated/calendar'
+    | '/_authenticated/campaigns'
     | '/_authenticated/command-center'
+    | '/_authenticated/commissions'
     | '/_authenticated/customers'
     | '/_authenticated/documents'
     | '/_authenticated/estimates'
+    | '/_authenticated/follow-ups'
     | '/_authenticated/import'
     | '/_authenticated/inbox'
     | '/_authenticated/inspections'
     | '/_authenticated/integrations'
     | '/_authenticated/inventory'
+    | '/_authenticated/invoices'
     | '/_authenticated/jobs'
     | '/_authenticated/kiosk'
     | '/_authenticated/mobile'
@@ -623,11 +672,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/campaigns': {
+      id: '/_authenticated/campaigns'
+      path: '/campaigns'
+      fullPath: '/campaigns'
+      preLoaderRoute: typeof AuthenticatedCampaignsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/command-center': {
       id: '/_authenticated/command-center'
       path: '/command-center'
       fullPath: '/command-center'
       preLoaderRoute: typeof AuthenticatedCommandCenterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/commissions': {
+      id: '/_authenticated/commissions'
+      path: '/commissions'
+      fullPath: '/commissions'
+      preLoaderRoute: typeof AuthenticatedCommissionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/customers': {
@@ -649,6 +712,13 @@ declare module '@tanstack/react-router' {
       path: '/estimates'
       fullPath: '/estimates'
       preLoaderRoute: typeof AuthenticatedEstimatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/follow-ups': {
+      id: '/_authenticated/follow-ups'
+      path: '/follow-ups'
+      fullPath: '/follow-ups'
+      preLoaderRoute: typeof AuthenticatedFollowUpsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/import': {
@@ -684,6 +754,13 @@ declare module '@tanstack/react-router' {
       path: '/inventory'
       fullPath: '/inventory'
       preLoaderRoute: typeof AuthenticatedInventoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/invoices': {
+      id: '/_authenticated/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AuthenticatedInvoicesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/jobs': {
@@ -853,15 +930,19 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
+  AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRoute
   AuthenticatedCommandCenterRoute: typeof AuthenticatedCommandCenterRoute
+  AuthenticatedCommissionsRoute: typeof AuthenticatedCommissionsRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedEstimatesRoute: typeof AuthenticatedEstimatesRoute
+  AuthenticatedFollowUpsRoute: typeof AuthenticatedFollowUpsRoute
   AuthenticatedImportRoute: typeof AuthenticatedImportRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedInspectionsRoute: typeof AuthenticatedInspectionsRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
+  AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRoute
   AuthenticatedJobsRoute: typeof AuthenticatedJobsRoute
   AuthenticatedKioskRoute: typeof AuthenticatedKioskRoute
   AuthenticatedMobileRoute: typeof AuthenticatedMobileRoute
@@ -882,15 +963,19 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
+  AuthenticatedCampaignsRoute: AuthenticatedCampaignsRoute,
   AuthenticatedCommandCenterRoute: AuthenticatedCommandCenterRoute,
+  AuthenticatedCommissionsRoute: AuthenticatedCommissionsRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedEstimatesRoute: AuthenticatedEstimatesRoute,
+  AuthenticatedFollowUpsRoute: AuthenticatedFollowUpsRoute,
   AuthenticatedImportRoute: AuthenticatedImportRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedInspectionsRoute: AuthenticatedInspectionsRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
+  AuthenticatedInvoicesRoute: AuthenticatedInvoicesRoute,
   AuthenticatedJobsRoute: AuthenticatedJobsRoute,
   AuthenticatedKioskRoute: AuthenticatedKioskRoute,
   AuthenticatedMobileRoute: AuthenticatedMobileRoute,
