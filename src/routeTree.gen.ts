@@ -12,12 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BookRouteImport } from './routes/book'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as WorkflowRouteImport } from './routes/workflow'
+import { Route as AuthenticatedAgencyRouteImport } from './routes/_authenticated/agency'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authenticated/command-center'
@@ -40,7 +43,9 @@ import { Route as AuthenticatedQcRouteImport } from './routes/_authenticated/qc'
 import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
+import { Route as AuthenticatedVehicleIntelRouteImport } from './routes/_authenticated/vehicle-intel'
 import { Route as AuthenticatedWarrantyRouteImport } from './routes/_authenticated/warranty'
 import { Route as AuthenticatedAutomationsIndexRouteImport } from './routes/_authenticated/automations.index'
 import { Route as AuthenticatedAutomationsWorkflowIdRouteImport } from './routes/_authenticated/automations.$workflowId'
@@ -70,6 +75,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookRoute = BookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnectRoute = ConnectRouteImport.update({
   id: '/connect',
   path: '/connect',
@@ -95,9 +105,19 @@ const WorkflowRoute = WorkflowRouteImport.update({
   path: '/workflow',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAgencyRoute = AuthenticatedAgencyRouteImport.update({
+  id: '/agency',
+  path: '/agency',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
@@ -214,11 +234,22 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSetupRoute = AuthenticatedSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
   path: '/team',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVehicleIntelRoute =
+  AuthenticatedVehicleIntelRouteImport.update({
+    id: '/vehicle-intel',
+    path: '/vehicle-intel',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWarrantyRoute = AuthenticatedWarrantyRouteImport.update({
   id: '/warranty',
   path: '/warranty',
@@ -296,12 +327,15 @@ const PWarrantyTokenRoute = PWarrantyTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/book': typeof BookRoute
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
+  '/agency': typeof AuthenticatedAgencyRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/audit': typeof AuthenticatedAuditRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
@@ -324,7 +358,9 @@ export interface FileRoutesByFullPath {
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/setup': typeof AuthenticatedSetupRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/vehicle-intel': typeof AuthenticatedVehicleIntelRoute
   '/warranty': typeof AuthenticatedWarrantyRoute
   '/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
@@ -343,12 +379,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/book': typeof BookRoute
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
+  '/agency': typeof AuthenticatedAgencyRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/audit': typeof AuthenticatedAuditRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
@@ -371,7 +410,9 @@ export interface FileRoutesByTo {
   '/schedule': typeof AuthenticatedScheduleRoute
   '/services': typeof AuthenticatedServicesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/setup': typeof AuthenticatedSetupRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/vehicle-intel': typeof AuthenticatedVehicleIntelRoute
   '/warranty': typeof AuthenticatedWarrantyRoute
   '/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
@@ -392,12 +433,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/book': typeof BookRoute
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
+  '/_authenticated/agency': typeof AuthenticatedAgencyRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRoute
   '/_authenticated/command-center': typeof AuthenticatedCommandCenterRoute
@@ -420,7 +464,9 @@ export interface FileRoutesById {
   '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/vehicle-intel': typeof AuthenticatedVehicleIntelRoute
   '/_authenticated/warranty': typeof AuthenticatedWarrantyRoute
   '/_authenticated/automations/$workflowId': typeof AuthenticatedAutomationsWorkflowIdRoute
   '/_authenticated/sales/$dealId': typeof AuthenticatedSalesDealIdRoute
@@ -441,12 +487,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/book'
     | '/connect'
     | '/demo'
     | '/faq'
     | '/platform'
     | '/workflow'
+    | '/agency'
     | '/analytics'
+    | '/audit'
     | '/calendar'
     | '/campaigns'
     | '/command-center'
@@ -469,7 +518,9 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/services'
     | '/settings'
+    | '/setup'
     | '/team'
+    | '/vehicle-intel'
     | '/warranty'
     | '/automations/$workflowId'
     | '/sales/$dealId'
@@ -488,12 +539,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/book'
     | '/connect'
     | '/demo'
     | '/faq'
     | '/platform'
     | '/workflow'
+    | '/agency'
     | '/analytics'
+    | '/audit'
     | '/calendar'
     | '/campaigns'
     | '/command-center'
@@ -516,7 +570,9 @@ export interface FileRouteTypes {
     | '/schedule'
     | '/services'
     | '/settings'
+    | '/setup'
     | '/team'
+    | '/vehicle-intel'
     | '/warranty'
     | '/automations/$workflowId'
     | '/sales/$dealId'
@@ -536,12 +592,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/book'
     | '/connect'
     | '/demo'
     | '/faq'
     | '/platform'
     | '/workflow'
+    | '/_authenticated/agency'
     | '/_authenticated/analytics'
+    | '/_authenticated/audit'
     | '/_authenticated/calendar'
     | '/_authenticated/campaigns'
     | '/_authenticated/command-center'
@@ -564,7 +623,9 @@ export interface FileRouteTypes {
     | '/_authenticated/schedule'
     | '/_authenticated/services'
     | '/_authenticated/settings'
+    | '/_authenticated/setup'
     | '/_authenticated/team'
+    | '/_authenticated/vehicle-intel'
     | '/_authenticated/warranty'
     | '/_authenticated/automations/$workflowId'
     | '/_authenticated/sales/$dealId'
@@ -585,6 +646,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BookRoute: typeof BookRoute
   ConnectRoute: typeof ConnectRoute
   DemoRoute: typeof DemoRoute
   FaqRoute: typeof FaqRoute
@@ -623,6 +685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/book': {
+      id: '/book'
+      path: '/book'
+      fullPath: '/book'
+      preLoaderRoute: typeof BookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connect': {
       id: '/connect'
       path: '/connect'
@@ -658,11 +727,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkflowRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/agency': {
+      id: '/_authenticated/agency'
+      path: '/agency'
+      fullPath: '/agency'
+      preLoaderRoute: typeof AuthenticatedAgencyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/audit': {
+      id: '/_authenticated/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuthenticatedAuditRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/calendar': {
@@ -819,11 +902,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/setup': {
+      id: '/_authenticated/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthenticatedSetupRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/team': {
       id: '/_authenticated/team'
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vehicle-intel': {
+      id: '/_authenticated/vehicle-intel'
+      path: '/vehicle-intel'
+      fullPath: '/vehicle-intel'
+      preLoaderRoute: typeof AuthenticatedVehicleIntelRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/warranty': {
@@ -928,7 +1025,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAgencyRoute: typeof AuthenticatedAgencyRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRoute
   AuthenticatedCommandCenterRoute: typeof AuthenticatedCommandCenterRoute
@@ -951,7 +1050,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSetupRoute: typeof AuthenticatedSetupRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedVehicleIntelRoute: typeof AuthenticatedVehicleIntelRoute
   AuthenticatedWarrantyRoute: typeof AuthenticatedWarrantyRoute
   AuthenticatedAutomationsWorkflowIdRoute: typeof AuthenticatedAutomationsWorkflowIdRoute
   AuthenticatedSalesDealIdRoute: typeof AuthenticatedSalesDealIdRoute
@@ -961,7 +1062,9 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAgencyRoute: AuthenticatedAgencyRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRoute,
   AuthenticatedCommandCenterRoute: AuthenticatedCommandCenterRoute,
@@ -984,7 +1087,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSetupRoute: AuthenticatedSetupRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedVehicleIntelRoute: AuthenticatedVehicleIntelRoute,
   AuthenticatedWarrantyRoute: AuthenticatedWarrantyRoute,
   AuthenticatedAutomationsWorkflowIdRoute:
     AuthenticatedAutomationsWorkflowIdRoute,
@@ -1001,6 +1106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BookRoute: BookRoute,
   ConnectRoute: ConnectRoute,
   DemoRoute: DemoRoute,
   FaqRoute: FaqRoute,
