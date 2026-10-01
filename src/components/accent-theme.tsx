@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/use-org";
 
 export const ACCENT_PRESETS: { name: string; hex: string }[] = [
+  { name: "Glass Blue", hex: "#4a8fd8" },
   { name: "Bronze", hex: "#d6a866" },
   { name: "Amber", hex: "#f0a13c" },
   { name: "Crimson", hex: "#e2564d" },
@@ -15,6 +16,7 @@ export const ACCENT_PRESETS: { name: string; hex: string }[] = [
 ];
 
 export const DEFAULT_ACCENT = ACCENT_PRESETS[0]!.hex;
+const LEGACY_DEFAULT = "#d6a866";
 
 function readable(hex: string) {
   const h = hex.replace("#", "");
@@ -31,7 +33,8 @@ function readable(hex: string) {
 /** Applies a hex accent to the live theme tokens. */
 export function applyAccent(hex: string | null | undefined) {
   if (typeof document === "undefined") return;
-  const value = hex && /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : DEFAULT_ACCENT;
+  const picked = hex && /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : DEFAULT_ACCENT;
+  const value = picked.toLowerCase() === LEGACY_DEFAULT ? DEFAULT_ACCENT : picked;
   const root = document.documentElement;
   root.style.setProperty("--bronze", value);
   root.style.setProperty("--bronze-hover", `color-mix(in oklab, ${value} 82%, black)`);
