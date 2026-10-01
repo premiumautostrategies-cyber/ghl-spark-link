@@ -16,8 +16,8 @@
   --radius-lg: var(--radius);
   --radius-xl: var(--radius);
   --radius-2xl: var(--radius);
-  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Geist", ui-sans-serif, sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -99,10 +99,10 @@
   --foreground: oklch(0.97 0.003 260);
   --card: var(--surface);
   --card-foreground: oklch(0.97 0.003 260);
-  --popover: var(--surface-2);
+  --popover: oklch(0.22 0.014 260);
   --popover-foreground: oklch(0.97 0.003 260);
   --primary: var(--bronze);
-  --primary-foreground: oklch(0.14 0.01 70);
+  --primary-foreground: oklch(0.99 0 0);
   --secondary: var(--surface-2);
   --secondary-foreground: oklch(0.97 0.003 260);
   --muted: var(--surface-2);
@@ -124,7 +124,7 @@
   --sidebar: var(--obsidian-deep);
   --sidebar-foreground: oklch(0.95 0.003 260);
   --sidebar-primary: var(--bronze);
-  --sidebar-primary-foreground: oklch(0.14 0.01 70);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: var(--surface-2);
   --sidebar-accent-foreground: oklch(0.97 0.003 260);
   --sidebar-border: var(--elevated);
@@ -165,7 +165,7 @@
   --foreground: oklch(0.22 0.008 265);
   --card: var(--surface);
   --card-foreground: oklch(0.22 0.008 265);
-  --popover: var(--surface);
+  --popover: oklch(0.99 0.003 250);
   --popover-foreground: oklch(0.22 0.008 265);
   --primary: var(--bronze);
   --primary-foreground: oklch(0.99 0.002 90);
@@ -203,6 +203,8 @@
 
   body {
     background-color: var(--color-background);
+    background-image: var(--atmosphere);
+    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     letter-spacing: 0;
@@ -272,4 +274,10 @@
   50% {
     box-shadow: 0 0 0 8px color-mix(in oklab, var(--color-critical) 0%, transparent);
   }
+}
+
+/* Frosted glass material on shared surfaces */
+.bg-surface, .bg-surface-2, .bg-sidebar, .bg-obsidian-deep, .bg-card {
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
