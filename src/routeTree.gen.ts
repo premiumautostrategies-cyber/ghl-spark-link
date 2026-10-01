@@ -25,10 +25,13 @@ import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedCampaignsRouteImport } from './routes/_authenticated/campaigns'
 import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authenticated/command-center'
 import { Route as AuthenticatedCommissionsRouteImport } from './routes/_authenticated/commissions'
+import { Route as AuthenticatedCorporateRouteImport } from './routes/_authenticated/corporate'
 import { Route as AuthenticatedCustomersRouteImport } from './routes/_authenticated/customers'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedEstimatesRouteImport } from './routes/_authenticated/estimates'
+import { Route as AuthenticatedFilmsRouteImport } from './routes/_authenticated/films'
 import { Route as AuthenticatedFollowUpsRouteImport } from './routes/_authenticated/follow-ups'
+import { Route as AuthenticatedGalleryRouteImport } from './routes/_authenticated/gallery'
 import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedInspectionsRouteImport } from './routes/_authenticated/inspections'
@@ -142,6 +145,11 @@ const AuthenticatedCommissionsRoute =
     path: '/commissions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCorporateRoute = AuthenticatedCorporateRouteImport.update({
+  id: '/corporate',
+  path: '/corporate',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCustomersRoute = AuthenticatedCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -157,9 +165,19 @@ const AuthenticatedEstimatesRoute = AuthenticatedEstimatesRouteImport.update({
   path: '/estimates',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFilmsRoute = AuthenticatedFilmsRouteImport.update({
+  id: '/films',
+  path: '/films',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFollowUpsRoute = AuthenticatedFollowUpsRouteImport.update({
   id: '/follow-ups',
   path: '/follow-ups',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGalleryRoute = AuthenticatedGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
@@ -340,10 +358,13 @@ export interface FileRoutesByFullPath {
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
   '/commissions': typeof AuthenticatedCommissionsRoute
+  '/corporate': typeof AuthenticatedCorporateRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
+  '/films': typeof AuthenticatedFilmsRoute
   '/follow-ups': typeof AuthenticatedFollowUpsRoute
+  '/gallery': typeof AuthenticatedGalleryRoute
   '/import': typeof AuthenticatedImportRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/inspections': typeof AuthenticatedInspectionsRoute
@@ -392,10 +413,13 @@ export interface FileRoutesByTo {
   '/campaigns': typeof AuthenticatedCampaignsRoute
   '/command-center': typeof AuthenticatedCommandCenterRoute
   '/commissions': typeof AuthenticatedCommissionsRoute
+  '/corporate': typeof AuthenticatedCorporateRoute
   '/customers': typeof AuthenticatedCustomersRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/estimates': typeof AuthenticatedEstimatesRoute
+  '/films': typeof AuthenticatedFilmsRoute
   '/follow-ups': typeof AuthenticatedFollowUpsRoute
+  '/gallery': typeof AuthenticatedGalleryRoute
   '/import': typeof AuthenticatedImportRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/inspections': typeof AuthenticatedInspectionsRoute
@@ -446,10 +470,13 @@ export interface FileRoutesById {
   '/_authenticated/campaigns': typeof AuthenticatedCampaignsRoute
   '/_authenticated/command-center': typeof AuthenticatedCommandCenterRoute
   '/_authenticated/commissions': typeof AuthenticatedCommissionsRoute
+  '/_authenticated/corporate': typeof AuthenticatedCorporateRoute
   '/_authenticated/customers': typeof AuthenticatedCustomersRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/estimates': typeof AuthenticatedEstimatesRoute
+  '/_authenticated/films': typeof AuthenticatedFilmsRoute
   '/_authenticated/follow-ups': typeof AuthenticatedFollowUpsRoute
+  '/_authenticated/gallery': typeof AuthenticatedGalleryRoute
   '/_authenticated/import': typeof AuthenticatedImportRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/inspections': typeof AuthenticatedInspectionsRoute
@@ -500,10 +527,13 @@ export interface FileRouteTypes {
     | '/campaigns'
     | '/command-center'
     | '/commissions'
+    | '/corporate'
     | '/customers'
     | '/documents'
     | '/estimates'
+    | '/films'
     | '/follow-ups'
+    | '/gallery'
     | '/import'
     | '/inbox'
     | '/inspections'
@@ -552,10 +582,13 @@ export interface FileRouteTypes {
     | '/campaigns'
     | '/command-center'
     | '/commissions'
+    | '/corporate'
     | '/customers'
     | '/documents'
     | '/estimates'
+    | '/films'
     | '/follow-ups'
+    | '/gallery'
     | '/import'
     | '/inbox'
     | '/inspections'
@@ -605,10 +638,13 @@ export interface FileRouteTypes {
     | '/_authenticated/campaigns'
     | '/_authenticated/command-center'
     | '/_authenticated/commissions'
+    | '/_authenticated/corporate'
     | '/_authenticated/customers'
     | '/_authenticated/documents'
     | '/_authenticated/estimates'
+    | '/_authenticated/films'
     | '/_authenticated/follow-ups'
+    | '/_authenticated/gallery'
     | '/_authenticated/import'
     | '/_authenticated/inbox'
     | '/_authenticated/inspections'
@@ -776,6 +812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommissionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/corporate': {
+      id: '/_authenticated/corporate'
+      path: '/corporate'
+      fullPath: '/corporate'
+      preLoaderRoute: typeof AuthenticatedCorporateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/customers': {
       id: '/_authenticated/customers'
       path: '/customers'
@@ -797,11 +840,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEstimatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/films': {
+      id: '/_authenticated/films'
+      path: '/films'
+      fullPath: '/films'
+      preLoaderRoute: typeof AuthenticatedFilmsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/follow-ups': {
       id: '/_authenticated/follow-ups'
       path: '/follow-ups'
       fullPath: '/follow-ups'
       preLoaderRoute: typeof AuthenticatedFollowUpsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/gallery': {
+      id: '/_authenticated/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof AuthenticatedGalleryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/import': {
@@ -1032,10 +1089,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCampaignsRoute: typeof AuthenticatedCampaignsRoute
   AuthenticatedCommandCenterRoute: typeof AuthenticatedCommandCenterRoute
   AuthenticatedCommissionsRoute: typeof AuthenticatedCommissionsRoute
+  AuthenticatedCorporateRoute: typeof AuthenticatedCorporateRoute
   AuthenticatedCustomersRoute: typeof AuthenticatedCustomersRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedEstimatesRoute: typeof AuthenticatedEstimatesRoute
+  AuthenticatedFilmsRoute: typeof AuthenticatedFilmsRoute
   AuthenticatedFollowUpsRoute: typeof AuthenticatedFollowUpsRoute
+  AuthenticatedGalleryRoute: typeof AuthenticatedGalleryRoute
   AuthenticatedImportRoute: typeof AuthenticatedImportRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedInspectionsRoute: typeof AuthenticatedInspectionsRoute
@@ -1069,10 +1129,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCampaignsRoute: AuthenticatedCampaignsRoute,
   AuthenticatedCommandCenterRoute: AuthenticatedCommandCenterRoute,
   AuthenticatedCommissionsRoute: AuthenticatedCommissionsRoute,
+  AuthenticatedCorporateRoute: AuthenticatedCorporateRoute,
   AuthenticatedCustomersRoute: AuthenticatedCustomersRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedEstimatesRoute: AuthenticatedEstimatesRoute,
+  AuthenticatedFilmsRoute: AuthenticatedFilmsRoute,
   AuthenticatedFollowUpsRoute: AuthenticatedFollowUpsRoute,
+  AuthenticatedGalleryRoute: AuthenticatedGalleryRoute,
   AuthenticatedImportRoute: AuthenticatedImportRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedInspectionsRoute: AuthenticatedInspectionsRoute,
