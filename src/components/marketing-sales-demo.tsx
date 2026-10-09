@@ -35,7 +35,7 @@ export function MarketingSalesDemo() {
     </div>
     <div className={cn(workspace !== "activity" && "hidden")}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-muted-foreground">Try Contact, Respond or Follow Up. Handled leads leave the attention queue.</p><Button variant="ghost" size="sm" onClick={() => setReset(n => n+1)}><RotateCcw className="size-4" />Reset preview</Button></div>
-      <div className="border-y border-border py-6"><DynamicActivity key={reset} config={config} /></div>
+      <div className="min-w-0 border-y border-border py-6 [&_.grid>*]:min-w-0 [&_li>span:first-child]:min-w-0"><DynamicActivity key={reset} config={config} /></div>
       <p className="mt-3 text-xs text-muted-foreground">Sample interactions update this preview only. Messages are not sent and no CRM is contacted.</p>
     </div>
     <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-6 text-sm">{["Customer replies first", "Untouched enquiries next", "High-intent quote activity", "Follow-ups before leads go cold"].map(t => <li key={t} className="flex gap-2"><Check className="size-4 shrink-0 text-primary" />{t}</li>)}</ul>
