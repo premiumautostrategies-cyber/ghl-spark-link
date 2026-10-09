@@ -16,6 +16,10 @@ import { Route as BookRouteImport } from './routes/book'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ForOperationsRouteImport } from './routes/for-operations'
+import { Route as ForSalesRouteImport } from './routes/for-sales'
+import { Route as ForTechniciansRouteImport } from './routes/for-technicians'
+import { Route as MarketingAdminRouteImport } from './routes/marketing-admin'
 import { Route as PlatformRouteImport } from './routes/platform'
 import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as AuthenticatedAgencyRouteImport } from './routes/_authenticated/agency'
@@ -96,6 +100,26 @@ const DemoRoute = DemoRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForOperationsRoute = ForOperationsRouteImport.update({
+  id: '/for-operations',
+  path: '/for-operations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForSalesRoute = ForSalesRouteImport.update({
+  id: '/for-sales',
+  path: '/for-sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForTechniciansRoute = ForTechniciansRouteImport.update({
+  id: '/for-technicians',
+  path: '/for-technicians',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingAdminRoute = MarketingAdminRouteImport.update({
+  id: '/marketing-admin',
+  path: '/marketing-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformRoute = PlatformRouteImport.update({
@@ -349,6 +373,10 @@ export interface FileRoutesByFullPath {
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
+  '/for-operations': typeof ForOperationsRoute
+  '/for-sales': typeof ForSalesRoute
+  '/for-technicians': typeof ForTechniciansRoute
+  '/marketing-admin': typeof MarketingAdminRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/agency': typeof AuthenticatedAgencyRoute
@@ -404,6 +432,10 @@ export interface FileRoutesByTo {
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
+  '/for-operations': typeof ForOperationsRoute
+  '/for-sales': typeof ForSalesRoute
+  '/for-technicians': typeof ForTechniciansRoute
+  '/marketing-admin': typeof MarketingAdminRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/agency': typeof AuthenticatedAgencyRoute
@@ -461,6 +493,10 @@ export interface FileRoutesById {
   '/connect': typeof ConnectRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
+  '/for-operations': typeof ForOperationsRoute
+  '/for-sales': typeof ForSalesRoute
+  '/for-technicians': typeof ForTechniciansRoute
+  '/marketing-admin': typeof MarketingAdminRoute
   '/platform': typeof PlatformRoute
   '/workflow': typeof WorkflowRoute
   '/_authenticated/agency': typeof AuthenticatedAgencyRoute
@@ -518,6 +554,10 @@ export interface FileRouteTypes {
     | '/connect'
     | '/demo'
     | '/faq'
+    | '/for-operations'
+    | '/for-sales'
+    | '/for-technicians'
+    | '/marketing-admin'
     | '/platform'
     | '/workflow'
     | '/agency'
@@ -573,6 +613,10 @@ export interface FileRouteTypes {
     | '/connect'
     | '/demo'
     | '/faq'
+    | '/for-operations'
+    | '/for-sales'
+    | '/for-technicians'
+    | '/marketing-admin'
     | '/platform'
     | '/workflow'
     | '/agency'
@@ -629,6 +673,10 @@ export interface FileRouteTypes {
     | '/connect'
     | '/demo'
     | '/faq'
+    | '/for-operations'
+    | '/for-sales'
+    | '/for-technicians'
+    | '/marketing-admin'
     | '/platform'
     | '/workflow'
     | '/_authenticated/agency'
@@ -686,6 +734,10 @@ export interface RootRouteChildren {
   ConnectRoute: typeof ConnectRoute
   DemoRoute: typeof DemoRoute
   FaqRoute: typeof FaqRoute
+  ForOperationsRoute: typeof ForOperationsRoute
+  ForSalesRoute: typeof ForSalesRoute
+  ForTechniciansRoute: typeof ForTechniciansRoute
+  MarketingAdminRoute: typeof MarketingAdminRoute
   PlatformRoute: typeof PlatformRoute
   WorkflowRoute: typeof WorkflowRoute
   ApiPublicSyncDrainRoute: typeof ApiPublicSyncDrainRoute
@@ -747,6 +799,34 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-operations': {
+      id: '/for-operations'
+      path: '/for-operations'
+      fullPath: '/for-operations'
+      preLoaderRoute: typeof ForOperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-sales': {
+      id: '/for-sales'
+      path: '/for-sales'
+      fullPath: '/for-sales'
+      preLoaderRoute: typeof ForSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-technicians': {
+      id: '/for-technicians'
+      path: '/for-technicians'
+      fullPath: '/for-technicians'
+      preLoaderRoute: typeof ForTechniciansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marketing-admin': {
+      id: '/marketing-admin'
+      path: '/marketing-admin'
+      fullPath: '/marketing-admin'
+      preLoaderRoute: typeof MarketingAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform': {
@@ -1173,6 +1253,10 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectRoute: ConnectRoute,
   DemoRoute: DemoRoute,
   FaqRoute: FaqRoute,
+  ForOperationsRoute: ForOperationsRoute,
+  ForSalesRoute: ForSalesRoute,
+  ForTechniciansRoute: ForTechniciansRoute,
+  MarketingAdminRoute: MarketingAdminRoute,
   PlatformRoute: PlatformRoute,
   WorkflowRoute: WorkflowRoute,
   ApiPublicSyncDrainRoute: ApiPublicSyncDrainRoute,

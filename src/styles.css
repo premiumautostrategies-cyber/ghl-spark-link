@@ -67,12 +67,17 @@
   --color-comms: var(--comms);
   --color-rig: var(--rig);
   --color-heat: var(--heat);
+  --color-marketing-copy: var(--marketing-copy);
   --shadow-lux: 0 24px 60px -20px oklch(0 0 0 / 0.75);
   --shadow-glow: 0 0 0 1px oklch(0.775 0.075 70 / 0.25), 0 18px 40px -18px oklch(0.775 0.075 70 / 0.35);
 }
 
 :root {
   --radius: 0.75rem;
+  --marketing-copy: oklch(0.87 0.008 260);
+  --marketing-hero-foreground: oklch(0.98 0.003 260);
+  --marketing-hero-shade: linear-gradient(90deg, oklch(0.12 0.006 260 / 0.95) 0%, oklch(0.12 0.006 260 / 0.78) 34%, oklch(0.12 0.006 260 / 0.12) 75%);
+  --marketing-mobile-shade: linear-gradient(90deg, oklch(0.12 0.006 260 / 0.9), oklch(0.12 0.006 260 / 0.55));
 
   /* Frosted-glass dark (ShopFlow approved direction) */
   --obsidian: oklch(0.16 0.012 260);
@@ -277,6 +282,13 @@
 }
 
 /* Frosted glass material on shared surfaces */
+.marketing-hero { color: var(--marketing-hero-foreground); }
+.marketing-hero-shade { background: var(--marketing-hero-shade); }
+.marketing-site { letter-spacing: 0; }
+@media (max-width: 639px) {
+  .marketing-hero-shade { background: var(--marketing-mobile-shade); }
+}
+
 .bg-surface, .bg-surface-2, .bg-sidebar, .bg-obsidian-deep, .bg-card {
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
