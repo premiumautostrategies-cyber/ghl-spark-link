@@ -16,7 +16,7 @@ import command from "@/assets/showcase-command.webp.asset.json";
 export const productShots = { sales: sales.url, messages: messages.url, tech: tech.url, techList: techList.url, operations: operations.url, schedule: schedule.url, marketing: marketing.url, team: team.url, command: command.url };
 
 export const PRODUCT_PAGES = [
-  { to: "/for-sales", number: "01", label: "Sales", title: "Move the conversation forward.", body: "Leads, conversations and proposals, without losing the customer's story." },
+  { to: "/for-sales", number: "01", label: "Sales", title: "Move the conversation forward.", body: "Dynamic Pipeline or Activity. Your CRM or Systemize. One connected closing workflow." },
   { to: "/for-technicians", number: "02", label: "Technicians", title: "More time on the vehicle.", body: "A phone-first work order. Clear instructions. One clean QC handoff." },
   { to: "/for-operations", number: "03", label: "Operations", title: "See the whole shop clearly.", body: "Schedules, resources, payments and performance in one connected view." },
   { to: "/marketing-admin", number: "04", label: "Marketing & Admin", title: "Build a more repeatable business.", body: "Follow-ups, campaign performance, team settings and shop standards." },

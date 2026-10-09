@@ -161,16 +161,16 @@ function money(n: number) {
   return `$${n.toLocaleString("en-US")}`;
 }
 
-export function DynamicActivity({ config }: { config: SalesConfig }) {
+export function DynamicActivity({ config, sourceLabel }: { config: SalesConfig; sourceLabel?: string }) {
   const [leads, setLeads] = useState<Lead[]>(SEED);
   const [feed, setFeed] = useState<Array<{ text: string; minutes: number }>>(
     SEED_FEED.map((text, i) => ({ text, minutes: 12 + i * 26 })),
   );
 
-  const source =
+  const source = sourceLabel ?? (
     config.dataSource === "crm" && config.crm
       ? `${crmName(config.crm)} · synced just now`
-      : "Systemize sales data";
+      : "Systemize sales data");
 
   const act = (lead: Lead, action: ActionKey) => {
     const next: StatusKey =
