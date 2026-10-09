@@ -91,6 +91,8 @@ function ConnectPage() {
         body="A shop system that demands you abandon your accounting, calendar and CRM does not get adopted. Systemize pushes clean data out to the tools already in use, and accepts back only what is genuinely useful."
       />
 
+      <section className="mx-auto max-w-6xl px-4 pt-8"><p className="border-l-2 border-primary pl-4 text-sm leading-relaxed text-muted-foreground">Prototype preview: provider connections and synchronization are simulated. The flows below describe the intended production integrations, not live account connections.</p><Button asChild variant="outline" className="mt-5"><Link to="/for-sales">Explore both dynamic sales workspaces</Link></Button></section>
+
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="grid gap-5 md:grid-cols-2">
           {PROVIDERS.map((p) => (
