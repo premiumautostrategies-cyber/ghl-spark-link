@@ -14,7 +14,7 @@ const SOURCES = [
 
 export function MarketingSalesDemo() {
   const [source, setSource] = useState<typeof SOURCES[number]["id"]>("systemize");
-  const [workspace, setWorkspace] = useState<"pipeline" | "activity">("pipeline");
+  const [workspace, setWorkspace] = useState<"pipeline" | "activity">("activity");
   const [reset, setReset] = useState(0);
   const selectedSource = SOURCES.find(s => s.id === source) ?? SOURCES[0];
   const config: SalesConfig = { dataSource: source === "systemize" ? "systemize" : "crm", workspace, crm: source === "systemize" ? null : source, connectedAt: null };
@@ -34,6 +34,7 @@ export function MarketingSalesDemo() {
       <div className="mt-6 grid gap-6 sm:grid-cols-3"><div><h3 className="text-sm font-semibold">Stage tells you where</h3><p className="mt-2 text-sm text-muted-foreground">New enquiry, contacted, quoted or decision. Keep the whole sale visible without losing the next action.</p></div><div><h3 className="text-sm font-semibold">Activity tells you when</h3><p className="mt-2 text-sm text-muted-foreground">Untouched leads, replies, quote engagement and cooling conversations stand apart from the deal stage.</p></div><div><h3 className="text-sm font-semibold">Focus tells you who</h3><p className="mt-2 text-sm text-muted-foreground">Filter new leads, live activity, follow-ups due and cooling opportunities to focus the rep's attention.</p></div></div>
     </div>
     <div className={cn(workspace !== "activity" && "hidden")}>
+      <h3 className="mb-3 text-xl font-semibold">Dynamic Activity · Live preview</h3>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-muted-foreground">Try Contact, Respond or Follow Up. Handled leads leave the attention queue.</p><Button variant="ghost" size="sm" onClick={() => setReset(n => n+1)}><RotateCcw className="size-4" />Reset preview</Button></div>
       <div className="min-w-0 border-y border-border py-6 [&_.grid>*]:min-w-0 [&_li>span:first-child]:min-w-0"><DynamicActivity key={reset} config={config} sourceLabel={`${selectedSource.name} · simulated sample data`} /></div>
       <p className="mt-3 text-xs text-muted-foreground">Sample interactions update this preview only. Messages are not sent and no CRM is contacted.</p>
