@@ -151,6 +151,8 @@ export const planMobileDay = createServerFn({ method: "POST" })
       ),
       ``,
       `Rules:`,
+      `0. Optimise in this order: (a) job length — put long installs (4h+) early in the day while light and temperature are best, short stops fill gaps; (b) traffic — avoid I-75, I-696, Telegraph and Woodward during 7:00–9:00 and 16:00–18:00 rush, pad drive minutes by 30–50% in those windows; (c) fuel — minimise total miles, assume a work van gets 15 mpg at $3.60/gal, never backtrack across the metro; (d) time — finish every crew's loop before 18:00.`,
+      `In each route summary state total miles, estimated fuel gallons and cost, and how traffic shaped the order, in one or two plain sentences.`,
       `1. Group jobs that are geographically close into the same crew's day so nobody criss-crosses the metro area. Use your knowledge of the cities, suburbs and ZIP codes given.`,
       `2. Order each crew's stops into a sensible driving loop out from base and back, and estimate realistic drive minutes between consecutive stops in traffic.`,
       `3. Give every stop an arrive and depart clock time in 24h HH:MM, chaining on-site hours plus drive time, with a 30 minute lunch somewhere sensible.`,
