@@ -1,23 +1,26 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { useState } from "react";
 
 const NAV = [
-  { to: "/platform", label: "Platform" },
-  { to: "/workflow", label: "Workflow" },
-  { to: "/connect", label: "Integrations" },
-  { to: "/faq", label: "FAQ" },
+  { to: "/for-sales", label: "Sales" },
+  { to: "/for-technicians", label: "Technicians" },
+  { to: "/for-operations", label: "Operations" },
+  { to: "/marketing-admin", label: "Marketing & Admin" },
 ] as const;
 
 export function MarketingLayout({ children }: { children: ReactNode }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-          <Link to="/" className="display-title text-2xl font-bold">
-            System<span className="text-primary">ize</span>
+    <div className="marketing-site min-h-screen bg-background">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+          <Link to="/" className="text-xl font-bold" aria-label="Systemize home">
+            SYSTEM<span className="text-primary">IZE</span><span className="ml-1 text-primary">.</span>
           </Link>
-          <nav className="hidden items-center gap-6 md:flex">
+          <nav aria-label="Main navigation" className="hidden items-center gap-7 lg:flex">
             {NAV.map((n) => (
               <Link
                 key={n.to}
@@ -29,34 +32,40 @@ export function MarketingLayout({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <Button asChild size="sm">
-            <Link to="/demo">Log in to demo</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" className="h-10"><Link to="/demo">Explore demo <ArrowUpRight className="size-4" /></Link></Button>
+            <Button variant="ghost" size="icon" className="lg:hidden" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</Button>
+          </div>
         </div>
+        {menuOpen && <nav aria-label="Mobile navigation" className="grid border-t border-border px-5 py-4 lg:hidden">{NAV.map(n => <Link key={n.to} to={n.to} onClick={() => setMenuOpen(false)} className="py-3 text-sm text-muted-foreground" activeProps={{ className: "text-primary" }}>{n.label}</Link>)}</nav>}
       </header>
 
       <main>{children}</main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-10 md:grid-cols-[2fr_1fr]">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 md:grid-cols-[2fr_1fr_1fr]">
           <div>
             <span className="display-title text-xl font-bold">
               System<span className="text-primary">ize</span>
             </span>
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Shop software for vehicle wrap, tint, PPF, ceramic and detailing studios. One record
-              carries a vehicle from first enquiry through warranty.
+              From the first enquiry to the final handoff. One connected workspace for automotive restyling shops.
             </p>
+            <p className="mt-5 text-xs text-muted-foreground">Interactive prototype · Screens show sample shop data.</p>
           </div>
-          <nav className="flex flex-col gap-2 text-sm text-muted-foreground md:items-end">
+          <nav aria-label="Product pages" className="flex flex-col gap-3 text-sm text-muted-foreground">
             {NAV.map((n) => (
               <Link key={n.to} to={n.to} className="hover:text-foreground">
                 {n.label}
               </Link>
             ))}
-            <Link to="/demo" className="hover:text-foreground">
-              Open the demo
-            </Link>
+          </nav>
+          <nav aria-label="More about Systemize" className="flex flex-col gap-3 text-sm text-muted-foreground">
+            <Link to="/platform" className="hover:text-foreground">Platform overview</Link>
+            <Link to="/workflow" className="hover:text-foreground">The vehicle journey</Link>
+            <Link to="/connect" className="hover:text-foreground">Integrations</Link>
+            <Link to="/faq" className="hover:text-foreground">FAQ</Link>
+            <Link to="/demo" className="hover:text-foreground">Open the demo <ArrowUpRight className="inline size-3" /></Link>
           </nav>
         </div>
       </footer>
