@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Showcase both dynamic sales modes and the CRM-to-closing story on the marketing Sales page
+- [ ] Verify mode switching, simulated source selection, activity actions, and page layouts
+
 - [x] Update the marketing home page and separate Sales, Technicians, Operations, Marketing & Admin pages with actual product screenshots
 - [x] Verify marketing navigation, screenshots, and layouts
 
