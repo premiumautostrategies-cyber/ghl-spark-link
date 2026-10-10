@@ -540,9 +540,16 @@ function InspectionsPage() {
                           </Select>
                         </div>
                         <Input name="note" placeholder="Rock chip cluster above badge" />
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 sm:grid-cols-3">
                           <Input name="photo_url" placeholder="Photo link(s), comma separated" />
                           <Input name="video_url" placeholder="Video clip link" />
+                          <Input
+                            name="repair_price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Repair price (optional)"
+                          />
                         </div>
                         <div className="flex gap-2">
                           <Button type="submit" disabled={addDefect.isPending}>
