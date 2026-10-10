@@ -349,6 +349,51 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
       photos = signed.filter((p): p is { id: string; url: string; jobId: string | null } => p !== null);
     }
 
+    /* Damage findings from inspections, with the customer's repair decision. */
+    const { data: customerInspections } = await db
+      .from("inspections")
+      .select("id,vehicle_id,created_at")
+      .eq("customer_id", customer.id)
+      .order("created_at", { ascending: false });
+    const inspectionRows = customerInspections ?? [];
+    const inspectionIds = inspectionRows.map((i) => i.id);
+    let findings: Array<{
+      id: string;
+      panel: string | null;
+      defect_type: string | null;
+      severity: string | null;
+      note: string | null;
+      photo_url: string | null;
+      repair_price: number | null;
+      customer_decision: string | null;
+      decided_at: string | null;
+      vehicle: string | null;
+      found_at: string;
+    }> = [];
+    if (inspectionIds.length > 0) {
+      const { data: defects } = await db
+        .from("inspection_defects")
+        .select("id,inspection_id,panel,defect_type,severity,note,photo_url,repair_price,customer_decision,decided_at")
+        .in("inspection_id", inspectionIds)
+        .order("created_at", { ascending: false });
+      findings = (defects ?? []).map((d) => {
+        const insp = inspectionRows.find((i) => i.id === d.inspection_id);
+        return {
+          id: d.id,
+          panel: d.panel,
+          defect_type: d.defect_type,
+          severity: d.severity,
+          note: d.note,
+          photo_url: d.photo_url,
+          repair_price: d.repair_price === null ? null : Number(d.repair_price),
+          customer_decision: d.customer_decision,
+          decided_at: d.decided_at,
+          vehicle: vehicleLabel(insp?.vehicle_id ?? null),
+          found_at: insp?.created_at ?? "",
+        };
+      });
+    }
+
     const paidTotal = (payments ?? [])
       .filter((p) => p.status === "paid")
       .reduce((t, p) => t + Number(p.amount ?? 0), 0);
