@@ -471,6 +471,7 @@ export const decideOnFinding = createServerFn({ method: "POST" })
       defect.repair_price !== null && defect.repair_price !== undefined
         ? ` (${Number(defect.repair_price).toFixed(2)})`
         : "";
+    if (!customer.organization_id) return { decision: data.decision, alreadyDecided: false };
     await db.from("messages").insert({
       organization_id: customer.organization_id,
       customer_id: customer.id,
