@@ -83,6 +83,9 @@ function Empty({ children }: { children: React.ReactNode }) {
 
 function PortalPage() {
   const data = Route.useLoaderData();
+  const { token } = Route.useParams();
+  const [decisions, setDecisions] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
   if (!data) {
     return (
       <Shell>
