@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getCustomerPortal } from "@/lib/portal.functions";
+import { useState } from "react";
+import { decideOnFinding, getCustomerPortal } from "@/lib/portal.functions";
 import { dayDate, label, money } from "@/lib/format";
 import {
+  AlertTriangle,
   BadgeCheck,
   CalendarClock,
   Camera,
