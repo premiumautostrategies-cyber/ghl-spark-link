@@ -597,7 +597,7 @@ function InspectionsPage() {
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            {d.customer_decision === "approved" && <Tag tone="pass">Approved</Tag>}
+                            {d.customer_decision === "approved" && <Tag tone="revenue">Approved</Tag>}
                             {d.customer_decision === "declined" && <Tag tone="muted">Declined</Tag>}
                             <Tag tone={d.severity === "critical" ? "critical" : "urgent"}>
                               {d.severity}
