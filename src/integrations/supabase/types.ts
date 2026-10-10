@@ -1021,6 +1021,8 @@ export type Database = {
       inspection_defects: {
         Row: {
           created_at: string
+          customer_decision: string | null
+          decided_at: string | null
           defect_type: string
           id: string
           inspection_id: string
@@ -1031,11 +1033,14 @@ export type Database = {
           photo_url: string | null
           pos_x: number
           pos_y: number
+          repair_price: number | null
           severity: string
           video_url: string | null
         }
         Insert: {
           created_at?: string
+          customer_decision?: string | null
+          decided_at?: string | null
           defect_type?: string
           id?: string
           inspection_id: string
@@ -1046,11 +1051,14 @@ export type Database = {
           photo_url?: string | null
           pos_x?: number
           pos_y?: number
+          repair_price?: number | null
           severity?: string
           video_url?: string | null
         }
         Update: {
           created_at?: string
+          customer_decision?: string | null
+          decided_at?: string | null
           defect_type?: string
           id?: string
           inspection_id?: string
@@ -1061,6 +1069,7 @@ export type Database = {
           photo_url?: string | null
           pos_x?: number
           pos_y?: number
+          repair_price?: number | null
           severity?: string
           video_url?: string | null
         }

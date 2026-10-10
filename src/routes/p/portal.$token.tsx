@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getCustomerPortal } from "@/lib/portal.functions";
+import { useState } from "react";
+import { decideOnFinding, getCustomerPortal } from "@/lib/portal.functions";
 import { dayDate, label, money } from "@/lib/format";
 import {
+  AlertTriangle,
   BadgeCheck,
   CalendarClock,
   Camera,
@@ -81,6 +83,9 @@ function Empty({ children }: { children: React.ReactNode }) {
 
 function PortalPage() {
   const data = Route.useLoaderData();
+  const { token } = Route.useParams();
+  const [decisions, setDecisions] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
   if (!data) {
     return (
       <Shell>
@@ -208,6 +213,100 @@ function PortalPage() {
               </a>
             ))}
           </div>
+        </Card>
+      )}
+
+      {data.findings.length > 0 && (
+        <Card
+          title="Findings on your vehicle"
+          icon={<AlertTriangle className="h-4 w-4" />}
+          hint={`${data.findings.filter((f) => !f.customer_decision && !decisions[f.id]).length} awaiting you`}
+        >
+          {data.findings.map((f) => {
+            const decision = decisions[f.id] ?? f.customer_decision;
+            return (
+              <div key={f.id} className="px-4 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">
+                      {label(f.defect_type ?? "damage")} — {f.panel ?? "vehicle"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {f.vehicle ?? "Your vehicle"}
+                      {f.severity ? ` · ${label(f.severity)} severity` : ""}
+                      {f.found_at ? ` · found ${dayDate(f.found_at)}` : ""}
+                    </p>
+                    {f.note && <p className="mt-2 text-sm text-muted-foreground">{f.note}</p>}
+                    {f.repair_price !== null && (
+                      <p className="mt-2 text-sm font-semibold">Repair cost: {money(f.repair_price)}</p>
+                    )}
+                  </div>
+                  {f.photo_url?.startsWith("http") && (
+                    <a href={f.photo_url} target="_blank" rel="noreferrer" className="shrink-0">
+                      <img
+                        src={f.photo_url}
+                        alt="Finding photo"
+                        className="h-20 w-20 rounded-lg border border-elevated object-cover"
+                      />
+                    </a>
+                  )}
+                </div>
+                <div className="mt-3">
+                  {decision === "approved" || decision === "declined" ? (
+                    <p className="text-xs font-semibold">
+                      {decision === "approved" ? (
+                        <span className="text-bronze">You approved this repair — we'll take care of it.</span>
+                      ) : (
+                        <span className="text-muted-foreground">You declined this repair.</span>
+                      )}
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={busy === f.id}
+                        onClick={async () => {
+                          setBusy(f.id);
+                          try {
+                            const r = await decideOnFinding({
+                              data: { token, defectId: f.id, decision: "approved" },
+                            });
+                            setDecisions((d) => ({ ...d, [f.id]: r.decision }));
+                          } finally {
+                            setBusy(null);
+                          }
+                        }}
+                        className="rounded-lg bg-bronze px-4 py-2 text-xs font-semibold text-background disabled:opacity-50"
+                      >
+                        Approve repair
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy === f.id}
+                        onClick={async () => {
+                          setBusy(f.id);
+                          try {
+                            const r = await decideOnFinding({
+                              data: { token, defectId: f.id, decision: "declined" },
+                            });
+                            setDecisions((d) => ({ ...d, [f.id]: r.decision }));
+                          } finally {
+                            setBusy(null);
+                          }
+                        }}
+                        className="rounded-lg border border-elevated px-4 py-2 text-xs font-semibold text-muted-foreground disabled:opacity-50"
+                      >
+                        Decline
+                      </button>
+                      <span className="text-xs text-muted-foreground">
+                        Questions? Call us and we'll walk you through it.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </Card>
       )}
 

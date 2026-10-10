@@ -154,6 +154,7 @@ function InspectionsPage() {
       pos_y: number;
       media_urls: string[];
       video_url: string | null;
+      repair_price: number | null;
     }) => {
       if (!orgId || !selected) throw new Error("Select an inspection first");
       const { error } = await supabase
@@ -498,6 +499,7 @@ function InspectionsPage() {
                         onSubmit={(e) => {
                           e.preventDefault();
                           const f = new FormData(e.currentTarget);
+                          const priceRaw = String(f.get("repair_price") || "").trim();
                           addDefect.mutate({
                             panel: activePanel,
                             defect_type: String(f.get("defect_type")),
@@ -510,6 +512,7 @@ function InspectionsPage() {
                               .map((u) => u.trim())
                               .filter(Boolean),
                             video_url: String(f.get("video_url") || "") || null,
+                            repair_price: priceRaw ? Number(priceRaw) : null,
                           });
                         }}
                       >
@@ -537,9 +540,16 @@ function InspectionsPage() {
                           </Select>
                         </div>
                         <Input name="note" placeholder="Rock chip cluster above badge" />
-                        <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-3 sm:grid-cols-3">
                           <Input name="photo_url" placeholder="Photo link(s), comma separated" />
                           <Input name="video_url" placeholder="Video clip link" />
+                          <Input
+                            name="repair_price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="Repair price (optional)"
+                          />
                         </div>
                         <div className="flex gap-2">
                           <Button type="submit" disabled={addDefect.isPending}>
@@ -580,8 +590,15 @@ function InspectionsPage() {
                                 {d.video_url ? " · video attached" : ""}
                               </p>
                             )}
+                            {d.repair_price !== null && (
+                              <p className="mt-0.5 text-xs text-muted-foreground">
+                                Repair quoted at ${Number(d.repair_price).toFixed(2)}
+                              </p>
+                            )}
                           </div>
                           <div className="flex items-center gap-2">
+                            {d.customer_decision === "approved" && <Tag tone="revenue">Approved</Tag>}
+                            {d.customer_decision === "declined" && <Tag tone="muted">Declined</Tag>}
                             <Tag tone={d.severity === "critical" ? "critical" : "urgent"}>
                               {d.severity}
                             </Tag>
