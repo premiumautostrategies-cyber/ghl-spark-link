@@ -418,6 +418,7 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
       payments: payments ?? [],
       jobs: jobRows.map((j) => ({ ...j, vehicle: vehicleLabel(j.vehicle_id) })),
       photos,
+      findings,
       billing: {
         workTotal,
         paid: paidTotal,
