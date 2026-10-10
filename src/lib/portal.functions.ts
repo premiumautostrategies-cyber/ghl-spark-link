@@ -427,3 +427,63 @@ export const getCustomerPortal = createServerFn({ method: "GET" })
     };
   });
 
+/* Customer approves or declines a repair for a damage finding, scoped by their
+   portal token so nobody can decide on another customer's car. */
+export const decideOnFinding = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; defectId: string; decision: "approved" | "declined" }) => d)
+  .handler(async ({ data }) => {
+    const db = await admin();
+    const { data: customer } = await db
+      .from("customers")
+      .select("id,name,organization_id")
+      .eq("portal_token", data.token)
+      .maybeSingle();
+    if (!customer) throw new Error("This link is no longer valid.");
+
+    const { data: defect } = await db
+      .from("inspection_defects")
+      .select("id,inspection_id,panel,defect_type,repair_price,customer_decision")
+      .eq("id", data.defectId)
+      .maybeSingle();
+    if (!defect) throw new Error("Finding not found.");
+
+    const { data: inspection } = await db
+      .from("inspections")
+      .select("id,customer_id,job_id")
+      .eq("id", defect.inspection_id)
+      .maybeSingle();
+    if (!inspection || inspection.customer_id !== customer.id) {
+      throw new Error("This finding does not belong to your vehicle.");
+    }
+    if (defect.customer_decision === "approved" || defect.customer_decision === "declined") {
+      return { decision: defect.customer_decision, alreadyDecided: true };
+    }
+
+    const now = new Date().toISOString();
+    const { error } = await db
+      .from("inspection_defects")
+      .update({ customer_decision: data.decision, decided_at: now })
+      .eq("id", defect.id);
+    if (error) throw new Error("Could not save your decision — please try again.");
+
+    /* Leave a note in the shop's message history so the team sees the decision. */
+    const price =
+      defect.repair_price !== null && defect.repair_price !== undefined
+        ? ` (${Number(defect.repair_price).toFixed(2)})`
+        : "";
+    await db.from("messages").insert({
+      organization_id: customer.organization_id,
+      customer_id: customer.id,
+      channel: "note",
+      direction: "in",
+      is_automated: true,
+      author_name: customer.name,
+      body:
+        data.decision === "approved"
+          ? `Customer APPROVED repair of ${defect.defect_type ?? "damage"} on ${defect.panel ?? "vehicle"}${price} via their portal.`
+          : `Customer DECLINED repair of ${defect.defect_type ?? "damage"} on ${defect.panel ?? "vehicle"}${price} via their portal.`,
+    });
+
+    return { decision: data.decision, alreadyDecided: false };
+  });
+
