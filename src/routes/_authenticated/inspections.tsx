@@ -154,6 +154,7 @@ function InspectionsPage() {
       pos_y: number;
       media_urls: string[];
       video_url: string | null;
+      repair_price: number | null;
     }) => {
       if (!orgId || !selected) throw new Error("Select an inspection first");
       const { error } = await supabase
@@ -498,6 +499,7 @@ function InspectionsPage() {
                         onSubmit={(e) => {
                           e.preventDefault();
                           const f = new FormData(e.currentTarget);
+                          const priceRaw = String(f.get("repair_price") || "").trim();
                           addDefect.mutate({
                             panel: activePanel,
                             defect_type: String(f.get("defect_type")),
@@ -510,6 +512,7 @@ function InspectionsPage() {
                               .map((u) => u.trim())
                               .filter(Boolean),
                             video_url: String(f.get("video_url") || "") || null,
+                            repair_price: priceRaw ? Number(priceRaw) : null,
                           });
                         }}
                       >
