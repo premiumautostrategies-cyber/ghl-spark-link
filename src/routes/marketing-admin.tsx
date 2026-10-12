@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProductShowcase, productShots, PRODUCT_PAGES, marketingHead } from "@/components/product-showcase";
-export const Route = createFileRoute("/marketing-admin")({ head: () => marketingHead("Marketing & administration — Systemize", "Explore campaign tracking, customer follow-ups, team management, shop setup and repeatable standards in the Systemize automotive prototype."), component: MarketingAdminShowcase });
+export const Route = createFileRoute("/marketing-admin")({ head: () => marketingHead("Marketing & administration — Veltrix", "Explore campaign tracking, customer follow-ups, team management, shop setup and repeatable standards in the Veltrix automotive prototype."), component: MarketingAdminShowcase });
 function MarketingAdminShowcase() {
   return <ProductShowcase category="Marketing & Admin" title="Marketing & Admin. Make the business repeatable." intro="Understand where enquiries come from, keep customer relationships warm, and give your team a consistent way to run the shop." image={productShots.marketing} imageTitle="Ad performance" caption="Prototype campaign tracking: sample spend and lead-source results. Ad accounts are not connected live."
     outcomes={[

@@ -10,3 +10,7 @@
 - [x] Make the technician Production workspace mobile-first for phones and iPads, with desktop as the secondary layout
 - [x] Remove the separate Shop Floor experience from technician navigation to avoid duplication
 - [x] Verify both workflows on desktop and mobile
+
+- [x] Apply the approved VELTRIX identity to marketing only, preserving the Systemize CRM
+- [x] Build marketing home, shared navigation, footer, feature/industry/about and clearly labeled pricing/contact/legal draft pages
+- [x] Verify marketing navigation, dynamic sales preview, logo, mobile layout and CRM isolation

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProductShowcase, productShots, PRODUCT_PAGES, marketingHead } from "@/components/product-showcase";
-export const Route = createFileRoute("/for-operations")({ head: () => marketingHead("Shop operations — Systemize", "See Systemize operations: bay and mobile scheduling, team workload, payment records, revenue by service and a connected quality-control handoff."), component: OperationsShowcase });
+export const Route = createFileRoute("/for-operations")({ head: () => marketingHead("Shop operations — Veltrix", "See Veltrix operations: bay and mobile scheduling, team workload, payment records, revenue by service and a connected quality-control handoff."), component: OperationsShowcase });
 function OperationsShowcase() {
   return <ProductShowcase category="Operations" title="Operations. A clear picture of the whole shop." intro="See what is booked, who is working, what is ready and where the business stands—without chasing separate records." image={productShots.operations} imageTitle="Shop reports" caption="Sample shop performance: collected revenue, outstanding balances, service mix and installer output."
     outcomes={[
