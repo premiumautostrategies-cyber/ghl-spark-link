@@ -320,3 +320,7 @@
 @media(max-width: 639px) { .veltrix-headline { font-size: 38px; } .marketing-site .veltrix-product { max-height: none; } }
 @media(prefers-reduced-motion: no-preference) { .marketing-site main > section { animation: veltrix-enter 550ms ease-out both; } }
 @keyframes veltrix-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.veltrix-livery[data-livery="titanium"] { background: #B7C2CC; color: #111318; }
+.veltrix-livery[data-livery="arctic"] { background: #F3F5F4; color: #111318; }
+.veltrix-mode { transition: transform 200ms ease; }
+@media(prefers-reduced-motion: no-preference) { .veltrix-mode:hover { transform: translateY(-2px); } .veltrix-fade { animation: veltrix-enter 350ms ease-out both; } }
