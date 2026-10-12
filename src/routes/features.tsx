@@ -1,0 +1,6 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { MarketingLayout, MarketingHero } from "@/components/marketing-layout";
+import { marketingHead, PRODUCT_PAGES } from "@/components/product-showcase";
+import { ArrowUpRight } from "lucide-react";
+export const Route = createFileRoute("/features")({ head: () => marketingHead("VELTRIX Features — Every side of the shop", "Explore sales, technician work orders, operations, marketing and administration through actual prototype screens."), component: Features });
+function Features() { return <MarketingLayout><MarketingHero eyebrow="VELTRIX / FEATURES" title="Every role. One connected operation." body="The next conversation. The next installation. The next decision. Explore the workspace built around each part of the shop."/><section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">{PRODUCT_PAGES.map(p => <Link key={p.to} to={p.to} className="grid gap-5 border-b border-border py-9 md:grid-cols-[80px_1fr_1fr_24px]"><span className="veltrix-label text-primary">{p.number}</span><h2 className="text-2xl font-semibold">{p.label}</h2><p className="text-muted-foreground">{p.body}</p><ArrowUpRight className="size-5 text-primary"/></Link>)}</section></MarketingLayout>; }
