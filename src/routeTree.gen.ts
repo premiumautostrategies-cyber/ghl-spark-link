@@ -11,16 +11,23 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as ConnectRouteImport } from './routes/connect'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as ForOperationsRouteImport } from './routes/for-operations'
 import { Route as ForSalesRouteImport } from './routes/for-sales'
 import { Route as ForTechniciansRouteImport } from './routes/for-technicians'
+import { Route as IndustriesRouteImport } from './routes/industries'
 import { Route as MarketingAdminRouteImport } from './routes/marketing-admin'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WorkflowRouteImport } from './routes/workflow'
 import { Route as AuthenticatedAgencyRouteImport } from './routes/_authenticated/agency'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -77,6 +84,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -92,6 +104,11 @@ const ConnectRoute = ConnectRouteImport.update({
   path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
@@ -100,6 +117,11 @@ const DemoRoute = DemoRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForOperationsRoute = ForOperationsRouteImport.update({
@@ -117,6 +139,11 @@ const ForTechniciansRoute = ForTechniciansRouteImport.update({
   path: '/for-technicians',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndustriesRoute = IndustriesRouteImport.update({
+  id: '/industries',
+  path: '/industries',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketingAdminRoute = MarketingAdminRouteImport.update({
   id: '/marketing-admin',
   path: '/marketing-admin',
@@ -125,6 +152,21 @@ const MarketingAdminRoute = MarketingAdminRouteImport.update({
 const PlatformRoute = PlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkflowRoute = WorkflowRouteImport.update({
@@ -368,16 +410,23 @@ const PWarrantyTokenRoute = PWarrantyTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/book': typeof BookRoute
   '/connect': typeof ConnectRoute
+  '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
+  '/features': typeof FeaturesRoute
   '/for-operations': typeof ForOperationsRoute
   '/for-sales': typeof ForSalesRoute
   '/for-technicians': typeof ForTechniciansRoute
+  '/industries': typeof IndustriesRoute
   '/marketing-admin': typeof MarketingAdminRoute
   '/platform': typeof PlatformRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/workflow': typeof WorkflowRoute
   '/agency': typeof AuthenticatedAgencyRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -427,16 +476,23 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/book': typeof BookRoute
   '/connect': typeof ConnectRoute
+  '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
+  '/features': typeof FeaturesRoute
   '/for-operations': typeof ForOperationsRoute
   '/for-sales': typeof ForSalesRoute
   '/for-technicians': typeof ForTechniciansRoute
+  '/industries': typeof IndustriesRoute
   '/marketing-admin': typeof MarketingAdminRoute
   '/platform': typeof PlatformRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/workflow': typeof WorkflowRoute
   '/agency': typeof AuthenticatedAgencyRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -488,16 +544,23 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/book': typeof BookRoute
   '/connect': typeof ConnectRoute
+  '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/faq': typeof FaqRoute
+  '/features': typeof FeaturesRoute
   '/for-operations': typeof ForOperationsRoute
   '/for-sales': typeof ForSalesRoute
   '/for-technicians': typeof ForTechniciansRoute
+  '/industries': typeof IndustriesRoute
   '/marketing-admin': typeof MarketingAdminRoute
   '/platform': typeof PlatformRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/workflow': typeof WorkflowRoute
   '/_authenticated/agency': typeof AuthenticatedAgencyRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -549,16 +612,23 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
     | '/book'
     | '/connect'
+    | '/contact'
     | '/demo'
     | '/faq'
+    | '/features'
     | '/for-operations'
     | '/for-sales'
     | '/for-technicians'
+    | '/industries'
     | '/marketing-admin'
     | '/platform'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/workflow'
     | '/agency'
     | '/analytics'
@@ -608,16 +678,23 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
     | '/book'
     | '/connect'
+    | '/contact'
     | '/demo'
     | '/faq'
+    | '/features'
     | '/for-operations'
     | '/for-sales'
     | '/for-technicians'
+    | '/industries'
     | '/marketing-admin'
     | '/platform'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/workflow'
     | '/agency'
     | '/analytics'
@@ -668,16 +745,23 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/auth'
     | '/book'
     | '/connect'
+    | '/contact'
     | '/demo'
     | '/faq'
+    | '/features'
     | '/for-operations'
     | '/for-sales'
     | '/for-technicians'
+    | '/industries'
     | '/marketing-admin'
     | '/platform'
+    | '/pricing'
+    | '/privacy'
+    | '/terms'
     | '/workflow'
     | '/_authenticated/agency'
     | '/_authenticated/analytics'
@@ -729,16 +813,23 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   BookRoute: typeof BookRoute
   ConnectRoute: typeof ConnectRoute
+  ContactRoute: typeof ContactRoute
   DemoRoute: typeof DemoRoute
   FaqRoute: typeof FaqRoute
+  FeaturesRoute: typeof FeaturesRoute
   ForOperationsRoute: typeof ForOperationsRoute
   ForSalesRoute: typeof ForSalesRoute
   ForTechniciansRoute: typeof ForTechniciansRoute
+  IndustriesRoute: typeof IndustriesRoute
   MarketingAdminRoute: typeof MarketingAdminRoute
   PlatformRoute: typeof PlatformRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   WorkflowRoute: typeof WorkflowRoute
   ApiPublicSyncDrainRoute: typeof ApiPublicSyncDrainRoute
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
@@ -766,6 +857,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -787,6 +885,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo': {
       id: '/demo'
       path: '/demo'
@@ -799,6 +904,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-operations': {
@@ -822,6 +934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForTechniciansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/industries': {
+      id: '/industries'
+      path: '/industries'
+      fullPath: '/industries'
+      preLoaderRoute: typeof IndustriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketing-admin': {
       id: '/marketing-admin'
       path: '/marketing-admin'
@@ -834,6 +953,27 @@ declare module '@tanstack/react-router' {
       path: '/platform'
       fullPath: '/platform'
       preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workflow': {
@@ -1248,16 +1388,23 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   BookRoute: BookRoute,
   ConnectRoute: ConnectRoute,
+  ContactRoute: ContactRoute,
   DemoRoute: DemoRoute,
   FaqRoute: FaqRoute,
+  FeaturesRoute: FeaturesRoute,
   ForOperationsRoute: ForOperationsRoute,
   ForSalesRoute: ForSalesRoute,
   ForTechniciansRoute: ForTechniciansRoute,
+  IndustriesRoute: IndustriesRoute,
   MarketingAdminRoute: MarketingAdminRoute,
   PlatformRoute: PlatformRoute,
+  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   WorkflowRoute: WorkflowRoute,
   ApiPublicSyncDrainRoute: ApiPublicSyncDrainRoute,
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
