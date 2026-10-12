@@ -13,4 +13,4 @@
 
 - [x] Apply the approved VELTRIX identity to marketing only, preserving the Systemize CRM
 - [x] Build marketing home, shared navigation, footer, feature/industry/about and clearly labeled pricing/contact/legal draft pages
-- [ ] Verify marketing navigation, dynamic sales preview, logo, mobile layout and CRM isolation
+- [x] Verify marketing navigation, dynamic sales preview, logo, mobile layout and CRM isolation

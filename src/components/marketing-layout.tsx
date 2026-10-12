@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Menu, X } from "lucide-react";
-import logo from "@/assets/veltrix-logo.png.asset.json";
+import logo from "@/assets/veltrix-logo-full.png.asset.json";
 const NAV = [{ to: "/platform", label: "Platform" }, { to: "/features", label: "Features" }, { to: "/industries", label: "Industries" }, { to: "/pricing", label: "Pricing" }, { to: "/about", label: "About" }] as const;
 const TEAMS = [{ to: "/for-sales", label: "Sales" }, { to: "/for-technicians", label: "Technicians" }, { to: "/for-operations", label: "Operations" }, { to: "/marketing-admin", label: "Marketing & Admin" }] as const;
 export function VeltrixLogo() { return <img src={logo.url} width={180} height={89} alt="VELTRIX" className="h-14 w-28 object-contain" />; }
