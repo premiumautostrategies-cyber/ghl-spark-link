@@ -11,13 +11,13 @@ import {
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "Systemize FAQ — how the system works" },
+      { title: "Veltrix FAQ — how the system works" },
       {
         name: "description",
         content:
-          "Straight answers about Systemize: which shops it suits, how pricing and catalogs are configured, how film and warranty tracking work, access control and multi-location setup.",
+          "Straight answers about Veltrix: which shops it suits, how pricing and catalogs are configured, how film and warranty tracking work, access control and multi-location setup.",
       },
-      { property: "og:title", content: "Systemize FAQ — how the system works" },
+      { property: "og:title", content: "Veltrix FAQ — how the system works" },
       {
         property: "og:description",
         content:
@@ -75,7 +75,7 @@ function FaqPage() {
       <MarketingHero
         eyebrow="Questions"
         title="Straight answers"
-        body="What Systemize does, how it is configured, and where its edges are. No claims about results — just how the system behaves."
+        body="What Veltrix does, how it is configured, and where its edges are. No claims about results — just how the system behaves."
       />
 
       <div className="mx-auto max-w-3xl px-4 py-16">

@@ -293,3 +293,30 @@
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
+
+/* VELTRIX is scoped to public marketing; CRM theme tokens are untouched. */
+.marketing-site {
+ --background: #111318; --foreground: #F3F5F4; --primary: #B8FF36; --primary-foreground: #111318;
+ --secondary: #1D2228; --secondary-foreground: #F3F5F4; --muted: #1D2228; --muted-foreground: #B7C2CC;
+ --accent: #353D42; --accent-foreground: #F3F5F4; --border: #353D42; --input: #353D42; --ring: #B8FF36;
+ --card: #1D2228; --card-foreground: #F3F5F4; --popover: #1D2228; --popover-foreground: #F3F5F4;
+ --obsidian: #111318; --hairline: #353D42; --surface: #1D2228; --surface-2: #1D2228;
+ --bronze: #B8FF36; --bronze-hover: #B8FF36; --marketing-copy: #B7C2CC;
+ --font-sans: "Inter", ui-sans-serif, sans-serif; --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+ --radius: 0.5rem; font-family: var(--font-sans); color-scheme: dark;
+}
+.marketing-site[data-colorway="titanium"] { --background: #B7C2CC; --foreground: #111318; --muted-foreground: #353D42; --border: #353D42; }
+.marketing-site[data-colorway="volt"] { --background: #B8FF36; --foreground: #111318; --primary: #111318; --primary-foreground: #F3F5F4; --muted-foreground: #353D42; }
+.marketing-site[data-colorway="blackout"] { --background: #08090B; --primary: #B7C2CC; --primary-foreground: #111318; }
+.marketing-site[data-colorway="arctic"] { --background: #F3F5F4; --foreground: #111318; --secondary: #B7C2CC; --muted-foreground: #353D42; --border: #B7C2CC; color-scheme: light; }
+.marketing-site h1, .marketing-site h2, .marketing-site h3 { font-family: var(--font-display); letter-spacing: 0; }
+.veltrix-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; line-height: 1.6; text-transform: uppercase; letter-spacing: 0; }
+.veltrix-headline { font-size: 64px; line-height: 1.02; }
+.veltrix-final { background: var(--primary); color: var(--primary-foreground); }
+.veltrix-final .bg-secondary { background: var(--primary-foreground); color: var(--primary); }
+.marketing-site .veltrix-product { max-height: 440px; overflow: hidden; }
+.marketing-site .veltrix-product figure > div { border-radius: 8px 8px 0 0; }
+@media(min-width: 1024px) { .veltrix-headline { font-size: 82px; } }
+@media(max-width: 639px) { .veltrix-headline { font-size: 38px; } .marketing-site .veltrix-product { max-height: none; } }
+@media(prefers-reduced-motion: no-preference) { .marketing-site main > section { animation: veltrix-enter 550ms ease-out both; } }
+@keyframes veltrix-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
