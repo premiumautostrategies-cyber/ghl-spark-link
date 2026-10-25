@@ -18,3 +18,6 @@
 - [x] Differentiated VELTRIX home: pillars hero, Your Business/Your Workflow, interactive seat story, livery transitions
 
 - [x] Rename marketing brand VELTRIX to Velotri: new volt-V logo, favicon, all marketing copy; CRM untouched
+
+- [ ] Restyle Platform, Features, Sales, Technicians, Operations, Marketing & Admin, Industries, About, Connect, FAQ in Velotri style
+- [ ] Publish live link
