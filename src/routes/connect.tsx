@@ -86,30 +86,30 @@ function ConnectPage() {
   return (
     <MarketingLayout>
       <MarketingHero
-        eyebrow="Integrations"
-        title="Fits the stack you already run"
+        eyebrow="VELOTRI / INTEGRATIONS"
+        title="Fits the stack you already run."
         body="A shop system that demands you abandon your accounting, calendar and CRM does not get adopted. Velotri pushes clean data out to the tools already in use, and accepts back only what is genuinely useful."
       />
 
-      <section className="mx-auto max-w-6xl px-4 pt-8"><p className="border-l-2 border-primary pl-4 text-sm leading-relaxed text-muted-foreground">Prototype preview: provider connections and synchronization are simulated. The flows below describe the intended production integrations, not live account connections.</p><Button asChild variant="outline" className="mt-5"><Link to="/for-sales">Explore both dynamic sales workspaces</Link></Button></section>
+      <section className="mx-auto max-w-7xl px-5 pt-10 sm:px-8">
+        <p className="velotri-label inline-block border border-primary/40 px-2 py-1 text-primary">PROTOTYPE PREVIEW — SIMULATED, NO LIVE CONNECTIONS</p>
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">Provider connections and synchronization are simulated. The flows below describe the intended production integrations, not live account connections.</p>
+        <Button asChild variant="outline" className="mt-6"><Link to="/for-sales">Explore both dynamic sales workspaces</Link></Button>
+      </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid gap-5 md:grid-cols-2">
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+        <div className="grid border-y border-border md:grid-cols-2">
           {PROVIDERS.map((p) => (
-            <article key={p.name} className="rounded-xl border border-border bg-card p-6">
+            <article key={p.name} className="border-border py-7 md:pr-8 md:[&:nth-child(odd)]:border-r md:[&:nth-child(even)]:pl-8 max-md:[&:not(:last-child)]:border-b md:[&:not(:nth-last-child(-n+2))]:border-b">
               <h2 className="text-xl font-semibold">{p.name}</h2>
-              <div className="mt-4 space-y-3 text-sm">
+              <div className="mt-4 space-y-4 text-sm">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                    Out of Velotri
-                  </p>
-                  <p className="mt-1 text-muted-foreground">{p.out}</p>
+                  <p className="velotri-label text-primary">OUT OF VELOTRI</p>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">{p.out}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Back into Velotri
-                  </p>
-                  <p className="mt-1 text-muted-foreground">{p.back}</p>
+                  <p className="velotri-label text-muted-foreground">BACK INTO VELOTRI</p>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">{p.back}</p>
                 </div>
               </div>
             </article>
@@ -117,31 +117,34 @@ function ConnectPage() {
         </div>
       </section>
 
-      <section className="border-y border-border/70 bg-card/40">
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          <h2 className="display-title text-3xl font-bold uppercase tracking-tight">
-            How the sync behaves
-          </h2>
-          <div className="mt-6 grid gap-5 md:grid-cols-3">
+      <section className="velotri-livery" data-livery="titanium">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+          <p className="velotri-label">02 / SYNC BEHAVIOUR</p>
+          <h2 className="mt-5 text-3xl font-semibold uppercase sm:text-4xl">How the sync behaves.</h2>
+          <div className="mt-10 grid border-t border-current/20 md:grid-cols-3">
             {MECHANICS.map((m) => (
-              <div key={m.title} className="rounded-xl border border-border bg-card p-6">
+              <div key={m.title} className="border-b border-current/20 py-6 md:pr-8">
                 <h3 className="font-semibold">{m.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{m.body}</p>
+                <p className="mt-2 text-sm leading-relaxed opacity-85">{m.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-3xl px-4 py-16 text-center">
-        <h2 className="text-2xl font-semibold">Open the integrations hub in the demo</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Connection health, sync scope toggles, the event queue and the activity log are all in the
-          demo workspace.
-        </p>
-        <Button asChild className="mt-6">
-          <Link to="/demo">Log in to demo</Link>
-        </Button>
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <p className="velotri-label text-primary">IN THE DEMO</p>
+            <h2 className="mt-3 text-3xl font-semibold">Open the integrations hub.</h2>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Connection health, sync scope toggles, the event queue and the activity log are all in the demo workspace.
+            </p>
+          </div>
+          <Button asChild size="lg">
+            <Link to="/demo">Log in to demo</Link>
+          </Button>
+        </div>
       </section>
     </MarketingLayout>
   );
