@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/connect")({
   head: () => ({
     meta: [
-      { title: "Integrations — Veltrix and the tools your shop already uses" },
+      { title: "Integrations — Velotri and the tools your shop already uses" },
       {
         name: "description",
         content:
-          "How Veltrix connects to QuickBooks, Google Calendar and Gmail, Outlook, HubSpot and GoHighLevel — what flows out, what flows back, and how failures are handled.",
+          "How Velotri connects to QuickBooks, Google Calendar and Gmail, Outlook, HubSpot and GoHighLevel — what flows out, what flows back, and how failures are handled.",
       },
       {
         property: "og:title",
-        content: "Integrations — Veltrix and the tools your shop already uses",
+        content: "Integrations — Velotri and the tools your shop already uses",
       },
       {
         property: "og:description",
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/connect")({
 const PROVIDERS = [
   {
     name: "QuickBooks",
-    out: "Invoices, payments, deposits, customers and tax lines leave Veltrix as they are created, so the books match the bay.",
+    out: "Invoices, payments, deposits, customers and tax lines leave Velotri as they are created, so the books match the bay.",
     back: "Payment status from QuickBooks updates the job, so a balance settled in accounting closes out in the shop.",
   },
   {
@@ -46,7 +46,7 @@ const PROVIDERS = [
   {
     name: "HubSpot",
     out: "New leads, contacts, vehicles, quote values and stage changes push into HubSpot as deals so marketing keeps one view.",
-    back: "Contact edits and inbound HubSpot leads create or update the matching Veltrix customer.",
+    back: "Contact edits and inbound HubSpot leads create or update the matching Velotri customer.",
   },
   {
     name: "GoHighLevel",
@@ -88,7 +88,7 @@ function ConnectPage() {
       <MarketingHero
         eyebrow="Integrations"
         title="Fits the stack you already run"
-        body="A shop system that demands you abandon your accounting, calendar and CRM does not get adopted. Veltrix pushes clean data out to the tools already in use, and accepts back only what is genuinely useful."
+        body="A shop system that demands you abandon your accounting, calendar and CRM does not get adopted. Velotri pushes clean data out to the tools already in use, and accepts back only what is genuinely useful."
       />
 
       <section className="mx-auto max-w-6xl px-4 pt-8"><p className="border-l-2 border-primary pl-4 text-sm leading-relaxed text-muted-foreground">Prototype preview: provider connections and synchronization are simulated. The flows below describe the intended production integrations, not live account connections.</p><Button asChild variant="outline" className="mt-5"><Link to="/for-sales">Explore both dynamic sales workspaces</Link></Button></section>
@@ -101,13 +101,13 @@ function ConnectPage() {
               <div className="mt-4 space-y-3 text-sm">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                    Out of Veltrix
+                    Out of Velotri
                   </p>
                   <p className="mt-1 text-muted-foreground">{p.out}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Back into Veltrix
+                    Back into Velotri
                   </p>
                   <p className="mt-1 text-muted-foreground">{p.back}</p>
                 </div>

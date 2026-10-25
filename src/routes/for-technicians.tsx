@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProductShowcase, productShots, PRODUCT_PAGES, marketingHead } from "@/components/product-showcase";
-export const Route = createFileRoute("/for-technicians")({ head: () => marketingHead("Technician workspace — Veltrix", "Explore the phone-first Veltrix technician experience: assigned work, check-in, inspection, photos, optional progress and bundled completion for QC."), component: TechnicianShowcase });
+export const Route = createFileRoute("/for-technicians")({ head: () => marketingHead("Technician workspace — Velotri", "Explore the phone-first Velotri technician experience: assigned work, check-in, inspection, photos, optional progress and bundled completion for QC."), component: TechnicianShowcase });
 function TechnicianShowcase() {
   return <ProductShowcase category="Technicians" title="Technicians. The work order, not the busywork." intro="Open the job. Read what matters. Do the work. Return when you're ready to document and hand it off." image={productShots.tech} imageTitle="Installer work order" caption="An actual installer work order: vehicle, service, bay, due time, instructions and phase status."
     outcomes={[

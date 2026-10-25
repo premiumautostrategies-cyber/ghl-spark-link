@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/platform")({
   head: () => ({
     meta: [
-      { title: "The Veltrix platform — every module explained" },
+      { title: "The Velotri platform — every module explained" },
       {
         name: "description",
         content:
-          "A module-by-module breakdown of Veltrix: pipeline, service catalog, proposals, bay scheduling, inspections, shop floor, film stock, quality control, warranty and reporting.",
+          "A module-by-module breakdown of Velotri: pipeline, service catalog, proposals, bay scheduling, inspections, shop floor, film stock, quality control, warranty and reporting.",
       },
-      { property: "og:title", content: "The Veltrix platform — every module explained" },
+      { property: "og:title", content: "The Velotri platform — every module explained" },
       {
         property: "og:description",
         content:
@@ -156,7 +156,7 @@ function PlatformPage() {
       <MarketingHero
         eyebrow="Platform"
         title="Every part of the shop, in one record"
-        body="Veltrix is organised the way a restyling shop actually runs: sales, installation and operations. Each module writes to the same vehicle record, so nothing is re-typed between the front counter and the bay."
+        body="Velotri is organised the way a restyling shop actually runs: sales, installation and operations. Each module writes to the same vehicle record, so nothing is re-typed between the front counter and the bay."
       />
 
       <div className="mx-auto max-w-6xl space-y-16 px-4 py-16">

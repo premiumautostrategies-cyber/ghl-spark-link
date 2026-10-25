@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/workflow")({
   head: () => ({
     meta: [
-      { title: "How a vehicle moves through Veltrix" },
+      { title: "How a vehicle moves through Velotri" },
       {
         name: "description",
         content:
           "Follow one vehicle from first enquiry to warranty: lead, quote, proposal and deposit, booking, inspection, production, quality control, delivery and aftercare.",
       },
-      { property: "og:title", content: "How a vehicle moves through Veltrix" },
+      { property: "og:title", content: "How a vehicle moves through Velotri" },
       {
         property: "og:description",
         content:
@@ -78,7 +78,7 @@ function WorkflowPage() {
       <MarketingHero
         eyebrow="Workflow"
         title="One vehicle, start to finish"
-        body="Most shops lose time in the handoffs — counter to bay, bay to foreman, foreman to invoice. In Veltrix each stage writes to the same record, so the next person opens it already informed."
+        body="Most shops lose time in the handoffs — counter to bay, bay to foreman, foreman to invoice. In Velotri each stage writes to the same record, so the next person opens it already informed."
       />
 
       <div className="mx-auto max-w-4xl px-4 py-16">
