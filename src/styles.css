@@ -294,7 +294,7 @@
   -webkit-backdrop-filter: blur(24px) saturate(140%);
 }
 
-/* VELTRIX is scoped to public marketing; CRM theme tokens are untouched. */
+/* VELOTRI is scoped to public marketing; CRM theme tokens are untouched. */
 .marketing-site {
  --background: #111318; --foreground: #F3F5F4; --primary: #B8FF36; --primary-foreground: #111318;
  --secondary: #1D2228; --secondary-foreground: #F3F5F4; --muted: #1D2228; --muted-foreground: #B7C2CC;
@@ -310,17 +310,17 @@
 .marketing-site[data-colorway="blackout"] { --background: #08090B; --primary: #B7C2CC; --primary-foreground: #111318; }
 .marketing-site[data-colorway="arctic"] { --background: #F3F5F4; --foreground: #111318; --secondary: #B7C2CC; --muted-foreground: #353D42; --border: #B7C2CC; color-scheme: light; }
 .marketing-site h1, .marketing-site h2, .marketing-site h3 { font-family: var(--font-display); letter-spacing: 0; }
-.veltrix-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; line-height: 1.6; text-transform: uppercase; letter-spacing: 0; }
-.veltrix-headline { font-size: 64px; line-height: 1.02; }
-.veltrix-final { background: var(--primary); color: var(--primary-foreground); }
-.veltrix-final .bg-secondary { background: var(--primary-foreground); color: var(--primary); }
-.marketing-site .veltrix-product { max-height: 440px; overflow: hidden; }
-.marketing-site .veltrix-product figure > div { border-radius: 8px 8px 0 0; }
-@media(min-width: 1024px) { .veltrix-headline { font-size: 82px; } }
-@media(max-width: 639px) { .veltrix-headline { font-size: 38px; } .marketing-site .veltrix-product { max-height: none; } }
-@media(prefers-reduced-motion: no-preference) { .marketing-site main > section { animation: veltrix-enter 550ms ease-out both; } }
-@keyframes veltrix-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-.veltrix-livery[data-livery="titanium"] { background: #B7C2CC; color: #111318; }
-.veltrix-livery[data-livery="arctic"] { background: #F3F5F4; color: #111318; }
-.veltrix-mode { transition: transform 200ms ease; }
-@media(prefers-reduced-motion: no-preference) { .veltrix-mode:hover { transform: translateY(-2px); } .veltrix-fade { animation: veltrix-enter 350ms ease-out both; } }
+.velotri-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; line-height: 1.6; text-transform: uppercase; letter-spacing: 0; }
+.velotri-headline { font-size: 64px; line-height: 1.02; }
+.velotri-final { background: var(--primary); color: var(--primary-foreground); }
+.velotri-final .bg-secondary { background: var(--primary-foreground); color: var(--primary); }
+.marketing-site .velotri-product { max-height: 440px; overflow: hidden; }
+.marketing-site .velotri-product figure > div { border-radius: 8px 8px 0 0; }
+@media(min-width: 1024px) { .velotri-headline { font-size: 82px; } }
+@media(max-width: 639px) { .velotri-headline { font-size: 38px; } .marketing-site .velotri-product { max-height: none; } }
+@media(prefers-reduced-motion: no-preference) { .marketing-site main > section { animation: velotri-enter 550ms ease-out both; } }
+@keyframes velotri-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.velotri-livery[data-livery="titanium"] { background: #B7C2CC; color: #111318; }
+.velotri-livery[data-livery="arctic"] { background: #F3F5F4; color: #111318; }
+.velotri-mode { transition: transform 200ms ease; }
+@media(prefers-reduced-motion: no-preference) { .velotri-mode:hover { transform: translateY(-2px); } .velotri-fade { animation: velotri-enter 350ms ease-out both; } }

@@ -16,7 +16,7 @@ import command from "@/assets/showcase-command.webp.asset.json";
 export const productShots = { sales: sales.url, messages: messages.url, tech: tech.url, techList: techList.url, operations: operations.url, schedule: schedule.url, marketing: marketing.url, team: team.url, command: command.url };
 
 export const PRODUCT_PAGES = [
-  { to: "/for-sales", number: "01", label: "Sales", title: "Move the conversation forward.", body: "Dynamic Pipeline or Activity. Your CRM or Veltrix. One connected closing workflow." },
+  { to: "/for-sales", number: "01", label: "Sales", title: "Move the conversation forward.", body: "Dynamic Pipeline or Activity. Your CRM or Velotri. One connected closing workflow." },
   { to: "/for-technicians", number: "02", label: "Technicians", title: "More time on the vehicle.", body: "A phone-first work order. Clear instructions. One clean QC handoff." },
   { to: "/for-operations", number: "03", label: "Operations", title: "See the whole shop clearly.", body: "Schedules, resources, payments and performance in one connected view." },
   { to: "/marketing-admin", number: "04", label: "Marketing & Admin", title: "Build a more repeatable business.", body: "Follow-ups, campaign performance, team settings and shop standards." },
@@ -26,7 +26,7 @@ export function Screenshot({ src, title, caption, eager = false }: { src: string
   return <figure className="min-w-0">
     <Dialog>
       <div className="overflow-hidden rounded-lg border border-hairline bg-obsidian">
-        <div className="flex min-h-11 items-center justify-between gap-3 border-b border-border px-4"><span className="text-xs font-medium text-muted-foreground">VELTRIX / {title}</span><DialogTrigger asChild><Button size="icon" variant="ghost" className="size-8" aria-label={`Enlarge ${title} screenshot`} title="Enlarge screenshot"><Maximize2 className="size-3.5" /></Button></DialogTrigger></div>
+        <div className="flex min-h-11 items-center justify-between gap-3 border-b border-border px-4"><span className="text-xs font-medium text-muted-foreground">VELOTRI / {title}</span><DialogTrigger asChild><Button size="icon" variant="ghost" className="size-8" aria-label={`Enlarge ${title} screenshot`} title="Enlarge screenshot"><Maximize2 className="size-3.5" /></Button></DialogTrigger></div>
         <DialogTrigger asChild><Button variant="ghost" className="block h-auto w-full overflow-hidden rounded-none p-0 hover:bg-transparent" aria-label={`View ${title} screenshot`}><img src={src} alt={`Actual Systemize ${title} screen with sample shop data`} width={1280} height={900} loading={eager ? "eager" : "lazy"} className="block h-auto w-full" /></Button></DialogTrigger>
       </div>
       <DialogContent className="max-h-[94dvh] marketing-site max-w-6xl overflow-y-auto bg-background p-4 sm:p-6"><DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>Actual product screen · Sample shop data</DialogDescription></DialogHeader><img src={src} alt={`Enlarged ${title} product screenshot`} width={1280} height={900} className="h-auto w-full" /></DialogContent>
@@ -40,7 +40,7 @@ type ShowcaseProps = { category: string; title: string; intro: string; image: st
 export function ProductShowcase({ category, title, intro, image, imageTitle, caption, outcomes, secondary, next }: ShowcaseProps) {
   return <MarketingLayout>
     <section className="mx-auto max-w-7xl px-5 pb-12 pt-12 sm:px-8 sm:pt-16">
-      <p className="text-xs font-semibold uppercase text-primary">Veltrix / {category}</p>
+      <p className="text-xs font-semibold uppercase text-primary">Velotri / {category}</p>
       <div className="mt-5 grid items-end gap-6 lg:grid-cols-[1.2fr_1fr]"><h1 className="max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl">{title}</h1><p className="max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">{intro}</p></div>
       <div className="mt-10"><Screenshot src={image} title={imageTitle} caption={caption} eager /></div>
     </section>
@@ -51,5 +51,5 @@ export function ProductShowcase({ category, title, intro, image, imageTitle, cap
 }
 
 export function marketingHead(title: string, description: string) {
-  return { links: [{ rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" }, { rel: "icon", type: "image/png", href: "/veltrix-favicon.png" }], meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] };
+  return { links: [{ rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" }, { rel: "icon", type: "image/png", href: "/velotri-favicon.png" }], meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] };
 }
