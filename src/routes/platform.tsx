@@ -154,22 +154,23 @@ function PlatformPage() {
   return (
     <MarketingLayout>
       <MarketingHero
-        eyebrow="Platform"
-        title="Every part of the shop, in one record"
+        eyebrow="VELOTRI / PLATFORM"
+        title="Every part of the shop, in one record."
         body="Velotri is organised the way a restyling shop actually runs: sales, installation and operations. Each module writes to the same vehicle record, so nothing is re-typed between the front counter and the bay."
       />
 
-      <div className="mx-auto max-w-6xl space-y-16 px-4 py-16">
-        {MODULES.map((section) => (
-          <section key={section.group}>
-            <h2 className="display-title text-3xl font-bold uppercase tracking-tight">
-              {section.group}
-            </h2>
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
+      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+        {MODULES.map((section, si) => (
+          <section key={section.group} className={si > 0 ? "mt-20" : ""}>
+            <div className="flex items-baseline gap-5 border-t border-border pt-6">
+              <span className="velotri-label text-primary">0{si + 1}</span>
+              <h2 className="text-3xl font-semibold uppercase sm:text-4xl">{section.group}</h2>
+            </div>
+            <div className="mt-8 grid border-y border-border md:grid-cols-2">
               {section.items.map((m) => (
-                <article key={m.name} className="rounded-xl border border-border bg-card p-6">
+                <article key={m.name} className="border-border py-7 md:pr-8 md:[&:nth-child(odd)]:border-r md:[&:nth-child(odd)]:pl-0 md:[&:nth-child(even)]:pl-8 max-md:[&:not(:last-child)]:border-b md:[&:not(:nth-last-child(-n+2))]:border-b">
                   <h3 className="text-xl font-semibold">{m.name}</h3>
-                  <p className="mt-3 text-sm text-muted-foreground">{m.body}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{m.body}</p>
                   <ul className="mt-4 space-y-2 text-sm">
                     {m.points.map((p) => (
                       <li key={p} className="flex gap-2">
@@ -184,16 +185,21 @@ function PlatformPage() {
           </section>
         ))}
 
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <h2 className="text-2xl font-semibold">See it with a shop already loaded</h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-            The demo workspace has customers, vehicles, quotes, booked bays, film rolls and
-            completed jobs so every module has something in it.
-          </p>
-          <Button asChild className="mt-6">
-            <Link to="/demo">Log in to demo</Link>
-          </Button>
-        </div>
+        <section className="mt-20 border-t border-border pt-10">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div>
+              <p className="velotri-label text-primary">SEE IT LOADED</p>
+              <h2 className="mt-3 text-3xl font-semibold">A shop already running.</h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                The demo workspace has customers, vehicles, quotes, booked bays, film rolls and
+                completed jobs so every module has something in it.
+              </p>
+            </div>
+            <Button asChild size="lg">
+              <Link to="/demo">Log in to demo</Link>
+            </Button>
+          </div>
+        </section>
       </div>
     </MarketingLayout>
   );

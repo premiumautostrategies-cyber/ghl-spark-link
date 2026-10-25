@@ -76,34 +76,35 @@ function WorkflowPage() {
   return (
     <MarketingLayout>
       <MarketingHero
-        eyebrow="Workflow"
-        title="One vehicle, start to finish"
+        eyebrow="VELOTRI / WORKFLOW"
+        title="One vehicle, start to finish."
         body="Most shops lose time in the handoffs — counter to bay, bay to foreman, foreman to invoice. In Velotri each stage writes to the same record, so the next person opens it already informed."
       />
 
-      <div className="mx-auto max-w-4xl px-4 py-16">
-        <ol className="relative space-y-8 border-l border-border pl-8">
+      <div className="mx-auto max-w-4xl px-5 py-16 sm:px-8">
+        <ol className="relative space-y-10 border-l border-border pl-8">
           {STEPS.map((s, i) => (
             <li key={s.stage} className="relative">
-              <span className="absolute -left-[41px] flex size-6 items-center justify-center rounded-full border border-border bg-card text-[11px] font-semibold text-primary">
+              <span className="absolute -left-[41px] flex size-6 items-center justify-center rounded-full border border-primary/50 bg-background velotri-label text-primary">
                 {i + 1}
               </span>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
-                {s.stage}
-              </p>
+              <p className="velotri-label text-primary">{s.stage}</p>
               <h2 className="mt-2 text-xl font-semibold">{s.title}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
             </li>
           ))}
         </ol>
 
-        <div className="mt-14 rounded-xl border border-border bg-card p-8 text-center">
-          <h2 className="text-2xl font-semibold">Walk the whole flow yourself</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-            The demo shop has vehicles sitting at every stage, from untouched leads to jobs waiting
-            on a QC signature.
-          </p>
-          <Button asChild className="mt-6">
+        <div className="mt-16 flex flex-wrap items-center justify-between gap-6 border-t border-border pt-10">
+          <div>
+            <p className="velotri-label text-primary">WALK IT YOURSELF</p>
+            <h2 className="mt-3 text-2xl font-semibold">Every stage, already loaded.</h2>
+            <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              The demo shop has vehicles sitting at every stage, from untouched leads to jobs waiting
+              on a QC signature.
+            </p>
+          </div>
+          <Button asChild size="lg">
             <Link to="/demo">Log in to demo</Link>
           </Button>
         </div>

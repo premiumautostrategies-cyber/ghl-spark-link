@@ -73,27 +73,28 @@ function FaqPage() {
   return (
     <MarketingLayout>
       <MarketingHero
-        eyebrow="Questions"
-        title="Straight answers"
+        eyebrow="VELOTRI / QUESTIONS"
+        title="Straight answers."
         body="What Velotri does, how it is configured, and where its edges are. No claims about results — just how the system behaves."
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-16">
+      <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8">
         <Accordion type="single" collapsible className="w-full">
           {FAQS.map((f, i) => (
             <AccordionItem key={f.q} value={`item-${i}`}>
               <AccordionTrigger className="text-left text-base">{f.q}</AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground">{f.a}</AccordionContent>
+              <AccordionContent className="text-sm leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
 
-        <div className="mt-12 rounded-xl border border-border bg-card p-8 text-center">
-          <h2 className="text-2xl font-semibold">Still easier to just look</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-            The demo opens straight into a loaded shop — no account, no form.
-          </p>
-          <Button asChild className="mt-6">
+        <div className="mt-14 flex flex-wrap items-center justify-between gap-6 border-t border-border pt-10">
+          <div>
+            <p className="velotri-label text-primary">STILL EASIER TO JUST LOOK</p>
+            <h2 className="mt-3 text-2xl font-semibold">The demo opens straight into a loaded shop.</h2>
+            <p className="mt-2 max-w-lg text-sm text-muted-foreground">No account, no form.</p>
+          </div>
+          <Button asChild size="lg">
             <Link to="/demo">Log in to demo</Link>
           </Button>
         </div>
