@@ -16,3 +16,5 @@
 - [x] Verify marketing navigation, dynamic sales preview, logo, mobile layout and CRM isolation
 
 - [x] Differentiated VELTRIX home: pillars hero, Your Business/Your Workflow, interactive seat story, livery transitions
+
+- [x] Rename marketing brand VELTRIX to Velotri: new volt-V logo, favicon, all marketing copy; CRM untouched
